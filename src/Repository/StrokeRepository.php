@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Entity\Game;
+use App\Entity\Round;
 use App\Entity\Stroke;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -20,18 +20,18 @@ class StrokeRepository extends ServiceEntityRepository
     /**
      * @return list<Stroke>
      */
-    public function findByGame(Game $game): array
+    public function findByRound(Round $round): array
     {
-        return $this->findBy(['game' => $game], ['position' => 'ASC']);
+        return $this->findBy(['round' => $round], ['position' => 'ASC']);
     }
 
-    public function findLast(Game $game): ?Stroke
+    public function findLast(Round $round): ?Stroke
     {
-        return $this->findOneBy(['game' => $game], ['position' => 'DESC']);
+        return $this->findOneBy(['round' => $round], ['position' => 'DESC']);
     }
 
-    public function nextPosition(Game $game): int
+    public function nextPosition(Round $round): int
     {
-        return ($this->findLast($game)?->getPosition() ?? 0) + 1;
+        return ($this->findLast($round)?->getPosition() ?? 0) + 1;
     }
 }

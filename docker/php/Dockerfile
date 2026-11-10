@@ -7,7 +7,8 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends git unzip \
     && rm -rf /var/lib/apt/lists/*
 
-RUN install-php-extensions intl zip
+# gd renders the drawing sent to the model.
+RUN install-php-extensions intl zip gd
 
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 

@@ -5,7 +5,7 @@ body {
     color: #111;
 }
 
-.home, .game {
+.home {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -26,4 +26,80 @@ body {
     display: flex;
     gap: 1rem;
     align-items: center;
+}
+
+.round {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.target {
+    font-size: 1.3rem;
+    margin: 0;
+}
+
+.theme {
+    color: #666;
+    font-size: 1rem;
+}
+
+.board {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.canvas.locked {
+    cursor: default;
+    opacity: 0.85;
+}
+
+.guesses {
+    min-width: 14rem;
+}
+
+.guesses h2 {
+    font-size: 1rem;
+    margin: 0 0 0.5rem;
+}
+
+.guesses ol {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.guesses li {
+    font-size: 1.2rem;
+    margin-bottom: 0.3rem;
+}
+
+.guesses li button {
+    margin-left: 0.5rem;
+}
+
+.guesses li.accepted {
+    font-weight: bold;
+    color: #1a7f37;
+}
+
+.new-game {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    align-items: stretch;
+}
+
+.new-game label {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.error {
+    color: #b42318;
 }

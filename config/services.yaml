@@ -7,6 +7,10 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    # Pause after each guess: the rhythm of a player around the table (2 to 4 s, decided on 10/11/2026).
+    game.guess_pause_ms: 2500
+    # A guesses stream ends after this; the browser reconnects by itself (EventSource).
+    game.guess_stream_max_s: 120
 
 services:
     # default configuration for services in *this* file
@@ -21,3 +25,8 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+when@test:
+    parameters:
+        game.guess_pause_ms: 0
+        game.guess_stream_max_s: 1

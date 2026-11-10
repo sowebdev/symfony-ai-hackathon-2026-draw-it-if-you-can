@@ -7,7 +7,7 @@ use App\Repository\StrokeRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: StrokeRepository::class)]
-#[ORM\UniqueConstraint(columns: ['game_id', 'position'])]
+#[ORM\UniqueConstraint(columns: ['round_id', 'position'])]
 class Stroke
 {
     #[ORM\Id]
@@ -24,7 +24,7 @@ class Stroke
     public function __construct(
         #[ORM\ManyToOne]
         #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-        private Game $game,
+        private Round $round,
         #[ORM\Column]
         private int $position,
         StrokePoints $points,
@@ -37,13 +37,13 @@ class Stroke
         return $this->id;
     }
 
-    public function getGame(): Game
+    public function getRound(): Round
     {
-        return $this->game;
+        return $this->round;
     }
 
     /**
-     * Order of the stroke in the game, from 1.
+     * Order of the stroke in the round, from 1.
      */
     public function getPosition(): int
     {

@@ -1,0 +1,21 @@
+ai:
+    platform:
+        generic:
+            # The local model (llama.cpp behind the gate of local-model). The router serves one model
+            # at a time: the one named by AI_MODEL must be loaded (`model use qwen3.8-27b-vision`).
+            local:
+                base_url: '%env(LOCAL_MODEL_URL)%'
+                model_catalog:
+                    models:
+                        qwen3.8-27b-vision:
+                            class: 'Symfony\AI\Platform\Bridge\Generic\CompletionsModel'
+                            capabilities:
+                                - !php/const Symfony\AI\Platform\Capability::INPUT_MESSAGES
+                                - !php/const Symfony\AI\Platform\Capability::INPUT_IMAGE
+                                - !php/const Symfony\AI\Platform\Capability::OUTPUT_TEXT
+                        gemma4:
+                            class: 'Symfony\AI\Platform\Bridge\Generic\CompletionsModel'
+                            capabilities:
+                                - !php/const Symfony\AI\Platform\Capability::INPUT_MESSAGES
+                                - !php/const Symfony\AI\Platform\Capability::INPUT_IMAGE
+                                - !php/const Symfony\AI\Platform\Capability::OUTPUT_TEXT

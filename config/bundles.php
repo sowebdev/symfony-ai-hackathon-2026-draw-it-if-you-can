@@ -7,4 +7,5 @@ return [
     Symfony\UX\StimulusBundle\StimulusBundle::class => ['all' => true],
     Symfony\Bundle\TwigBundle\TwigBundle::class => ['all' => true],
     Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
+    Symfony\AI\AiBundle\AiBundle::class => ['all' => true],
 ];

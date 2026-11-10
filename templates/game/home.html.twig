@@ -5,7 +5,27 @@
 {% block body %}
     <main class="home">
         <h1>Draw It If You Can</h1>
-        <form method="post" action="{{ path('game_create') }}">
+        <p>You draw, the AI guesses.</p>
+        {% if error %}
+            <p class="error" role="alert">{{ error }}</p>
+        {% endif %}
+        <form method="post" action="{{ path('game_create') }}" class="new-game">
+            <label>
+                Theme
+                <select name="theme">
+                    {% for theme in themes %}
+                        <option value="{{ theme.value }}">{{ theme.label }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                Language
+                <select name="language">
+                    {% for language in languages %}
+                        <option value="{{ language.value }}">{{ language.label }}</option>
+                    {% endfor %}
+                </select>
+            </label>
             <button type="submit">New game</button>
         </form>
     </main>

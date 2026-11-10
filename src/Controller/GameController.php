@@ -2,81 +2,60 @@
 
 namespace App\Controller;
 
-use App\Drawing\InvalidStroke;
-use App\Drawing\StrokePoints;
+use App\Ai\WordPicker;
 use App\Entity\Game;
-use App\Entity\Stroke;
-use App\Repository\StrokeRepository;
+use App\Entity\Round;
+use App\Game\Language;
+use App\Game\Theme;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Routing\Requirement\Requirement;
 
 final class GameController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly StrokeRepository $strokes,
+        private readonly WordPicker $wordPicker,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
     #[Route('/', name: 'home', methods: ['GET'])]
     public function home(): Response
     {
-        return $this->render('game/home.html.twig');
+        return $this->renderHome();
     }
 
     #[Route('/games', name: 'game_create', methods: ['POST'])]
-    public function create(): Response
+    public function create(#[MapRequestPayload] NewGame $payload): Response
     {
-        $game = new Game();
-        $this->entityManager->persist($game);
-        $this->entityManager->flush();
+        $game = new Game($payload->theme, $payload->language);
 
-        return $this->redirectToRoute('game_show', ['id' => $game->getId()]);
-    }
-
-    #[Route('/games/{id}', name: 'game_show', requirements: ['id' => Requirement::UUID_V7], methods: ['GET'])]
-    public function show(Game $game): Response
-    {
-        return $this->render('game/show.html.twig', ['game' => $game]);
-    }
-
-    #[Route('/games/{id}/strokes', name: 'game_strokes', requirements: ['id' => Requirement::UUID_V7], methods: ['GET'])]
-    public function strokes(Game $game): JsonResponse
-    {
-        return $this->json(array_map(
-            static fn (Stroke $stroke): array => ['position' => $stroke->getPosition(), 'points' => $stroke->getPoints()],
-            $this->strokes->findByGame($game),
-        ));
-    }
-
-    #[Route('/games/{id}/strokes', name: 'game_stroke_add', requirements: ['id' => Requirement::UUID_V7], methods: ['POST'])]
-    public function addStroke(Game $game, #[MapRequestPayload] NewStroke $payload): JsonResponse
-    {
         try {
-            $points = StrokePoints::fromArray($payload->points);
-        } catch (InvalidStroke $exception) {
-            return $this->json(['error' => $exception->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
+            $word = $this->wordPicker->pick($game->getTheme(), $game->getLanguage());
+        } catch (\Throwable $exception) {
+            $this->logger->error('No word to draw: {message}', ['message' => $exception->getMessage(), 'exception' => $exception]);
+
+            return $this->renderHome('The AI could not pick a word. Is the model running?', Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
-        $stroke = new Stroke($game, $this->strokes->nextPosition($game), $points);
-        $this->entityManager->persist($stroke);
+        $round = new Round($game, $word);
+        $this->entityManager->persist($game);
+        $this->entityManager->persist($round);
         $this->entityManager->flush();
 
-        return $this->json(['position' => $stroke->getPosition()], Response::HTTP_CREATED);
+        return $this->redirectToRoute('round_show', ['id' => $round->getId()]);
     }
 
-    #[Route('/games/{id}/strokes/last', name: 'game_stroke_undo', requirements: ['id' => Requirement::UUID_V7], methods: ['DELETE'])]
-    public function undo(Game $game): Response
+    private function renderHome(?string $error = null, int $status = Response::HTTP_OK): Response
     {
-        $stroke = $this->strokes->findLast($game) ?? throw $this->createNotFoundException('No stroke to undo.');
-        $this->entityManager->remove($stroke);
-        $this->entityManager->flush();
-
-        return new Response(status: Response::HTTP_NO_CONTENT);
+        return $this->render('game/home.html.twig', [
+            'themes' => Theme::cases(),
+            'languages' => Language::cases(),
+            'error' => $error,
+        ], new Response(status: $status));
     }
 }

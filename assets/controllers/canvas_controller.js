@@ -6,20 +6,19 @@ import { Controller } from '@hotwired/stimulus';
 const SIZE = 1000;
 
 export default class extends Controller {
-    static targets = ['canvas'];
-    static values = { strokesUrl: String, addUrl: String, undoUrl: String };
+    static targets = ['canvas', 'undo'];
+    static values = { elapsedMs: Number, strokesUrl: String, addUrl: String, undoUrl: String, locked: Boolean };
 
     async connect() {
         this.pen = this.canvasTarget.getContext('2d');
         this.strokes = [];
         this.current = null;
+        // The server's clock: t counts from the start of the round, even after a reload.
+        this.startedAt = performance.now() - this.elapsedMsValue;
+        this.lockedValueChanged();
 
         const response = await fetch(this.strokesUrlValue);
         this.strokes = (await response.json()).map((stroke) => stroke.points);
-
-        // After a reload, the clock picks up where the last stroke ended.
-        const lastStroke = this.strokes.at(-1);
-        this.startedAt = performance.now() - (lastStroke ? lastStroke.at(-1)[2] : 0);
         this.redraw();
 
         this.canvasTarget.addEventListener('pointerdown', this.start);
@@ -35,7 +34,22 @@ export default class extends Controller {
         this.canvasTarget.removeEventListener('pointercancel', this.end);
     }
 
+    // The round is over: no more drawing.
+    lock() {
+        this.lockedValue = true;
+    }
+
+    lockedValueChanged() {
+        if (this.hasUndoTarget) {
+            this.undoTarget.disabled = this.lockedValue;
+        }
+        this.canvasTarget.classList.toggle('locked', this.lockedValue);
+    }
+
     start = (event) => {
+        if (this.lockedValue) {
+            return;
+        }
         this.canvasTarget.setPointerCapture(event.pointerId);
         this.current = [this.toPoint(event)];
         this.redraw();
@@ -73,6 +87,9 @@ export default class extends Controller {
     };
 
     async undo() {
+        if (this.lockedValue) {
+            return;
+        }
         const response = await fetch(this.undoUrlValue, { method: 'DELETE' });
         if (response.ok) {
             this.strokes.pop();

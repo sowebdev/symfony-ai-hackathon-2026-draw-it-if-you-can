@@ -1,0 +1,138 @@
+<?php
+
+namespace App\Game;
+
+use App\Ai\Guesser;
+use App\Drawing\StrokeRenderer;
+use App\Entity\Guess;
+use App\Entity\Round;
+use App\Entity\Stroke;
+use App\Repository\GuessRepository;
+use App\Repository\RoundRepository;
+use App\Repository\StrokeRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\ServerEvent;
+
+/**
+ * While the player draws, the AI calls out a word every few seconds. The game sets the rhythm,
+ * the model only answers one word at a time. Runs inside one server-sent events response.
+ */
+final readonly class GuessLoop
+{
+    /**
+     * Guesses on a drawing that did not change, before waiting for a new stroke.
+     */
+    private const int GUESSES_PER_DRAWING = 2;
+
+    /**
+     * Pause while waiting for a new stroke or for "Yes!".
+     */
+    private const int IDLE_PAUSE_MS = 500;
+
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+        private RoundRepository $rounds,
+        private StrokeRepository $strokes,
+        private GuessRepository $guesses,
+        private StrokeRenderer $renderer,
+        private Guesser $guesser,
+        private WordMatcher $matcher,
+        #[Autowire('%game.guess_pause_ms%')]
+        private int $pauseMs,
+        #[Autowire('%game.guess_stream_max_s%')]
+        private int $maxDurationS,
+    ) {
+    }
+
+    /**
+     * @return \Generator<ServerEvent>
+     */
+    public function run(Round $round): \Generator
+    {
+        $roundId = $round->getId();
+        $deadline = microtime(true) + $this->maxDurationS;
+        $lastDrawing = null;
+        $guessesOnDrawing = 0;
+
+        while (microtime(true) < $deadline) {
+            // Strokes and "Yes!" come from other requests: read them fresh at each turn.
+            $this->entityManager->clear();
+            $round = $this->rounds->find($roundId) ?? throw new \LogicException('The round is gone.');
+            if ($round->isFound()) {
+                yield $this->foundEvent($round);
+
+                return;
+            }
+
+            $strokes = $this->strokes->findByRound($round);
+            $drawing = self::fingerprint($strokes);
+            if ($drawing !== $lastDrawing) {
+                $lastDrawing = $drawing;
+                $guessesOnDrawing = 0;
+            }
+            if ([] === $strokes || $guessesOnDrawing >= self::GUESSES_PER_DRAWING) {
+                // A comment keeps the connection alive, and tells whether the player left.
+                yield new ServerEvent('', comment: 'waiting');
+                $this->pause(self::IDLE_PAUSE_MS);
+                continue;
+            }
+
+            $guess = $this->guessOnce($round, $strokes);
+            ++$guessesOnDrawing;
+            if (null !== $guess) {
+                yield new ServerEvent((string) json_encode(['id' => $guess->getId(), 'word' => $guess->getWord()]), type: 'guess');
+                if ($round->isFound()) {
+                    yield $this->foundEvent($round);
+
+                    return;
+                }
+            }
+            $this->pause($this->pauseMs);
+        }
+    }
+
+    /**
+     * @param list<Stroke> $strokes
+     */
+    private function guessOnce(Round $round, array $strokes): ?Guess
+    {
+        $game = $round->getGame();
+        $said = array_map(static fn (Guess $guess): string => $guess->getWord(), $this->guesses->findByRound($round));
+        $png = $this->renderer->toPng(array_map(static fn (Stroke $stroke): array => $stroke->getPoints(), $strokes));
+
+        $word = $this->guesser->guess($png, $game->getTheme(), $game->getLanguage(), $said);
+        if (null === $word || \in_array(WordMatcher::normalize($word), array_map(WordMatcher::normalize(...), $said), true)) {
+            return null;
+        }
+
+        $guess = new Guess($round, $word, $round->elapsedMs());
+        $this->entityManager->persist($guess);
+        if ($this->matcher->matches($word, $round->getTargetWord())) {
+            $round->markFound($guess);
+        }
+        $this->entityManager->flush();
+
+        return $guess;
+    }
+
+    private function foundEvent(Round $round): ServerEvent
+    {
+        return new ServerEvent((string) json_encode(['foundAfterMs' => $round->getFoundAfterMs()]), type: 'found');
+    }
+
+    /**
+     * @param list<Stroke> $strokes
+     */
+    private static function fingerprint(array $strokes): string
+    {
+        return implode(',', array_map(static fn (Stroke $stroke): string => $stroke->getPosition().':'.\count($stroke->getPoints()), $strokes));
+    }
+
+    private function pause(int $ms): void
+    {
+        if ($ms > 0) {
+            usleep($ms * 1000);
+        }
+    }
+}

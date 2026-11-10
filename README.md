@@ -21,6 +21,10 @@ make install
 
 Then open http://127.0.0.1:8040 (another port: `APP_PORT=8050 make start`). `make` lists the other commands.
 
+## The model
+
+For now the game talks to a local llama.cpp server through the gate of the `local-model` setup: the container joins its Docker network (`local-model_default`) and calls `http://gate:8001`. The model is set by `AI_MODEL` (default `qwen3.8-27b-vision`, which must be the loaded one); `AI_MODEL=gemma4` in `.env.local` uses Gemma instead.
+
 ## Tests
 
 ```bash

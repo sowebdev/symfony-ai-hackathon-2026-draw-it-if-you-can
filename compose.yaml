@@ -1,4 +1,6 @@
 # A single service: the game and its tools. The SQLite database is a file under var/.
+# The local model is reached through the gate of a local model server, on its network
+# (http://gate:8001): the game joins that network, nothing is opened on the machine.
 services:
   php:
     build:
@@ -10,3 +12,11 @@ services:
       - .:/app
     ports:
       - "127.0.0.1:${APP_PORT:-8040}:8000"
+    networks:
+      - default
+      - local-model
+
+networks:
+  local-model:
+    name: local-model_default
+    external: true

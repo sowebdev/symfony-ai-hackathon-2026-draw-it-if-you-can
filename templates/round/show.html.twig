@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Draw It If You Can{% endblock %}
+
+{% block body %}
+    <main class="round"
+          data-controller="canvas guesses"
+          data-canvas-elapsed-ms-value="{{ round.elapsedMs }}"
+          data-canvas-strokes-url-value="{{ path('round_strokes', {id: round.id}) }}"
+          data-canvas-add-url-value="{{ path('round_stroke_add', {id: round.id}) }}"
+          data-canvas-undo-url-value="{{ path('round_stroke_undo', {id: round.id}) }}"
+          data-canvas-locked-value="{{ round.found ? 'true' : 'false' }}"
+          data-guesses-stream-url-value="{{ path('round_guesses', {id: round.id}) }}"
+          data-guesses-accept-url-value="{{ path('round_guess_accept', {id: round.id, guessId: 0}) }}"
+          data-guesses-found-value="{{ round.found ? 'true' : 'false' }}"
+          data-action="guesses:found->canvas#lock">
+        <p class="target">Draw: <strong>{{ round.targetWord }}</strong> <span class="theme">({{ round.game.theme.label }})</span></p>
+
+        <div class="board">
+            <canvas class="canvas" width="1000" height="1000" data-canvas-target="canvas"></canvas>
+
+            <section class="guesses" aria-live="polite">
+                <h2>The AI says…</h2>
+                <ol data-guesses-target="list">
+                    {% for guess in guesses %}
+                        <li data-guess-id="{{ guess.id }}" class="{{ guess.accepted ? 'accepted' }}">
+                            <span>{{ guess.word }}</span>
+                            {% if not round.found %}<button type="button" data-action="guesses#accept">Yes!</button>{% endif %}
+                        </li>
+                    {% endfor %}
+                </ol>
+                <p class="result" data-guesses-target="result" {{ round.found ? '' : 'hidden' }}>
+                    Found in <strong data-guesses-target="time">{{ round.found ? (round.foundAfterMs / 1000)|number_format(1) : '' }}</strong> s
+                </p>
+            </section>
+        </div>
+
+        <div class="toolbar">
+            <button type="button" data-action="canvas#undo" data-canvas-target="undo">Undo</button>
+            <a href="{{ path('home') }}">New game</a>
+        </div>
+    </main>
+{% endblock %}
