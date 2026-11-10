@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Draw It If You Can{% endblock %}
+
+{% block body %}
+    <main class="home">
+        <h1>Draw It If You Can</h1>
+        <form method="post" action="{{ path('game_create') }}">
+            <button type="submit">New game</button>
+        </form>
+    </main>
+{% endblock %}

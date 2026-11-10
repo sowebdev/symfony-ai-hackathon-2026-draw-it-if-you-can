@@ -1,0 +1,10 @@
+# Short tests only: the unit tests, run in the php container. Functional tests: make test-functional.
+repos:
+  - repo: local
+    hooks:
+      - id: unit-tests
+        name: unit tests
+        entry: make test-unit
+        language: system
+        pass_filenames: false
+        always_run: true

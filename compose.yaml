@@ -1,0 +1,12 @@
+# A single service: the game and its tools. The SQLite database is a file under var/.
+services:
+  php:
+    build:
+      context: docker/php
+      args:
+        HOST_UID: ${HOST_UID:-1000}
+        HOST_GID: ${HOST_GID:-1000}
+    volumes:
+      - .:/app
+    ports:
+      - "127.0.0.1:${APP_PORT:-8040}:8000"
