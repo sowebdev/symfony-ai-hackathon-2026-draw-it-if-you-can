@@ -21,9 +21,25 @@ make install
 
 Then open http://127.0.0.1:8040 (another port: `APP_PORT=8050 make start`). `make` lists the other commands.
 
-## The model
+## The models
 
-For now the game talks to a local llama.cpp server through the gate of the `local-model` setup: the container joins its Docker network (`local-model_default`) and calls `http://gate:8001`. The model is set by `AI_MODEL` (default `qwen3.8-27b-vision`, which must be the loaded one); `AI_MODEL=gemma4` in `.env.local` uses Gemma instead.
+The AI has two roles, each with its own OpenAI-compatible endpoint, model and optional API key:
+
+- **the drawer** draws while you guess;
+- **the guesser** picks the word you draw, then guesses your drawing: its model must read images.
+
+Set them in `.env.local` (defaults in `.env`):
+
+```bash
+AI_GUESSER_BASE_URL=https://api.mistral.ai
+AI_GUESSER_MODEL=mistral-small-latest
+AI_GUESSER_API_KEY=...
+AI_GUESSER_DISABLE_THINKING=false   # true sends llama.cpp's chat_template_kwargs, which an API may refuse
+```
+
+Then `make check` tries each model on a tiny task whose answer is known (the guesser must name a circle drawn in an image) and tells what is wrong.
+
+By default both roles use [Ollama](https://ollama.com) on your machine (`http://host.docker.internal:11434`) with `gemma3`, a model that reads images: `ollama pull gemma3`. Any other OpenAI-compatible server works, llama.cpp, LM Studio or a provider's API. If the game must join a Docker network of yours to reach it, put that in a `compose.override.yaml` (not committed).
 
 ## Tests
 

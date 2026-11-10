@@ -1,4 +1,5 @@
 .idea/
+/compose.override.yaml
 
 
 ###> symfony/framework-bundle ###

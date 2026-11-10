@@ -3,8 +3,6 @@
 namespace App\Ai;
 
 use Symfony\AI\Platform\Message\MessageBag;
-use Symfony\AI\Platform\PlatformInterface;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Asks the model for a single word, and checks the answer by code: the model never decides
@@ -15,21 +13,16 @@ final readonly class OneWordModel
     private const int MAX_LENGTH = 40;
     private const int MAX_WORDS = 3;
 
-    public function __construct(
-        private PlatformInterface $platform,
-        #[Autowire('%env(AI_MODEL)%')]
-        private string $model,
-    ) {
+    public function __construct(private Models $models)
+    {
     }
 
     /**
      * @return string|null The word, or null if the answer is not a single word
      */
-    public function ask(MessageBag $messages, float $temperature): ?string
+    public function ask(Role $role, MessageBag $messages, float $temperature): ?string
     {
-        $answer = $this->platform->invoke($this->model, $messages, [
-            // No reasoning: the game needs a word every few seconds (tests of 10/11/2026).
-            'chat_template_kwargs' => ['enable_thinking' => false],
+        $answer = $this->models->invoke($role, $messages, [
             'temperature' => $temperature,
             'max_tokens' => 20,
         ])->asText();
@@ -52,4 +45,5 @@ final readonly class OneWordModel
 
         return $word;
     }
+
 }

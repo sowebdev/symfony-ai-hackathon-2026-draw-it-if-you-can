@@ -18,7 +18,7 @@ trait ScriptedModel
         // The model lives in the container: it must survive from one request to the next.
         $client->disableReboot();
 
-        $client->getContainer()->set('ai.platform.generic.local', MockPlatformFactory::createPlatform(
+        $client->getContainer()->set('ai.platform.generic.guesser', MockPlatformFactory::createPlatform(
             static function ($model, $input) use ($word, &$guesses): string {
                 if (str_contains((string) json_encode($input), 'Pick the word')) {
                     return $word;

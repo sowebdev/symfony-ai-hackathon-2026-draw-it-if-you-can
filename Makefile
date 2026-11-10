@@ -2,7 +2,7 @@
 # The image is built with the machine's user, so that the files it writes belong to them.
 
 .DEFAULT_GOAL := help
-.PHONY: help install start stop shell db test test-unit test-functional
+.PHONY: help install start stop shell db check test test-unit test-functional
 
 export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
@@ -29,6 +29,9 @@ shell: start ## Open a shell in the container
 
 db: start ## Create the development database and run the migrations
 	$(CONSOLE) doctrine:migrations:migrate -n
+
+check: start ## Try the model of each role on a tiny task (after changing AI_* in .env.local)
+	$(CONSOLE) app:ai:check
 
 test: test-unit test-functional ## Run all the tests
 

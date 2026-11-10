@@ -32,7 +32,7 @@ final readonly class WordPicker
 
         for ($attempt = 1; $attempt <= self::ATTEMPTS; ++$attempt) {
             // A high temperature, so that two games do not get the same word.
-            if (null !== $word = $this->model->ask($messages, 1.0)) {
+            if (null !== $word = $this->model->ask(Role::Guesser, $messages, 1.0)) {
                 return $word;
             }
         }

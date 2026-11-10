@@ -39,7 +39,7 @@ final class GameController extends AbstractController
         } catch (\Throwable $exception) {
             $this->logger->error('No word to draw: {message}', ['message' => $exception->getMessage(), 'exception' => $exception]);
 
-            return $this->renderHome('The AI could not pick a word. Is the model running?', Response::HTTP_SERVICE_UNAVAILABLE);
+            return $this->renderHome('The AI could not pick a word. Is the model running? "make check" tells what is wrong.', Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
         $round = new Round($game, $word);

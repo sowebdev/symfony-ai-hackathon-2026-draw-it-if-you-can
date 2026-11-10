@@ -1,21 +1,12 @@
 ai:
     platform:
+        # One OpenAI-compatible endpoint per role: a local llama.cpp server or a provider's API.
+        # No model catalog: the generic bridge accepts any model name. Whether the model can do
+        # its job (see an image, for the guesser) is checked by trying it: bin/console app:ai:check.
         generic:
-            # The local model (llama.cpp behind the gate of local-model). The router serves one model
-            # at a time: the one named by AI_MODEL must be loaded (`model use qwen3.8-27b-vision`).
-            local:
-                base_url: '%env(LOCAL_MODEL_URL)%'
-                model_catalog:
-                    models:
-                        qwen3.8-27b-vision:
-                            class: 'Symfony\AI\Platform\Bridge\Generic\CompletionsModel'
-                            capabilities:
-                                - !php/const Symfony\AI\Platform\Capability::INPUT_MESSAGES
-                                - !php/const Symfony\AI\Platform\Capability::INPUT_IMAGE
-                                - !php/const Symfony\AI\Platform\Capability::OUTPUT_TEXT
-                        gemma4:
-                            class: 'Symfony\AI\Platform\Bridge\Generic\CompletionsModel'
-                            capabilities:
-                                - !php/const Symfony\AI\Platform\Capability::INPUT_MESSAGES
-                                - !php/const Symfony\AI\Platform\Capability::INPUT_IMAGE
-                                - !php/const Symfony\AI\Platform\Capability::OUTPUT_TEXT
+            drawer:
+                base_url: '%env(AI_DRAWER_BASE_URL)%'
+                api_key: '%env(default::AI_DRAWER_API_KEY)%'
+            guesser:
+                base_url: '%env(AI_GUESSER_BASE_URL)%'
+                api_key: '%env(default::AI_GUESSER_API_KEY)%'
