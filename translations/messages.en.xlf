@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Keys describe their purpose, not where they are shown (Symfony best practices). Same keys in every language: tests/Unit/TranslationsTest.php -->
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+    <file source-language="en" target-language="en" datatype="plaintext" original="file.ext">
+        <body>
+            <trans-unit id="tagline" resname="tagline">
+                <source>tagline</source>
+                <target>You draw, the AI guesses.</target>
+                <note>Under the title of the home page</note>
+            </trans-unit>
+            <trans-unit id="label.language" resname="label.language">
+                <source>label.language</source>
+                <target>Language</target>
+                <note>Name of the language switcher, for screen readers</note>
+            </trans-unit>
+            <trans-unit id="label.theme" resname="label.theme">
+                <source>label.theme</source>
+                <target>Theme</target>
+                <note>Field of the new game form</note>
+            </trans-unit>
+            <trans-unit id="action.new_game" resname="action.new_game">
+                <source>action.new_game</source>
+                <target>New game</target>
+                <note>Button and link that start a new game</note>
+            </trans-unit>
+            <trans-unit id="action.undo" resname="action.undo">
+                <source>action.undo</source>
+                <target>Undo</target>
+                <note>Removes the last stroke</note>
+            </trans-unit>
+            <trans-unit id="action.accept_guess" resname="action.accept_guess">
+                <source>action.accept_guess</source>
+                <target>Yes!</target>
+                <note>Next to a word of the AI: the player says it is right</note>
+            </trans-unit>
+            <trans-unit id="instruction.draw" resname="instruction.draw">
+                <source>instruction.draw</source>
+                <target>Draw:</target>
+                <note>Before the word the player must draw</note>
+            </trans-unit>
+            <trans-unit id="heading.ai_guesses" resname="heading.ai_guesses">
+                <source>heading.ai_guesses</source>
+                <target>The AI says…</target>
+                <note>Above the words the AI calls out</note>
+            </trans-unit>
+            <trans-unit id="result.found_in" resname="result.found_in">
+                <source>result.found_in</source>
+                <target>Found in %seconds% s</target>
+                <note>When the AI found the word; %seconds% is a number in an HTML element</note>
+            </trans-unit>
+            <trans-unit id="error.no_word" resname="error.no_word">
+                <source>error.no_word</source>
+                <target>The AI could not pick a word. Is the model running? "make check" tells what is wrong.</target>
+                <note>The model gave no word to draw</note>
+            </trans-unit>
+            <trans-unit id="theme.animals" resname="theme.animals">
+                <source>theme.animals</source>
+                <target>Animals</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+            <trans-unit id="theme.food" resname="theme.food">
+                <source>theme.food</source>
+                <target>Food and cooking</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+            <trans-unit id="theme.everyday-objects" resname="theme.everyday-objects">
+                <source>theme.everyday-objects</source>
+                <target>Everyday objects</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+            <trans-unit id="theme.developer" resname="theme.developer">
+                <source>theme.developer</source>
+                <target>Developer life</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

@@ -4,7 +4,7 @@ import { Controller } from '@hotwired/stimulus';
 // "Yes!" accepts a near word; the exact word is recognised by the server.
 export default class extends Controller {
     static targets = ['list', 'result', 'time'];
-    static values = { streamUrl: String, acceptUrl: String, found: Boolean };
+    static values = { streamUrl: String, acceptUrl: String, found: Boolean, yesLabel: String };
 
     connect() {
         if (this.foundValue) {
@@ -26,7 +26,7 @@ export default class extends Controller {
         text.textContent = word;
         const yes = document.createElement('button');
         yes.type = 'button';
-        yes.textContent = 'Yes!';
+        yes.textContent = this.yesLabelValue;
         yes.dataset.action = 'guesses#accept';
         item.append(text, yes);
         this.listTarget.append(item);

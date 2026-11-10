@@ -1,32 +1,28 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Draw It If You Can{% endblock %}
-
 {% block body %}
     <main class="home">
+        <nav class="languages" aria-label="{{ 'label.language'|trans }}">
+            {% for language in languages %}
+                <a href="{{ path('home', {_locale: language.value}) }}" hreflang="{{ language.value }}" lang="{{ language.value }}"
+                   {{ language.value == app.locale ? 'aria-current="page"' }}>{{ language.label }}</a>
+            {% endfor %}
+        </nav>
         <h1>Draw It If You Can</h1>
-        <p>You draw, the AI guesses.</p>
+        <p>{{ 'tagline'|trans }}</p>
         {% if error %}
-            <p class="error" role="alert">{{ error }}</p>
+            <p class="error" role="alert">{{ error|trans }}</p>
         {% endif %}
         <form method="post" action="{{ path('game_create') }}" class="new-game">
             <label>
-                Theme
+                {{ 'label.theme'|trans }}
                 <select name="theme">
                     {% for theme in themes %}
-                        <option value="{{ theme.value }}">{{ theme.label }}</option>
+                        <option value="{{ theme.value }}">{{ theme|trans }}</option>
                     {% endfor %}
                 </select>
             </label>
-            <label>
-                Language
-                <select name="language">
-                    {% for language in languages %}
-                        <option value="{{ language.value }}">{{ language.label }}</option>
-                    {% endfor %}
-                </select>
-            </label>
-            <button type="submit">New game</button>
+            <button type="submit">{{ 'action.new_game'|trans }}</button>
         </form>
     </main>
 {% endblock %}

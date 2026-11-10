@@ -6,6 +6,8 @@ A solo drawing and guessing game against an AI, built with Symfony AI and MCP.
 - **The AI draws, you guess**: the model draws stroke by stroke, rendered to look hand-drawn.
 - **A copilot over MCP**: an external agent connects to the game to see the drawing in progress and give you hints.
 
+The game speaks English and French: the whole game follows the language of the page, the interface, the word to draw and the words of the AI.
+
 Work in progress for the Symfony AI hackathon (November 2026).
 
 ## Requirements

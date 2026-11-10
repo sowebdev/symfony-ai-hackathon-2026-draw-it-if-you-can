@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Keys describe their purpose, not where they are shown (Symfony best practices). Same keys in every language: tests/Unit/TranslationsTest.php -->
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+    <file source-language="en" target-language="fr" datatype="plaintext" original="file.ext">
+        <body>
+            <trans-unit id="tagline" resname="tagline">
+                <source>tagline</source>
+                <target>Tu dessines, l'IA devine.</target>
+                <note>Under the title of the home page</note>
+            </trans-unit>
+            <trans-unit id="label.language" resname="label.language">
+                <source>label.language</source>
+                <target>Langue</target>
+                <note>Name of the language switcher, for screen readers</note>
+            </trans-unit>
+            <trans-unit id="label.theme" resname="label.theme">
+                <source>label.theme</source>
+                <target>Thème</target>
+                <note>Field of the new game form</note>
+            </trans-unit>
+            <trans-unit id="action.new_game" resname="action.new_game">
+                <source>action.new_game</source>
+                <target>Nouvelle partie</target>
+                <note>Button and link that start a new game</note>
+            </trans-unit>
+            <trans-unit id="action.undo" resname="action.undo">
+                <source>action.undo</source>
+                <target>Annuler</target>
+                <note>Removes the last stroke</note>
+            </trans-unit>
+            <trans-unit id="action.accept_guess" resname="action.accept_guess">
+                <source>action.accept_guess</source>
+                <target>Oui !</target>
+                <note>Next to a word of the AI: the player says it is right</note>
+            </trans-unit>
+            <trans-unit id="instruction.draw" resname="instruction.draw">
+                <source>instruction.draw</source>
+                <target>À dessiner :</target>
+                <note>Before the word the player must draw</note>
+            </trans-unit>
+            <trans-unit id="heading.ai_guesses" resname="heading.ai_guesses">
+                <source>heading.ai_guesses</source>
+                <target>L'IA propose…</target>
+                <note>Above the words the AI calls out</note>
+            </trans-unit>
+            <trans-unit id="result.found_in" resname="result.found_in">
+                <source>result.found_in</source>
+                <target>Trouvé en %seconds% s</target>
+                <note>When the AI found the word; %seconds% is a number in an HTML element</note>
+            </trans-unit>
+            <trans-unit id="error.no_word" resname="error.no_word">
+                <source>error.no_word</source>
+                <target>L'IA n'a pas pu choisir de mot. Le modèle tourne-t-il ? « make check » dit ce qui ne va pas.</target>
+                <note>The model gave no word to draw</note>
+            </trans-unit>
+            <trans-unit id="theme.animals" resname="theme.animals">
+                <source>theme.animals</source>
+                <target>Animaux</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+            <trans-unit id="theme.food" resname="theme.food">
+                <source>theme.food</source>
+                <target>Cuisine</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+            <trans-unit id="theme.everyday-objects" resname="theme.everyday-objects">
+                <source>theme.everyday-objects</source>
+                <target>Objets du quotidien</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+            <trans-unit id="theme.developer" resname="theme.developer">
+                <source>theme.developer</source>
+                <target>Vie de développeur</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

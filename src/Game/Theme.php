@@ -2,24 +2,25 @@
 
 namespace App\Game;
 
+use Symfony\Contracts\Translation\TranslatableInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
+
 /**
  * Frames what is drawn: the AI picks the word in the theme, and the guesser knows it.
  */
-enum Theme: string
+enum Theme: string implements TranslatableInterface
 {
     case Animals = 'animals';
     case Food = 'food';
     case EverydayObjects = 'everyday-objects';
     case Developer = 'developer';
 
-    public function label(): string
+    /**
+     * The name shown to the player, in translations/messages.*.yaml.
+     */
+    public function trans(TranslatorInterface $translator, ?string $locale = null): string
     {
-        return match ($this) {
-            self::Animals => 'Animals',
-            self::Food => 'Food and cooking',
-            self::EverydayObjects => 'Everyday objects',
-            self::Developer => 'Developer life',
-        };
+        return $translator->trans('theme.'.$this->value, locale: $locale);
     }
 
     /**

@@ -9,20 +9,45 @@ final class GameControllerTest extends WebTestCase
 {
     use ScriptedModel;
 
-    public function testANewGameStartsARoundWithTheWordOfTheAi(): void
+    public function testTheRootSpeaksTheLanguageOfTheBrowser(): void
     {
         $client = self::createClient();
-        self::scriptModel($client, word: 'giraffe');
 
-        $client->request('GET', '/');
+        $client->request('GET', '/', server: ['HTTP_ACCEPT_LANGUAGE' => 'fr-FR,fr;q=0.9,en;q=0.8']);
+        self::assertResponseRedirects('/fr');
+
+        $client->request('GET', '/', server: ['HTTP_ACCEPT_LANGUAGE' => 'de-DE']);
+        self::assertResponseRedirects('/en');
+    }
+
+    public function testAnUnknownLanguageIsNotFound(): void
+    {
+        $client = self::createClient();
+        $client->request('GET', '/de');
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testAGameIsPlayedInTheLanguageOfThePage(): void
+    {
+        $client = self::createClient();
+        self::scriptModel($client, word: 'girafe');
+
+        $client->request('GET', '/fr');
         self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('html[lang="fr"] h1 + p', "Tu dessines, l'IA devine.");
+        self::assertSelectorTextContains('option[value="animals"]', 'Animaux');
 
-        $client->submitForm('New game', ['theme' => 'animals', 'language' => 'fr']);
+        $client->submitForm('Nouvelle partie', ['theme' => 'animals']);
         self::assertResponseRedirects();
 
-        $client->followRedirect();
+        // The round page speaks the language of its game, whatever the browser says.
+        $client->request('GET', (string) $client->getResponse()->headers->get('Location'), server: ['HTTP_ACCEPT_LANGUAGE' => 'en']);
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('.target strong', 'giraffe');
+        self::assertSelectorExists('html[lang="fr"]');
+        self::assertSelectorTextContains('.target', 'À dessiner');
+        self::assertSelectorTextContains('.target strong', 'girafe');
+        self::assertSelectorTextContains('.target .theme', 'Animaux');
         self::assertSelectorExists('canvas[data-canvas-target="canvas"]');
     }
 
@@ -31,7 +56,7 @@ final class GameControllerTest extends WebTestCase
         $client = self::createClient();
         self::scriptModel($client, word: 'I would say a giraffe');
 
-        $client->request('POST', '/games', ['theme' => 'animals', 'language' => 'en']);
+        $client->request('POST', '/en/games', ['theme' => 'animals']);
 
         self::assertResponseStatusCodeSame(503);
         self::assertSelectorTextContains('.error', 'could not pick a word');
@@ -42,7 +67,7 @@ final class GameControllerTest extends WebTestCase
         $client = self::createClient();
         self::scriptModel($client);
 
-        $client->request('POST', '/games', ['theme' => 'cars', 'language' => 'en']);
+        $client->request('POST', '/en/games', ['theme' => 'cars']);
 
         self::assertResponseStatusCodeSame(422);
     }

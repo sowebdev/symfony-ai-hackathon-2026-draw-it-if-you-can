@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
+use Symfony\Component\Translation\LocaleSwitcher;
 
 #[Route('/rounds/{id}', requirements: ['id' => Requirement::UUID_V7])]
 final class RoundController extends AbstractController
@@ -27,12 +28,16 @@ final class RoundController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly StrokeRepository $strokes,
         private readonly GuessRepository $guesses,
+        private readonly LocaleSwitcher $localeSwitcher,
     ) {
     }
 
     #[Route('', name: 'round_show', methods: ['GET'])]
     public function show(Round $round): Response
     {
+        // A round speaks the language of its game, whatever the browser says.
+        $this->localeSwitcher->setLocale($round->getGame()->getLanguage()->value);
+
         return $this->render('round/show.html.twig', [
             'round' => $round,
             'guesses' => $this->guesses->findByRound($round),

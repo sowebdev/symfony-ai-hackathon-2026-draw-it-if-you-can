@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Game\Language;
 use App\Game\Theme;
 
 /**
@@ -12,7 +11,6 @@ final readonly class NewGame
 {
     public function __construct(
         public Theme $theme,
-        public Language $language,
     ) {
     }
 }
