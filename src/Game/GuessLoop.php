@@ -50,6 +50,8 @@ final readonly class GuessLoop
      */
     public function run(Round $round): \Generator
     {
+        // Bounded by the deadline below, not by PHP's 30 s: the stream lasts longer.
+        set_time_limit(0);
         $roundId = $round->getId();
         $deadline = microtime(true) + $this->maxDurationS;
         $lastDrawing = null;
