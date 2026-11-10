@@ -10,7 +10,7 @@ export default class extends Controller {
     static values = { strokesUrl: String, addUrl: String, undoUrl: String };
 
     async connect() {
-        this.context = this.canvasTarget.getContext('2d');
+        this.pen = this.canvasTarget.getContext('2d');
         this.strokes = [];
         this.current = null;
 
@@ -93,21 +93,21 @@ export default class extends Controller {
     }
 
     redraw() {
-        const context = this.context;
-        context.clearRect(0, 0, SIZE, SIZE);
-        context.lineWidth = 6;
-        context.lineCap = 'round';
-        context.lineJoin = 'round';
-        context.strokeStyle = '#111';
+        const pen = this.pen;
+        pen.clearRect(0, 0, SIZE, SIZE);
+        pen.lineWidth = 6;
+        pen.lineCap = 'round';
+        pen.lineJoin = 'round';
+        pen.strokeStyle = '#111';
 
         for (const points of this.current ? [...this.strokes, this.current] : this.strokes) {
-            context.beginPath();
-            context.moveTo(points[0][0], points[0][1]);
+            pen.beginPath();
+            pen.moveTo(points[0][0], points[0][1]);
             // A single point is drawn as a dot.
             for (const [x, y] of points.length > 1 ? points.slice(1) : points) {
-                context.lineTo(x, y);
+                pen.lineTo(x, y);
             }
-            context.stroke();
+            pen.stroke();
         }
     }
 }
