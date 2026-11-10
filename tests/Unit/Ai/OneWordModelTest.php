@@ -46,4 +46,11 @@ final class OneWordModelTest extends TestCase
     {
         self::assertNull(OneWordModel::clean($answer));
     }
+
+    public function testKeepsTheUsableWordsOfAList(): void
+    {
+        $answer = "<think></think>1. mouse\n2) Keyboard\n- coffee mug\n* Mouse\nHere are some words:\n\n• rubber duck\n42";
+
+        self::assertSame(['mouse', 'Keyboard', 'coffee mug', 'rubber duck'], OneWordModel::cleanList($answer));
+    }
 }

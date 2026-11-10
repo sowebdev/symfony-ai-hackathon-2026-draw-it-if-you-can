@@ -20,7 +20,7 @@ trait ScriptedModel
 
         $client->getContainer()->set('ai.platform.generic.guesser', MockPlatformFactory::createPlatform(
             static function ($model, $input) use ($word, &$guesses): string {
-                if (str_contains((string) json_encode($input), 'Pick the word')) {
+                if (str_contains((string) json_encode($input), 'List words the player could draw')) {
                     return $word;
                 }
 
