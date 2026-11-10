@@ -5,7 +5,7 @@
         <body>
             <trans-unit id="tagline" resname="tagline">
                 <source>tagline</source>
-                <target>Tu dessines, l'IA devine.</target>
+                <target>Dessine pour l'IA, ou devine ses dessins.</target>
                 <note>Under the title of the home page</note>
             </trans-unit>
             <trans-unit id="label.language" resname="label.language">
@@ -72,6 +72,61 @@
                 <source>theme.developer</source>
                 <target>Vie de développeur</target>
                 <note>Name of a theme</note>
+            </trans-unit>
+            <trans-unit id="action.player_draws" resname="action.player_draws">
+                <source>action.player_draws</source>
+                <target>Je dessine</target>
+                <note>Starts a game where the player draws and the AI guesses</note>
+            </trans-unit>
+            <trans-unit id="action.ai_draws" resname="action.ai_draws">
+                <source>action.ai_draws</source>
+                <target>L'IA dessine</target>
+                <note>Starts a game where the AI draws and the player guesses</note>
+            </trans-unit>
+            <trans-unit id="instruction.guess" resname="instruction.guess">
+                <source>instruction.guess</source>
+                <target>Que dessine l'IA ?</target>
+                <note>Above the drawing of the AI</note>
+            </trans-unit>
+            <trans-unit id="label.answer" resname="label.answer">
+                <source>label.answer</source>
+                <target>Ta réponse</target>
+                <note>Field where the player types a guess</note>
+            </trans-unit>
+            <trans-unit id="action.answer" resname="action.answer">
+                <source>action.answer</source>
+                <target>Proposer</target>
+                <note>Sends the guess of the player</note>
+            </trans-unit>
+            <trans-unit id="heading.player_guesses" resname="heading.player_guesses">
+                <source>heading.player_guesses</source>
+                <target>Tes propositions</target>
+                <note>Above the words the player tried</note>
+            </trans-unit>
+            <trans-unit id="action.give_up" resname="action.give_up">
+                <source>action.give_up</source>
+                <target>Je donne ma langue au chat</target>
+                <note>The player gives up and sees the word</note>
+            </trans-unit>
+            <trans-unit id="result.word_was" resname="result.word_was">
+                <source>result.word_was</source>
+                <target>Le mot était %word%</target>
+                <note>After giving up; %word% is the word in an HTML element</note>
+            </trans-unit>
+            <trans-unit id="status.ai_drawing" resname="status.ai_drawing">
+                <source>status.ai_drawing</source>
+                <target>L'IA dessine…</target>
+                <note>While the AI draws</note>
+            </trans-unit>
+            <trans-unit id="status.ai_finished" resname="status.ai_finished">
+                <source>status.ai_finished</source>
+                <target>L'IA a fini son dessin.</target>
+                <note>When the AI has drawn its last stroke</note>
+            </trans-unit>
+            <trans-unit id="error.ai_drawing" resname="error.ai_drawing">
+                <source>error.ai_drawing</source>
+                <target>L'IA n'a pas pu dessiner. « make check » dit ce qui ne va pas.</target>
+                <note>The model could not draw</note>
             </trans-unit>
         </body>
     </file>

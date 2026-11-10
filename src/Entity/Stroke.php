@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Drawing\GridStroke;
 use App\Drawing\StrokePoints;
 use App\Repository\StrokeRepository;
 use Doctrine\ORM\Mapping as ORM;
@@ -21,6 +22,18 @@ class Stroke
     #[ORM\Column]
     private array $points;
 
+    /**
+     * For a stroke of the AI: what it says the stroke depicts ("left ear").
+     */
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $part = null;
+
+    /**
+     * For a stroke of the AI: the grid cells as the model wrote them, before StrokeTracer.
+     */
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $written = null;
+
     public function __construct(
         #[ORM\ManyToOne]
         #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -28,8 +41,21 @@ class Stroke
         #[ORM\Column]
         private int $position,
         StrokePoints $points,
+        ?GridStroke $source = null,
     ) {
         $this->points = $points->points;
+        $this->part = $source?->part;
+        $this->written = $source?->written;
+    }
+
+    public function getPart(): ?string
+    {
+        return $this->part;
+    }
+
+    public function getWritten(): ?string
+    {
+        return $this->written;
     }
 
     public function getId(): ?int

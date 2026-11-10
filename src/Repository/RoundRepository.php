@@ -37,4 +37,24 @@ class RoundRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleColumnResult();
     }
+
+    /**
+     * Marks the drawing of the AI as started, unless another request did it first: a single SQL
+     * update, so two requests cannot both win.
+     */
+    public function claimAiDrawing(Round $round): bool
+    {
+        $claimed = $this->createQueryBuilder('r')
+            ->update()
+            ->set('r.aiDrawingStarted', ':started')
+            ->where('r.id = :id')
+            ->andWhere('r.aiDrawingStarted = :notStarted')
+            ->setParameter('started', true)
+            ->setParameter('notStarted', false)
+            ->setParameter('id', $round->getId(), 'uuid')
+            ->getQuery()
+            ->execute();
+
+        return 1 === $claimed;
+    }
 }

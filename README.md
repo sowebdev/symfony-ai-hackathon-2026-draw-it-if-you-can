@@ -39,6 +39,8 @@ AI_GUESSER_API_KEY=...
 AI_GUESSER_DISABLE_THINKING=false   # true sends llama.cpp's chat_template_kwargs, which an API may refuse
 ```
 
+The strokes of the AI look drawn by a hand; `HUMANIZED_DRAWING=false` in `.env.local` draws straight segments instead.
+
 Then `make check` tries each model on a tiny task whose answer is known (the guesser must name a circle drawn in an image) and tells what is wrong.
 
 By default both roles use [Ollama](https://ollama.com) on your machine (`http://host.docker.internal:11434`) with `gemma3`, a model that reads images: `ollama pull gemma3`. Any other OpenAI-compatible server works, llama.cpp, LM Studio or a provider's API. If the game must join a Docker network of yours to reach it, put that in a `compose.override.yaml` (not committed).

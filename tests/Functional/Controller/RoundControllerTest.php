@@ -2,12 +2,14 @@
 
 namespace App\Tests\Functional\Controller;
 
+use App\Tests\Functional\EventStream;
 use App\Tests\Functional\ScriptedModel;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class RoundControllerTest extends WebTestCase
 {
+    use EventStream;
     use ScriptedModel;
 
     private KernelBrowser $client;
@@ -172,19 +174,7 @@ final class RoundControllerTest extends WebTestCase
      */
     private function streamGuesses(string $round): array
     {
-        ob_start();
-        $this->client->request('GET', $round.'/guesses');
-        $body = (string) ob_get_clean().$this->client->getInternalResponse()->getContent();
-        self::assertResponseIsSuccessful();
-
-        $events = [];
-        foreach (preg_split('/\n\n/', $body) ?: [] as $block) {
-            if (preg_match('/^event: (\w+)$/m', $block, $type) && preg_match('/^data: (.*)$/m', $block, $data)) {
-                $events[] = ['type' => $type[1], 'data' => json_decode($data[1], true, flags: \JSON_THROW_ON_ERROR)];
-            }
-        }
-
-        return $events;
+        return self::readEvents($this->client, $round.'/guesses');
     }
 
     /**

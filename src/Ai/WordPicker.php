@@ -30,7 +30,10 @@ final readonly class WordPicker
     ) {
     }
 
-    public function pick(Theme $theme, Language $language): string
+    /**
+     * @param Role $role The role whose model picks: the guesser when the player draws, the drawer when the AI draws
+     */
+    public function pick(Theme $theme, Language $language, Role $role = Role::Guesser): string
     {
         $recent = $this->rounds->recentTargetWords($theme, $language, self::RECENT_ROUNDS);
         $avoid = [] === $recent ? '' : "\nThese words were drawn recently, list other ones: ".implode(', ', $recent).'.';
@@ -47,7 +50,7 @@ final readonly class WordPicker
         );
 
         for ($attempt = 1; $attempt <= self::ATTEMPTS; ++$attempt) {
-            $word = self::draw($this->model->askList(Role::Guesser, $messages, 1.0), $recent, $this->randomizer);
+            $word = self::draw($this->model->askList($role, $messages, 1.0), $recent, $this->randomizer);
             if (null !== $word) {
                 return $word;
             }

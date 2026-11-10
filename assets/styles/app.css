@@ -1,3 +1,8 @@
+/* An element hidden by the hidden attribute stays hidden, whatever its display. */
+[hidden] {
+    display: none !important;
+}
+
 body {
     margin: 0;
     font-family: system-ui, sans-serif;
@@ -102,4 +107,30 @@ body {
 
 .error {
     color: #b42318;
+}
+
+.modes {
+    display: flex;
+    gap: 0.8rem;
+}
+
+.modes button {
+    flex: 1;
+}
+
+.answer {
+    display: flex;
+    gap: 0.5rem;
+    align-items: end;
+    margin-bottom: 1rem;
+}
+
+.answer label {
+    display: flex;
+    flex-direction: column;
+}
+
+.status {
+    color: #666;
+    margin: 0 0 0.8rem;
 }

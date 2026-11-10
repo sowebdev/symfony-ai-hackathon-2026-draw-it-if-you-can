@@ -7,7 +7,9 @@ use App\Drawing\StrokePoints;
 use App\Entity\Guess;
 use App\Entity\Round;
 use App\Entity\Stroke;
+use App\Game\DrawingLoop;
 use App\Game\GuessLoop;
+use App\Game\WordMatcher;
 use App\Repository\GuessRepository;
 use App\Repository\StrokeRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,7 +40,7 @@ final class RoundController extends AbstractController
         // A round speaks the language of its game, whatever the browser says.
         $this->localeSwitcher->setLocale($round->getGame()->getLanguage()->value);
 
-        return $this->render('round/show.html.twig', [
+        return $this->render($round->isDrawnByAi() ? 'round/guess.html.twig' : 'round/show.html.twig', [
             'round' => $round,
             'guesses' => $this->guesses->findByRound($round),
         ]);
@@ -56,6 +58,7 @@ final class RoundController extends AbstractController
     #[Route('/strokes', name: 'round_stroke_add', methods: ['POST'])]
     public function addStroke(Round $round, #[MapRequestPayload] NewStroke $payload): JsonResponse
     {
+        $this->denyUnlessPlayerDraws($round);
         try {
             $points = StrokePoints::fromArray($payload->points);
         } catch (InvalidStroke $exception) {
@@ -72,6 +75,7 @@ final class RoundController extends AbstractController
     #[Route('/strokes/last', name: 'round_stroke_undo', methods: ['DELETE'])]
     public function undo(Round $round): Response
     {
+        $this->denyUnlessPlayerDraws($round);
         $stroke = $this->strokes->findLast($round) ?? throw $this->createNotFoundException('No stroke to undo.');
         $this->entityManager->remove($stroke);
         $this->entityManager->flush();
@@ -85,6 +89,7 @@ final class RoundController extends AbstractController
     #[Route('/guesses', name: 'round_guesses', methods: ['GET'])]
     public function guesses(Round $round, GuessLoop $loop): EventStreamResponse
     {
+        $this->denyUnlessPlayerDraws($round);
         return new EventStreamResponse(static fn (): \Generator => $loop->run($round));
     }
 
@@ -94,6 +99,7 @@ final class RoundController extends AbstractController
     #[Route('/guesses/{guessId}/accept', name: 'round_guess_accept', requirements: ['guessId' => Requirement::DIGITS], methods: ['POST'])]
     public function accept(Round $round, #[MapEntity(id: 'guessId')] Guess $guess): JsonResponse
     {
+        $this->denyUnlessPlayerDraws($round);
         if ($guess->getRound() !== $round) {
             throw $this->createNotFoundException('This guess belongs to another round.');
         }
@@ -101,5 +107,69 @@ final class RoundController extends AbstractController
         $this->entityManager->flush();
 
         return $this->json(['foundAfterMs' => $round->getFoundAfterMs()]);
+    }
+
+    /**
+     * The strokes of the AI, pushed to the browser as server-sent events while the player guesses.
+     */
+    #[Route('/drawing', name: 'round_drawing', methods: ['GET'])]
+    public function drawing(Round $round, DrawingLoop $loop): EventStreamResponse
+    {
+        $this->denyUnlessAiDraws($round);
+
+        return new EventStreamResponse(static fn (): \Generator => $loop->run($round));
+    }
+
+    /**
+     * A word the player types to guess the drawing of the AI, judged by code.
+     */
+    #[Route('/answers', name: 'round_answer', methods: ['POST'])]
+    public function answer(Round $round, #[MapRequestPayload] NewAnswer $payload, WordMatcher $matcher): JsonResponse
+    {
+        $this->denyUnlessAiDraws($round);
+        if ($round->isOver()) {
+            return $this->json(['error' => 'The round is over.'], Response::HTTP_CONFLICT);
+        }
+
+        $guess = new Guess($round, trim($payload->word), $round->elapsedMs());
+        $this->entityManager->persist($guess);
+        if ($matcher->matches($guess->getWord(), $round->getTargetWord())) {
+            $round->markFound($guess);
+        }
+        $this->entityManager->flush();
+
+        return $this->json([
+            'word' => $guess->getWord(),
+            'found' => $round->isFound(),
+            'foundAfterMs' => $round->getFoundAfterMs(),
+            'targetWord' => $round->isFound() ? $round->getTargetWord() : null,
+        ], Response::HTTP_CREATED);
+    }
+
+    /**
+     * The player gives up: the word is revealed.
+     */
+    #[Route('/give-up', name: 'round_give_up', methods: ['POST'])]
+    public function giveUp(Round $round): JsonResponse
+    {
+        $this->denyUnlessAiDraws($round);
+        $round->giveUp();
+        $this->entityManager->flush();
+
+        return $this->json(['targetWord' => $round->getTargetWord(), 'found' => $round->isFound()]);
+    }
+
+    private function denyUnlessPlayerDraws(Round $round): void
+    {
+        if ($round->isDrawnByAi()) {
+            throw $this->createNotFoundException('The AI draws in this round.');
+        }
+    }
+
+    private function denyUnlessAiDraws(Round $round): void
+    {
+        if (!$round->isDrawnByAi()) {
+            throw $this->createNotFoundException('The player draws in this round.');
+        }
     }
 }

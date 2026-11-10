@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <main class="round"
+          data-controller="ai-drawing"
+          data-ai-drawing-stream-url-value="{{ path('round_drawing', {id: round.id}) }}"
+          data-ai-drawing-answer-url-value="{{ path('round_answer', {id: round.id}) }}"
+          data-ai-drawing-give-up-url-value="{{ path('round_give_up', {id: round.id}) }}"
+          data-ai-drawing-over-value="{{ round.over ? 'true' : 'false' }}"
+          data-ai-drawing-finished-label-value="{{ 'status.ai_finished'|trans }}"
+          data-ai-drawing-failed-label-value="{{ 'error.ai_drawing'|trans }}">
+        <p class="target">{{ 'instruction.guess'|trans }} <span class="theme">({{ round.game.theme|trans }})</span></p>
+
+        <div class="board">
+            <canvas class="canvas locked" width="1000" height="1000" data-ai-drawing-target="canvas"></canvas>
+
+            <section class="guesses" aria-live="polite">
+                <p class="status" data-ai-drawing-target="status">{{ round.aiDrawingFinished ? 'status.ai_finished'|trans : 'status.ai_drawing'|trans }}</p>
+                <form class="answer" data-ai-drawing-target="form" data-action="ai-drawing#answer">
+                    <label>
+                        {{ 'label.answer'|trans }}
+                        <input type="text" name="word" maxlength="100" autocomplete="off" required autofocus data-ai-drawing-target="word">
+                    </label>
+                    <button type="submit">{{ 'action.answer'|trans }}</button>
+                </form>
+                <h2>{{ 'heading.player_guesses'|trans }}</h2>
+                <ol data-ai-drawing-target="list">
+                    {% for guess in guesses %}
+                        <li class="{{ guess.accepted ? 'accepted' }}">{{ guess.word }}</li>
+                    {% endfor %}
+                </ol>
+                <p class="result" data-ai-drawing-target="result" {{ round.found ? '' : 'hidden' }}>
+                    {{ 'result.found_in'|trans({'%seconds%': '<strong data-ai-drawing-target="time">' ~ (round.found ? (round.foundAfterMs / 1000)|number_format(1) : '') ~ '</strong>'})|raw }}
+                </p>
+                <p class="reveal" data-ai-drawing-target="reveal" {{ round.givenUp ? '' : 'hidden' }}>
+                    {{ 'result.word_was'|trans({'%word%': '<strong data-ai-drawing-target="targetWord">' ~ (round.givenUp ? round.targetWord|e : '') ~ '</strong>'})|raw }}
+                </p>
+            </section>
+        </div>
+
+        <div class="toolbar">
+            <button type="button" data-action="ai-drawing#giveUp" data-ai-drawing-target="giveUp">{{ 'action.give_up'|trans }}</button>
+            <a href="{{ path('home', {_locale: app.locale}) }}">{{ 'action.new_game'|trans }}</a>
+        </div>
+    </main>
+{% endblock %}

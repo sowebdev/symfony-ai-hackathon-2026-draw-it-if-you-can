@@ -2,9 +2,11 @@
 
 namespace App\Controller;
 
+use App\Ai\Role;
 use App\Ai\WordPicker;
 use App\Entity\Game;
 use App\Entity\Round;
+use App\Game\DrawnBy;
 use App\Game\Language;
 use App\Game\Theme;
 use Doctrine\ORM\EntityManagerInterface;
@@ -51,14 +53,16 @@ final class GameController extends AbstractController
         $game = new Game($payload->theme, Language::from($request->getLocale()));
 
         try {
-            $word = $this->wordPicker->pick($game->getTheme(), $game->getLanguage());
+            // The AI that does not guess picks the word: the guesser when the player draws, the drawer otherwise.
+            $role = DrawnBy::Ai === $payload->drawnBy ? Role::Drawer : Role::Guesser;
+            $word = $this->wordPicker->pick($game->getTheme(), $game->getLanguage(), $role);
         } catch (\Throwable $exception) {
             $this->logger->error('No word to draw: {message}', ['message' => $exception->getMessage(), 'exception' => $exception]);
 
             return $this->renderHome('error.no_word', Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
-        $round = new Round($game, $word);
+        $round = new Round($game, $word, $payload->drawnBy);
         $this->entityManager->persist($game);
         $this->entityManager->persist($round);
         $this->entityManager->flush();

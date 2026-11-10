@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Game\DrawnBy;
 use App\Repository\RoundRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -9,7 +10,7 @@ use Symfony\Component\Clock\DatePoint;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * One drawing to guess. For now the player draws and the AI guesses.
+ * One drawing to guess: the player draws and the AI guesses, or the other way round.
  */
 #[ORM\Entity(repositoryClass: RoundRepository::class)]
 class Round
@@ -30,12 +31,29 @@ class Round
     #[ORM\Column(nullable: true)]
     private ?int $foundAfterMs = null;
 
+    /**
+     * Whether a request has started the drawing of the AI: only one may run it.
+     */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $aiDrawingStarted = false;
+
+    #[ORM\Column(options: ['default' => false])]
+    private bool $aiDrawingFinished = false;
+
+    /**
+     * The player gave up guessing the drawing of the AI.
+     */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $givenUp = false;
+
     public function __construct(
         #[ORM\ManyToOne]
         #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
         private Game $game,
         #[ORM\Column(length: 100)]
         private string $targetWord,
+        #[ORM\Column(length: 10, enumType: DrawnBy::class, options: ['default' => 'player'])]
+        private DrawnBy $drawnBy = DrawnBy::Player,
     ) {
         $this->id = Uuid::v7();
         $this->startedAtMs = self::toMs(new DatePoint());
@@ -91,5 +109,50 @@ class Round
         }
         $guess->accept();
         $this->foundAfterMs = $guess->getSaidAfterMs();
+    }
+
+    public function getDrawnBy(): DrawnBy
+    {
+        return $this->drawnBy;
+    }
+
+    public function isDrawnByAi(): bool
+    {
+        return DrawnBy::Ai === $this->drawnBy;
+    }
+
+    /**
+     * Found or given up: nothing more to draw nor to guess.
+     */
+    public function isOver(): bool
+    {
+        return $this->isFound() || $this->givenUp;
+    }
+
+    public function isGivenUp(): bool
+    {
+        return $this->givenUp;
+    }
+
+    public function giveUp(): void
+    {
+        if (!$this->isFound()) {
+            $this->givenUp = true;
+        }
+    }
+
+    public function isAiDrawingStarted(): bool
+    {
+        return $this->aiDrawingStarted;
+    }
+
+    public function isAiDrawingFinished(): bool
+    {
+        return $this->aiDrawingFinished;
+    }
+
+    public function finishAiDrawing(): void
+    {
+        $this->aiDrawingFinished = true;
     }
 }

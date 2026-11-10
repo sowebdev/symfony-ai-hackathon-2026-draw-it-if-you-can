@@ -2,6 +2,8 @@
 
 namespace App\Ai;
 
+use Symfony\AI\Agent\Agent;
+use Symfony\AI\Agent\Toolbox\Toolbox;
 use Symfony\AI\Platform\Message\MessageBag;
 use Symfony\AI\Platform\PlatformInterface;
 use Symfony\AI\Platform\Result\DeferredResult;
@@ -37,14 +39,37 @@ final readonly class Models
      */
     public function invoke(Role $role, MessageBag $messages, array $options = []): DeferredResult
     {
-        [$platform, $model, , $disableThinking] = $this->of($role);
-        if ($disableThinking) {
+        [$platform, $model] = $this->of($role);
+
+        return $platform->invoke($model, $messages, $this->options($role, $options));
+    }
+
+    /**
+     * An agent on the model of the role, with the given tools. Call it with options().
+     */
+    public function agent(Role $role, object $tool, int $maxToolCalls): Agent
+    {
+        [$platform, $model] = $this->of($role);
+
+        return new Agent($platform, $model, toolbox: new Toolbox([$tool]), maxToolCalls: $maxToolCalls);
+    }
+
+    /**
+     * The call options, with those the role needs.
+     *
+     * @param array<string, mixed> $options
+     *
+     * @return array<string, mixed>
+     */
+    public function options(Role $role, array $options = []): array
+    {
+        if ($this->of($role)[3]) {
             // No reasoning: the game needs an answer every few seconds (tests of 10/11/2026).
             // A llama.cpp option: a provider's API may refuse it, hence the switch.
             $options['chat_template_kwargs'] = ['enable_thinking' => false];
         }
 
-        return $platform->invoke($model, $messages, $options);
+        return $options;
     }
 
     /**

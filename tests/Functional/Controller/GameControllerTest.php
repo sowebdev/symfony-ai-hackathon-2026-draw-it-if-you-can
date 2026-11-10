@@ -35,10 +35,10 @@ final class GameControllerTest extends WebTestCase
 
         $client->request('GET', '/fr');
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('html[lang="fr"] h1 + p', "Tu dessines, l'IA devine.");
+        self::assertSelectorTextContains('html[lang="fr"] h1 + p', "Dessine pour l'IA, ou devine ses dessins.");
         self::assertSelectorTextContains('option[value="animals"]', 'Animaux');
 
-        $client->submitForm('Nouvelle partie', ['theme' => 'animals']);
+        $client->submitForm('Je dessine', ['theme' => 'animals']);
         self::assertResponseRedirects();
 
         // The round page speaks the language of its game, whatever the browser says.
