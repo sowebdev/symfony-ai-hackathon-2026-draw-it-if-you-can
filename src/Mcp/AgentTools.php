@@ -178,7 +178,7 @@ final readonly class AgentTools
         return \sprintf('"%s" is shown to the player, who decides. %d hints left in this round.', $hint->getWord(), Copilot::MAX_HINTS - \count($this->hints->findByRound($current)));
     }
 
-    #[McpTool(name: 'choose_nickname', description: 'Choose the name the player sees for you, a funny nickname in the language of the game, e.g. "Picasso du dimanche" in French. 24 characters at most. Best done in the lobby, before the game starts.')]
+    #[McpTool(name: 'choose_nickname', description: 'Choose the name the player sees for you: invent a funny nickname of your own, in the language of the game, 24 characters at most. Best done in the lobby, before the game starts.')]
     public function chooseNickname(
         #[Schema(description: 'Your nickname, 24 characters at most')]
         string $nickname,

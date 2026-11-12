@@ -27,6 +27,9 @@ final class AgentName
         'visual studio code' => 'Copilot',
     ];
 
+    /** Names that say nothing of the client: the default of an MCP library, e.g. "mcp" for Mistral Vibe. */
+    private const array GENERIC = ['mcp', 'mcp client', 'mcp-client', 'client', 'app'];
+
     /** Longer names are cut: the name sits in a bar and in headings. */
     private const int MAX_LENGTH = 20;
 
@@ -55,7 +58,7 @@ final class AgentName
     {
         $name = trim((string) $clientName);
         $key = mb_strtolower($name);
-        if ('' === $name || 'mcp client' === $key) {
+        if ('' === $name || \in_array($key, self::GENERIC, true)) {
             return null;
         }
         if (isset(self::KNOWN[$key])) {

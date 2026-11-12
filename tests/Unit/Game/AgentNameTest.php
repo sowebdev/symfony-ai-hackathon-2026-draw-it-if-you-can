@@ -20,6 +20,7 @@ final class AgentNameTest extends TestCase
         yield 'a long name, cut' => ['a-very-long-name-for-an-agent', 'A very long name fo…'];
         yield 'no name' => ['', null];
         yield 'the old placeholder' => ['MCP client', null];
+        yield 'the default of an MCP library, as Vibe sends it' => ['mcp', null];
         yield 'nothing' => [null, null];
     }
 
