@@ -48,7 +48,7 @@ final class CopilotTest extends WebTestCase
         self::assertSame(2, $state['strokes']);
         self::assertSame(['cheval'], $state['wrong_answers']);
         self::assertSame('French', $state['language']);
-        self::assertStringNotContainsString('girafe', $status['content'][0]['text'], 'The word to find is never given');
+        self::assertStringNotContainsString('girafe', $status['content'][0]['text'], 'The word to find is not given during the round');
 
         $drawing = $this->call('look_at_drawing');
         self::assertSame(['text', 'image'], array_column($drawing['content'], 'type'));
@@ -159,6 +159,7 @@ final class CopilotTest extends WebTestCase
 
         Clock::get()->sleep(120);
         $status = $this->roundStatus();
+        self::assertSame('girafe', $status['the_word_was'], 'The round is over: the word is given');
         self::assertTrue($status['stop']);
         self::assertStringContainsString('probably stopped', $status['what_you_can_do']);
     }

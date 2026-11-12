@@ -62,7 +62,7 @@ final readonly class AgentTools
     /**
      * @return array<string, mixed>
      */
-    #[McpTool(name: 'round_status', description: 'Start here. The round being played in Draw It If You Can: whether you are the copilot of the player or their rival in a duel, who draws, the theme, the time left, the wrong answers so far, and what you can do now. Never the word to find. While the game waits (lobby, between rounds), it waits too, up to 25 s, and answers as soon as a round starts. Call it again and again, until it answers "stop": true; never stop before.')]
+    #[McpTool(name: 'round_status', description: 'Start here. The round being played in Draw It If You Can: whether you are the copilot of the player or their rival in a duel, who draws, the theme, the time left, the wrong answers so far, and what you can do now. Never the word to find while the round is played; the word once it is over. While the game waits (lobby, between rounds), it waits too, up to 25 s, and answers as soon as a round starts. Call it again and again, until it answers "stop": true; never stop before.')]
     public function roundStatus(
         #[Schema(description: 'Id of a round; leave empty for the round being played')]
         ?string $round = null,
@@ -114,6 +114,10 @@ final readonly class AgentTools
             },
             'strokes' => \count($this->strokes->findByRound($current)),
         ];
+        // Once the round is over, nothing counts any more: the agent may know what it missed.
+        if ($current->isOver()) {
+            $status['the_word_was'] = $current->getTargetWord();
+        }
         if ($game->isDuel()) {
             $rounds = $this->rounds->findByGame($game);
             $status += [
