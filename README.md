@@ -77,6 +77,17 @@ claude mcp add --transport http draw-it http://127.0.0.1:8040/mcp
 
 Then choose the mode on the home page: the game waits in a lobby, which repeats these steps and tells you when the agent is connected. Open Claude Code in the folder of the game and run the prompt of the `draw-it` server, `/mcp__draw-it__copilot` or `/mcp__draw-it__duel`, then start the game. Clients that start their servers themselves can use STDIO instead: `docker compose exec -T php php bin/console mcp:server`. The HTTP endpoint only answers on localhost.
 
+With Mistral Vibe, add the server by hand to `~/.vibe/config.toml` (`vibe mcp add` only adds OAuth servers, and the game asks for none):
+
+```toml
+[[mcp_servers]]
+name = "draw-it"
+url = "http://127.0.0.1:8040/mcp"
+transport = "streamable-http"
+```
+
+Then ask it in plain words, e.g. "play the duel with draw-it, starting with round_status", and allow the tools of `draw-it` for the session: approving each call makes it too slow to play.
+
 The rival of a duel is asked to play fair, and nothing more: an agent opened in the folder of the game could read the word in the SQLite database. Run it from another folder to rule that out.
 
 ## Licence and credits
