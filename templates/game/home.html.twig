@@ -24,16 +24,17 @@
             </label>
             <fieldset class="game-mode">
                 <legend>{{ 'label.mode'|trans }}</legend>
-                {% for mode in ['solo', 'copilot', 'duel'] %}
-                    <label class="mode-{{ mode }}">
-                        <input type="radio" name="mode" value="{{ mode }}" {{ loop.first ? 'checked' }}>
-                        <span>
+                <div class="mode-cards">
+                    {% for mode in ['solo', 'copilot', 'duel'] %}
+                        <label class="mode-card mode-{{ mode }}">
+                            <input type="radio" name="mode" value="{{ mode }}" {{ loop.first ? 'checked' }}>
+                            {{ include('game/_mode_sketch.html.twig') }}
                             <strong>{{ ('mode.' ~ mode)|trans }}</strong>
                             <small>{{ ('mode.' ~ mode ~ '_hint')|trans }}</small>
-                        </span>
-                    </label>
-                {% endfor %}
-                <p class="mode-note">{{ 'mode.agent_note'|trans }}</p>
+                            {% if mode != 'solo' %}<span class="mode-mcp">{{ 'mode.via_mcp'|trans }}</span>{% endif %}
+                        </label>
+                    {% endfor %}
+                </div>
             </fieldset>
             <p class="who-starts">{{ 'label.who_starts'|trans }}</p>
             <div class="modes">

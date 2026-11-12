@@ -478,10 +478,10 @@
                 <target>An agent such as Claude Code or Vibe plays against you and your AI.</target>
                 <note>Home page, under a mode of the game</note>
             </trans-unit>
-            <trans-unit id="mode.agent_note" resname="mode.agent_note">
-                <source>mode.agent_note</source>
-                <target>Copilot and duel: the agent connects over MCP, the lobby explains how.</target>
-                <note>Home page, under the modes of the game</note>
+            <trans-unit id="mode.via_mcp" resname="mode.via_mcp">
+                <source>mode.via_mcp</source>
+                <target>over MCP</target>
+                <note>Home page, on the cards of the modes with an agent</note>
             </trans-unit>
         </body>
     </file>

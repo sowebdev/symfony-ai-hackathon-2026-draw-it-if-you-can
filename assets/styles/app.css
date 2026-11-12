@@ -151,6 +151,7 @@ button:focus-visible,
     border-radius: 6px 10px 7px 12px;
     box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.08);
     transform: rotate(0.6deg);
+    max-width: 50rem;
 }
 
 .new-game::before {
@@ -555,56 +556,99 @@ button:focus-visible,
     color: #777;
 }
 
-/* A game with an agent, copilot or rival: the choice of the mode, the lobby, and the bar. */
+/* The choice of the mode, as three cards with a sketch: the one chosen stands straight and gets a
+   piece of tape. Then the lobby and the bar of a game with an agent, copilot or rival. */
 .game-mode {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
     margin: 0;
     padding: 0;
     border: 0;
 }
 
 .game-mode legend {
-    margin-bottom: 0.4rem;
+    margin: 0 auto 0.8rem;
+    text-align: center;
 }
 
-.new-game .game-mode label {
-    justify-content: flex-start;
-    gap: 0.6rem;
-    max-width: 26rem;
+.mode-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
 }
 
-.new-game .game-mode label {
-    align-items: flex-start;
-}
-
-.game-mode label span {
+.new-game .mode-card {
+    position: relative;
     display: flex;
     flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 1rem 0.8rem 0.9rem;
+    text-align: center;
+    background: #fff;
+    border: 2px solid #bbb;
+    border-radius: 8px 5px 10px 6px;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
 }
 
-.game-mode strong {
+.mode-card:nth-child(1) { transform: rotate(-1.5deg); }
+.mode-card:nth-child(2) { transform: rotate(1deg); }
+.mode-card:nth-child(3) { transform: rotate(-0.5deg); }
+
+.mode-card:has(input:checked) {
+    transform: rotate(0) translateY(-4px);
+    border-color: var(--ink);
+    box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.12);
+}
+
+.mode-card:has(input:checked)::before {
+    content: '';
+    position: absolute;
+    top: -11px;
+    left: 50%;
+    width: 70px;
+    height: 22px;
+    margin-left: -35px;
+    background: var(--tape);
+    transform: rotate(-3deg);
+}
+
+.mode-card:has(input:focus-visible) {
+    outline: 3px dashed var(--pencil);
+    outline-offset: 4px;
+}
+
+/* The radio button stays for the keyboard and screen readers, the card shows the choice. */
+.mode-card input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.mode-card strong {
+    font-size: 1.3rem;
     font-weight: normal;
 }
 
-.game-mode small,
-.mode-note {
+.mode-card small {
     font-size: 0.95rem;
     color: #666;
     line-height: 1.25;
 }
 
-.mode-note {
-    margin: 0.2rem 0 0;
+.mode-mcp {
+    margin-top: 0.2rem;
+    padding: 0 0.5rem;
+    font-size: 0.85rem;
+    color: var(--pencil);
+    border: 1.5px solid var(--pencil);
+    border-radius: 10px 6px 9px 7px;
 }
 
-.game-mode input {
-    margin-top: 0.2rem;
-    width: 1.3rem;
-    height: 1.3rem;
-    flex: none;
-    accent-color: var(--pencil);
+@media (max-width: 40rem) {
+    .mode-cards {
+        grid-template-columns: 1fr;
+    }
 }
 
 .lobby {
