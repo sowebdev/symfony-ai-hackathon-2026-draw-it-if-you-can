@@ -157,9 +157,17 @@ final readonly class CopilotTools
         return [$game, $found];
     }
 
+    /**
+     * The round to look at or to help with: only in a game played with a copilot.
+     */
     private function findRound(?string $round, ?RequestContext $context): Round
     {
-        return $this->find($round, $context)[1] ?? throw new ToolCallException('The game has not started: the player is in the lobby. Call round_status until it starts.');
+        [$game, $found] = $this->find($round, $context);
+        if (!$game->isWithCopilot()) {
+            throw new ToolCallException('The player plays this game alone, without a copilot: stop playing.');
+        }
+
+        return $found ?? throw new ToolCallException('The game has not started: the player is in the lobby. Call round_status until it starts.');
     }
 
     /**

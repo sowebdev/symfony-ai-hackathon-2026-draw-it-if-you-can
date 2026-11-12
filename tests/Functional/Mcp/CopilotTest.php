@@ -180,6 +180,20 @@ final class CopilotTest extends WebTestCase
         self::assertStringContainsString('alone', $status['what_you_can_do']);
     }
 
+    public function testAGameWithoutACopilotIsNotSeenNorHelped(): void
+    {
+        $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'drawnBy' => 'ai']);
+        $round = (string) $this->client->getResponse()->headers->get('Location');
+        self::readEvents($this->client, $round.'/drawing');
+
+        foreach ([['look_at_drawing', []], ['suggest_word', ['word' => 'girafe']]] as [$tool, $arguments]) {
+            $result = $this->call($tool, $arguments);
+            self::assertTrue($result['isError'], $tool);
+            self::assertStringContainsString('alone', $result['content'][0]['text']);
+        }
+        self::assertSame([], self::readEvents($this->client, $round.'/hints'), 'No hint in the margin');
+    }
+
     /**
      * Opens a game with a copilot, and returns the URL of its lobby.
      */

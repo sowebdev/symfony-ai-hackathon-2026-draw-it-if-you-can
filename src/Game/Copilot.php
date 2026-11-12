@@ -30,6 +30,9 @@ final readonly class Copilot
         if ('' === $word || mb_strlen($word) > 100) {
             throw new CopilotRefusal('A hint is one word or a short phrase, at most 100 characters.');
         }
+        if (!$round->getGame()->isWithCopilot()) {
+            throw new CopilotRefusal('The player plays this game alone, without a copilot: stop playing.');
+        }
         if ($round->getGame()->hasLeft()) {
             throw new CopilotRefusal('The player left the game: stop playing.');
         }
