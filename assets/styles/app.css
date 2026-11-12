@@ -572,10 +572,35 @@ button:focus-visible,
 .new-game .game-mode label {
     justify-content: flex-start;
     gap: 0.6rem;
-    max-width: 24rem;
+    max-width: 26rem;
+}
+
+.new-game .game-mode label {
+    align-items: flex-start;
+}
+
+.game-mode label span {
+    display: flex;
+    flex-direction: column;
+}
+
+.game-mode strong {
+    font-weight: normal;
+}
+
+.game-mode small,
+.mode-note {
+    font-size: 0.95rem;
+    color: #666;
+    line-height: 1.25;
+}
+
+.mode-note {
+    margin: 0.2rem 0 0;
 }
 
 .game-mode input {
+    margin-top: 0.2rem;
     width: 1.3rem;
     height: 1.3rem;
     flex: none;

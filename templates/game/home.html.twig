@@ -27,9 +27,13 @@
                 {% for mode in ['solo', 'copilot', 'duel'] %}
                     <label class="mode-{{ mode }}">
                         <input type="radio" name="mode" value="{{ mode }}" {{ loop.first ? 'checked' }}>
-                        <span>{{ ('mode.' ~ mode)|trans }}</span>
+                        <span>
+                            <strong>{{ ('mode.' ~ mode)|trans }}</strong>
+                            <small>{{ ('mode.' ~ mode ~ '_hint')|trans }}</small>
+                        </span>
                     </label>
                 {% endfor %}
+                <p class="mode-note">{{ 'mode.agent_note'|trans }}</p>
             </fieldset>
             <p class="who-starts">{{ 'label.who_starts'|trans }}</p>
             <div class="modes">

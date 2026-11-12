@@ -345,17 +345,17 @@
             </trans-unit>
             <trans-unit id="mode.solo" resname="mode.solo">
                 <source>mode.solo</source>
-                <target>Alone against the AI</target>
+                <target>On a team with the AI</target>
                 <note>Home page, a mode of the game</note>
             </trans-unit>
             <trans-unit id="mode.copilot" resname="mode.copilot">
                 <source>mode.copilot</source>
-                <target>With a copilot: an agent connected over MCP helps me guess</target>
+                <target>With a copilot</target>
                 <note>Home page, a mode of the game</note>
             </trans-unit>
             <trans-unit id="mode.duel" resname="mode.duel">
                 <source>mode.duel</source>
-                <target>In a duel: an agent connected over MCP guesses against me</target>
+                <target>In a duel</target>
                 <note>Home page, a mode of the game</note>
             </trans-unit>
             <trans-unit id="heading.lobby_duel" resname="heading.lobby_duel">
@@ -462,6 +462,26 @@
                 <source>heading.your_ai_guesses</source>
                 <target>Your AI says…</target>
                 <note>In a duel, above the words of the AI of the player while the player draws</note>
+            </trans-unit>
+            <trans-unit id="mode.solo_hint" resname="mode.solo_hint">
+                <source>mode.solo_hint</source>
+                <target>You draw for it, you guess its drawings, you score together.</target>
+                <note>Home page, under a mode of the game</note>
+            </trans-unit>
+            <trans-unit id="mode.copilot_hint" resname="mode.copilot_hint">
+                <source>mode.copilot_hint</source>
+                <target>An agent such as Claude Code or Vibe helps you guess.</target>
+                <note>Home page, under a mode of the game</note>
+            </trans-unit>
+            <trans-unit id="mode.duel_hint" resname="mode.duel_hint">
+                <source>mode.duel_hint</source>
+                <target>An agent such as Claude Code or Vibe plays against you and your AI.</target>
+                <note>Home page, under a mode of the game</note>
+            </trans-unit>
+            <trans-unit id="mode.agent_note" resname="mode.agent_note">
+                <source>mode.agent_note</source>
+                <target>Copilot and duel: the agent connects over MCP, the lobby explains how.</target>
+                <note>Home page, under the modes of the game</note>
             </trans-unit>
         </body>
     </file>
