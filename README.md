@@ -60,7 +60,7 @@ The game is an MCP server (Symfony MCP Bundle). An agent connected to it plays a
 
 Five tools and two prompts:
 
-- `round_status`: the round being played, the role of the agent, who draws, the theme, the time left, the wrong answers so far, the score of a duel, and what to do now. Never the word to find. It also tells the agent to stop, when the game is over or the player left.
+- `round_status`: the round being played, the role of the agent, who draws, the theme, the time left, the wrong answers so far, the score of a duel, and what to do now. Never the word to find. It also tells the agent to stop, when the game is over or the player left. While the game waits, in the lobby or between rounds, it waits too, up to 25 s, and answers as soon as a round starts: an agent cannot wait by itself between two calls, so it only has to call again.
 - `look_at_drawing`: the drawing as it is now, as a PNG image.
 - `suggest_word`: for a copilot, a word shown to you, at most 5 per round.
 - `submit_answer`: for a rival, an answer of its own.

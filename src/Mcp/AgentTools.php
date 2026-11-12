@@ -27,6 +27,7 @@ use Mcp\Server\RequestContext;
 use Mcp\Server\Stateless\RequestMeta;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Clock\DatePoint;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -39,6 +40,9 @@ final readonly class AgentTools
     /** A round over, and no next one for this long: the player has probably stopped. */
     public const int IDLE_S = 120;
 
+    /** While round_status waits, it looks at the game this often. */
+    private const int WAIT_PAUSE_MS = 500;
+
     public function __construct(
         private EntityManagerInterface $entityManager,
         private GameRepository $games,
@@ -50,20 +54,35 @@ final readonly class AgentTools
         private ScoreGauge $gauge,
         private Copilot $copilot,
         private Duel $duel,
+        #[Autowire('%game.agent_wait_s%')]
+        private int $waitS,
     ) {
     }
 
     /**
      * @return array<string, mixed>
      */
-    #[McpTool(name: 'round_status', description: 'Start here. The round being played in Draw It If You Can: whether you are the copilot of the player or their rival in a duel, who draws, the theme, the time left, the wrong answers so far, and what you can do now. Never the word to find. Call it again and again, until it answers "stop": true.')]
+    #[McpTool(name: 'round_status', description: 'Start here. The round being played in Draw It If You Can: whether you are the copilot of the player or their rival in a duel, who draws, the theme, the time left, the wrong answers so far, and what you can do now. Never the word to find. While the game waits (lobby, between rounds), it waits too, up to 25 s, and answers as soon as a round starts. Call it again and again, until it answers "stop": true; never stop before.')]
     public function roundStatus(
         #[Schema(description: 'Id of a round; leave empty for the round being played')]
         ?string $round = null,
         ?RequestContext $context = null,
     ): array {
-        [$game, $current] = $this->find($round, $context);
-        [$stop, $advice] = $this->advice($game, $current);
+        // An agent cannot wait by itself between two calls: the game waits for it, while the
+        // player is in the lobby or reads the end of a round.
+        $deadline = microtime(true) + $this->waitS;
+        while (true) {
+            [$game, $current] = $this->find($round, $context);
+            [$stop, $advice] = $this->advice($game, $current);
+            // A copilot has nothing to do while the player draws: it waits for the next round too.
+            $waiting = !$stop && (null === $current || $current->isOver() || (!$game->isDuel() && !$current->isDrawnByAi()));
+            if (!$waiting || microtime(true) >= $deadline) {
+                break;
+            }
+            usleep(self::WAIT_PAUSE_MS * 1000);
+            // The player starts the next round in another request.
+            $this->entityManager->clear();
+        }
         if (null === $current) {
             return [
                 'game' => $game->getId()->toRfc4122(),
@@ -280,13 +299,13 @@ final readonly class AgentTools
             $game->hasLeft() => [true, 'The player left the game. Stop playing; the player will call you again for another game.'],
             !$game->isWithAgent() => [true, 'The player now plays alone, without an agent. Stop playing.'],
             null === $round => [false, null === $game->getAgentNickname()
-                ? 'You are connected: the player sees it in the lobby. Choose a funny nickname with choose_nickname, then call round_status again in a few seconds, until the game starts.'
-                : 'You are connected: the player sees it in the lobby. Call round_status again in a few seconds, until the game starts.'],
+                ? 'You are connected: the player sees it in the lobby. Choose a funny nickname with choose_nickname, then call round_status again at once: it waits for the game to start. Keep calling it; the player may take a minute.'
+                : 'You are connected: the player sees it in the lobby. Call round_status again at once: it waits for the game to start. Keep calling it; the player may take a minute.'],
             $round->isOver() && $round->isLast() => [true, 'The game is over. Stop playing.'],
             null !== $idle && $idle > self::IDLE_S * 1000 => [true, \sprintf('No new round for %d minutes: the player has probably stopped. Stop playing; the player will call you again.', intdiv(self::IDLE_S, 60))],
-            $round->isOver() => [false, 'This round is over: wait for the player to start the next one, then call round_status again.'],
+            $round->isOver() => [false, 'This round is over: call round_status again at once, it waits for the player to start the next one. Keep calling it.'],
             $game->isDuel() => [false, \sprintf('%s: call look_at_drawing, then submit_answer with your best guess, one word in the language of the game. Wrong? Look again as the drawing grows, and answer again, every %d seconds at most. Play fair: see the game through these tools only.', $round->isDrawnByAi() ? 'The AI draws, the player and you guess' : 'The player draws, the AI of the player and you guess', intdiv(Duel::ANSWER_GAP_MS, 1000))],
-            !$round->isDrawnByAi() => [false, 'The player draws and the AI guesses: nothing for you to do in this round. Call round_status again later.'],
+            !$round->isDrawnByAi() => [false, 'The player draws and the AI guesses: nothing for you to do in this round. Call round_status again at once: it waits for the next round. Keep calling it.'],
             default => [false, 'The AI draws and the player guesses: call look_at_drawing, then suggest_word with your best guess. Look again as the drawing grows.'],
         };
     }
