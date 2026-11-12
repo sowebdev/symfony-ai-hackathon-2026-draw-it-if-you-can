@@ -3,6 +3,9 @@
    controllers of the round can act on it. #}
 <header class="scoreboard">
     <p class="round-number">{{ 'label.round'|trans({'%number%': round.number, '%count%': round.game.roundCount}) }} · {{ round.game.theme|trans }}</p>
+    {% if round.game.withCopilot %}
+        <p class="copilot-badge {{ round.game.copilotConnected ? 'connected' }}">{{ 'label.copilot'|trans }} {{ round.game.copilotName ?? 'status.copilot_absent'|trans }}</p>
+    {% endif %}
     <p class="team-score">{{ 'label.team_score'|trans }} <strong>{{ team_score }}</strong></p>
     {% if not round.over %}
         <p class="clock" aria-label="{{ 'label.time_left'|trans }}">⏱ <strong data-round-timer-target="seconds">{{ (round.remainingMs / 1000)|round(0, 'ceil') }}</strong> s</p>

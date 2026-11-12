@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 
 // The hints of the copilot, an agent connected over MCP, received as server-sent events while the
-// player guesses. A click puts the word in the answer field: the player decides.
+// player guesses. A click on a hint answers it: the player decides.
 export default class extends Controller {
     static targets = ['list'];
     static values = { streamUrl: String, over: Boolean };
@@ -34,7 +34,9 @@ export default class extends Controller {
         this.element.hidden = false;
     }
 
+    // A click answers the hint: once only.
     pick(event) {
+        event.currentTarget.disabled = true;
         this.dispatch('pick', { detail: { word: event.currentTarget.textContent } });
     }
 }

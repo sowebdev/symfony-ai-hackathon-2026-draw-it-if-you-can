@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <main class="lobby"
+          data-controller="copilot-status"
+          data-copilot-status-url-value="{{ path('game_copilot', {id: game.id}) }}"
+          data-copilot-status-connected-value="{{ game.copilotConnected ? 'true' : 'false' }}"
+          data-copilot-status-waiting-label-value="{{ 'status.copilot_waiting'|trans }}"
+          data-copilot-status-connected-label-value="{{ 'status.copilot_connected'|trans }}">
+        <h1>{{ 'heading.lobby'|trans }}</h1>
+        <p>{{ 'lobby.intro'|trans }}</p>
+
+        <ol class="lobby-steps">
+            <li>
+                {{ 'lobby.step_add'|trans }}
+                <pre><code>claude mcp add --transport http draw-it {{ url('_mcp_endpoint_default') }}</code></pre>
+            </li>
+            <li>
+                {{ 'lobby.step_prompt'|trans }}
+                <pre><code>/mcp__draw-it__copilot</code></pre>
+            </li>
+        </ol>
+        <p class="lobby-other">{{ 'lobby.other_clients'|trans({'%url%': url('_mcp_endpoint_default')}) }}</p>
+
+        <p class="copilot-status {{ game.copilotConnected ? 'connected' }}" role="status" data-copilot-status-target="status">
+            {{ game.copilotConnected ? 'status.copilot_connected'|trans({'%name%': game.copilotName}) : 'status.copilot_waiting'|trans }}
+        </p>
+
+        <form method="post" action="{{ path('game_next_round', {id: game.id}) }}">
+            <button type="submit" data-copilot-status-target="start">{{ 'action.start_game'|trans }}</button>
+        </form>
+        <a href="{{ path('home', {_locale: app.locale}) }}">{{ 'action.new_game'|trans }}</a>
+    </main>
+{% endblock %}

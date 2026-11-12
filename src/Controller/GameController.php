@@ -11,6 +11,7 @@ use App\Repository\RoundRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -55,7 +56,12 @@ final class GameController extends AbstractController
     #[Route('/{_locale}/games', name: 'game_create', requirements: ['_locale' => new EnumRequirement(Language::class)], methods: ['POST'])]
     public function create(Request $request, #[MapRequestPayload] NewGame $payload): Response
     {
-        $game = new Game($payload->theme, Language::from($request->getLocale()), $this->roundCount, $payload->drawnBy);
+        $game = new Game($payload->theme, Language::from($request->getLocale()), $this->roundCount, $payload->drawnBy, $payload->copilot);
+        if ($game->isWithCopilot()) {
+            $this->starter->openLobby($game);
+
+            return $this->redirectToRoute('game_lobby', ['id' => $game->getId()]);
+        }
         try {
             $round = $this->starter->startGame($game);
         } catch (\Throwable $exception) {
@@ -90,7 +96,10 @@ final class GameController extends AbstractController
     public function show(Game $game): Response
     {
         $rounds = $this->rounds->findByGame($game);
-        $last = $rounds[array_key_last($rounds)] ?? throw $this->createNotFoundException('A game starts with its first round.');
+        if ([] === $rounds) {
+            return $this->redirectToRoute('game_lobby', ['id' => $game->getId()]);
+        }
+        $last = $rounds[array_key_last($rounds)];
         if (!$last->isLast() || !$last->isOver()) {
             return $this->redirectToRoute('round_show', ['id' => $last->getId()]);
         }
@@ -101,6 +110,30 @@ final class GameController extends AbstractController
             'rounds' => array_map(fn ($round): array => ['round' => $round, 'points' => $this->gauge->pointsOf($round)], $rounds),
             'total' => $this->gauge->total($rounds),
         ]);
+    }
+
+    /**
+     * Before a game with a copilot: how to connect the agent, and whether it is there.
+     */
+    #[Route('/games/{id}/lobby', name: 'game_lobby', requirements: ['id' => Requirement::UUID_V7], methods: ['GET'])]
+    public function lobby(Game $game): Response
+    {
+        $last = $this->rounds->findLastOfGame($game);
+        if (null !== $last) {
+            return $this->redirectToRoute('round_show', ['id' => $last->getId()]);
+        }
+        $this->speak($game);
+
+        return $this->render('game/lobby.html.twig', ['game' => $game]);
+    }
+
+    /**
+     * Whether the copilot has called the game yet, for the lobby and the scoreboard.
+     */
+    #[Route('/games/{id}/copilot', name: 'game_copilot', requirements: ['id' => Requirement::UUID_V7], methods: ['GET'])]
+    public function copilot(Game $game): JsonResponse
+    {
+        return $this->json(['connected' => $game->isCopilotConnected(), 'name' => $game->getCopilotName()]);
     }
 
     /**

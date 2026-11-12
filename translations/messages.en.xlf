@@ -253,6 +253,61 @@
                 <target>Your copilot whispers…</target>
                 <note>Above the words an agent connected over MCP suggests to the player</note>
             </trans-unit>
+            <trans-unit id="label.with_copilot" resname="label.with_copilot">
+                <source>label.with_copilot</source>
+                <target>With a copilot: an agent connected over MCP helps me guess</target>
+                <note>Checkbox on the home page</note>
+            </trans-unit>
+            <trans-unit id="label.copilot" resname="label.copilot">
+                <source>label.copilot</source>
+                <target>Copilot:</target>
+                <note>Before the name of the copilot, in the bar of a round</note>
+            </trans-unit>
+            <trans-unit id="heading.lobby" resname="heading.lobby">
+                <source>heading.lobby</source>
+                <target>Connect your copilot</target>
+                <note>Title of the lobby of a game with a copilot</note>
+            </trans-unit>
+            <trans-unit id="lobby.intro" resname="lobby.intro">
+                <source>lobby.intro</source>
+                <target>When the AI draws, your copilot watches the drawing and whispers words in the margin. A click on a word answers it.</target>
+                <note>First paragraph of the lobby</note>
+            </trans-unit>
+            <trans-unit id="lobby.step_add" resname="lobby.step_add">
+                <source>lobby.step_add</source>
+                <target>With Claude Code, once, in the folder of the game:</target>
+                <note>First step of the lobby, before a command</note>
+            </trans-unit>
+            <trans-unit id="lobby.step_prompt" resname="lobby.step_prompt">
+                <source>lobby.step_prompt</source>
+                <target>Open Claude Code in that folder, then run the copilot prompt:</target>
+                <note>Second step of the lobby, before a command</note>
+            </trans-unit>
+            <trans-unit id="lobby.other_clients" resname="lobby.other_clients">
+                <source>lobby.other_clients</source>
+                <target>Another MCP client: connect it to %url%, then ask it to play the copilot prompt.</target>
+                <note>Under the steps of the lobby</note>
+            </trans-unit>
+            <trans-unit id="status.copilot_waiting" resname="status.copilot_waiting">
+                <source>status.copilot_waiting</source>
+                <target>Waiting for your copilot…</target>
+                <note>In the lobby, until the agent calls the game</note>
+            </trans-unit>
+            <trans-unit id="status.copilot_connected" resname="status.copilot_connected">
+                <source>status.copilot_connected</source>
+                <target>Copilot connected: %name%</target>
+                <note>In the lobby, once the agent called the game; %name% is the name of its MCP client</note>
+            </trans-unit>
+            <trans-unit id="status.copilot_absent" resname="status.copilot_absent">
+                <source>status.copilot_absent</source>
+                <target>not connected yet</target>
+                <note>In the bar of a round, when the copilot never called the game</note>
+            </trans-unit>
+            <trans-unit id="action.start_game" resname="action.start_game">
+                <source>action.start_game</source>
+                <target>Start the game</target>
+                <note>Leaves the lobby: the first round starts</note>
+            </trans-unit>
         </body>
     </file>
 </xliff>

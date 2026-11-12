@@ -43,22 +43,32 @@ final readonly class RoundStarter
     }
 
     /**
-     * The round after the last one of the game, once it is over. Null when the game is over.
+     * A game with a copilot: stored without a round, it waits in the lobby for the copilot.
+     */
+    public function openLobby(Game $game): void
+    {
+        $this->entityManager->persist($game);
+        $this->entityManager->flush();
+    }
+
+    /**
+     * The round after the last one of the game, once it is over, or the first one. Null when the game is over.
      * A second request (a double click) gets the round the first one started.
      *
      * @throws \Throwable When the model gives no word: nothing is stored
      */
     public function startNext(Game $game): ?Round
     {
-        $last = $this->rounds->findLastOfGame($game) ?? throw new \LogicException('A game starts with its first round.');
-        if (!$last->isOver()) {
+        // A game with a copilot has no round until the player leaves the lobby.
+        $last = $this->rounds->findLastOfGame($game);
+        if (null !== $last && !$last->isOver()) {
             return $last;
         }
-        if ($last->isLast()) {
+        if (null !== $last && $last->isLast()) {
             return null;
         }
 
-        $round = $this->newRound($game, $last->getNumber() + 1);
+        $round = $this->newRound($game, null === $last ? 1 : $last->getNumber() + 1);
         try {
             $this->entityManager->persist($round);
             $this->entityManager->flush();

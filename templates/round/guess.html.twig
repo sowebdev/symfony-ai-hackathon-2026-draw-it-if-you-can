@@ -33,7 +33,7 @@
                 <div class="hints" data-controller="hints"
                      data-hints-stream-url-value="{{ path('round_hints', {id: round.id}) }}"
                      data-hints-over-value="{{ round.over ? 'true' : 'false' }}"
-                     data-action="hints:pick->ai-drawing#fill"
+                     data-action="hints:pick->ai-drawing#answerHint"
                      {{ hints is empty ? 'hidden' }}>
                     <h2>{{ 'heading.copilot_hints'|trans }}</h2>
                     <ul data-hints-target="list">

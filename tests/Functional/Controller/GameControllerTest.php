@@ -49,6 +49,7 @@ final class GameControllerTest extends WebTestCase
         self::assertSelectorTextContains('.target strong', 'girafe');
         self::assertSelectorTextContains('.round-number', 'Animaux');
         self::assertSelectorExists('canvas[data-canvas-target="canvas"]');
+        self::assertSelectorNotExists('.copilot-badge', 'No copilot unless asked');
     }
 
     public function testAModelWithoutAUsableWordIsReported(): void

@@ -51,7 +51,7 @@ When the AI draws, an agent can help you guess. The game is an MCP server (Symfo
 
 - `round_status`: the round being played, who draws, the theme, the time left, your wrong answers and the hints given. Never the word to find.
 - `look_at_drawing`: the drawing as it is now, as a PNG image.
-- `suggest_word`: a word shown to you in the margin, at most 5 per round. A click puts it in your answer field: you decide.
+- `suggest_word`: a word shown to you in the margin, at most 5 per round. A click on it answers it: you decide, the copilot never answers by itself.
 - the `copilot` prompt tells the agent how to play.
 
 With Claude Code, over HTTP while the game runs:
@@ -60,7 +60,7 @@ With Claude Code, over HTTP while the game runs:
 claude mcp add --transport http draw-it http://127.0.0.1:8040/mcp
 ```
 
-Then start a game where the AI draws, and run the `copilot` prompt of the `draw-it` server (`/mcp__draw-it__copilot`). Clients that start their servers themselves can use STDIO instead: `docker compose exec -T php php bin/console mcp:server`. The HTTP endpoint only answers on localhost.
+Then tick "With a copilot" on the home page: the game waits in a lobby, which repeats these steps and tells you when the agent is connected. Open Claude Code in the folder of the game and run the `copilot` prompt of the `draw-it` server (`/mcp__draw-it__copilot`), then start the game. Clients that start their servers themselves can use STDIO instead: `docker compose exec -T php php bin/console mcp:server`. The HTTP endpoint only answers on localhost.
 
 ## Tests
 

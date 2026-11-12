@@ -102,6 +102,39 @@ final class CopilotTest extends WebTestCase
         self::assertStringContainsString('over', $this->call('suggest_word', ['word' => 'girafe'])['content'][0]['text']);
     }
 
+    public function testAGameWithACopilotWaitsInTheLobbyUntilThePlayerStartsIt(): void
+    {
+        $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'copilot' => '1']);
+        self::assertResponseRedirects();
+        $lobby = (string) $this->client->getResponse()->headers->get('Location');
+        self::assertMatchesRegularExpression('#^/games/[0-9a-f-]{36}/lobby$#', $lobby);
+        $game = substr($lobby, 0, -\strlen('/lobby'));
+
+        $this->client->request('GET', $lobby);
+        self::assertSelectorTextContains('.copilot-status', 'En attente de ton copilote');
+        self::assertSelectorTextContains('.lobby-steps', 'claude mcp add --transport http draw-it http://localhost/mcp');
+        $this->client->request('GET', $game.'/copilot');
+        self::assertSame(['connected' => false, 'name' => null], json_decode((string) $this->client->getResponse()->getContent(), true));
+
+        // The copilot calls: the player sees it is connected, by the name of its MCP client.
+        $status = json_decode($this->call('round_status')['content'][0]['text'], true, flags: \JSON_THROW_ON_ERROR);
+        self::assertSame('waiting for the player to start the game', $status['state']);
+        self::assertStringContainsString('not started', $this->call('look_at_drawing')['content'][0]['text']);
+        $this->client->request('GET', $game.'/copilot');
+        self::assertSame(['connected' => true, 'name' => 'test'], json_decode((string) $this->client->getResponse()->getContent(), true));
+        $this->client->request('GET', $lobby);
+        self::assertSelectorTextContains('.copilot-status.connected', 'Copilote connecté : test');
+
+        // The clock starts when the player starts the game.
+        $this->client->submitForm('Commencer la partie');
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('.round-number', 'Manche 1 / 6');
+        self::assertSelectorTextContains('.copilot-badge.connected', 'test');
+        self::assertSelectorTextContains('.clock strong', '60');
+        $this->client->request('GET', $lobby);
+        self::assertResponseRedirects(message: 'The lobby is behind once the game started');
+    }
+
     private function startRound(string $drawnBy): string
     {
         $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'drawnBy' => $drawnBy]);

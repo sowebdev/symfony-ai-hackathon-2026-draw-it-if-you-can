@@ -3,12 +3,14 @@
 namespace App\Mcp;
 
 use App\Drawing\StrokeRenderer;
+use App\Entity\Game;
 use App\Entity\Guess;
 use App\Entity\Hint;
 use App\Entity\Round;
 use App\Entity\Stroke;
 use App\Game\Copilot;
 use App\Game\CopilotRefusal;
+use App\Repository\GameRepository;
 use App\Repository\GuessRepository;
 use App\Repository\HintRepository;
 use App\Repository\RoundRepository;
@@ -18,6 +20,9 @@ use Mcp\Capability\Attribute\Schema;
 use Mcp\Exception\ToolCallException;
 use Mcp\Schema\Content\ImageContent;
 use Mcp\Schema\Content\TextContent;
+use Mcp\Server\RequestContext;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Clock\DatePoint;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -27,6 +32,8 @@ use Symfony\Component\Uid\Uuid;
 final readonly class CopilotTools
 {
     public function __construct(
+        private EntityManagerInterface $entityManager,
+        private GameRepository $games,
         private RoundRepository $rounds,
         private StrokeRepository $strokes,
         private GuessRepository $guesses,
@@ -43,9 +50,18 @@ final readonly class CopilotTools
     public function roundStatus(
         #[Schema(description: 'Id of a round; leave empty for the round being played')]
         ?string $round = null,
+        ?RequestContext $context = null,
     ): array {
-        $current = $this->find($round);
-        $game = $current->getGame();
+        [$game, $current] = $this->find($round, $context);
+        if (null === $current) {
+            return [
+                'game' => $game->getId()->toRfc4122(),
+                'state' => 'waiting for the player to start the game',
+                'theme' => $game->getTheme()->description(),
+                'language' => $game->getLanguage()->nameInEnglish(),
+                'what_you_can_do' => 'You are connected: the player sees it. Call round_status again in a few seconds, until the game starts.',
+            ];
+        }
 
         return [
             'round' => $current->getId()->toRfc4122(),
@@ -76,8 +92,9 @@ final readonly class CopilotTools
     public function lookAtDrawing(
         #[Schema(description: 'Id of a round; leave empty for the round being played')]
         ?string $round = null,
+        ?RequestContext $context = null,
     ): array {
-        $current = $this->find($round);
+        $current = $this->findRound($round, $context);
         $strokes = $this->strokes->findByRound($current);
         if ([] === $strokes) {
             return [new TextContent('The canvas is still empty: nothing drawn yet. Look again in a few seconds.')];
@@ -97,8 +114,9 @@ final readonly class CopilotTools
         string $word,
         #[Schema(description: 'Id of a round; leave empty for the round being played')]
         ?string $round = null,
+        ?RequestContext $context = null,
     ): string {
-        $current = $this->find($round);
+        $current = $this->findRound($round, $context);
         try {
             $hint = $this->copilot->suggest($current, $word);
         } catch (CopilotRefusal $refusal) {
@@ -108,16 +126,33 @@ final readonly class CopilotTools
         return \sprintf('"%s" is shown to the player, who decides. %d hints left in this round.', $hint->getWord(), Copilot::MAX_HINTS - \count($this->hints->findByRound($current)));
     }
 
-    private function find(?string $round): Round
+    /**
+     * The game and round asked for, by default the last ones; the copilot is marked as seen on the game.
+     *
+     * @return array{Game, ?Round} No round yet while the game waits in its lobby
+     */
+    private function find(?string $round, ?RequestContext $context): array
     {
         if (null === $round || '' === trim($round)) {
-            return $this->rounds->findLatest() ?? throw new ToolCallException('No game has started yet: the player starts one at http://127.0.0.1:8040.');
-        }
-        if (!Uuid::isValid($round)) {
+            $game = $this->games->findLatest() ?? throw new ToolCallException('No game has started yet: the player starts one at http://127.0.0.1:8040, with a copilot.');
+            $found = $this->rounds->findLastOfGame($game);
+        } elseif (!Uuid::isValid($round)) {
             throw new ToolCallException('A round id looks like 019a6e2c-0000-7000-8000-000000000000; leave it empty for the round being played.');
+        } else {
+            $found = $this->rounds->find(Uuid::fromString($round)) ?? throw new ToolCallException('No round has this id.');
+            $game = $found->getGame();
         }
 
-        return $this->rounds->find(Uuid::fromString($round)) ?? throw new ToolCallException('No round has this id.');
+        $client = $context?->getSession()->get('client_info');
+        $game->copilotSeen(\is_array($client) && \is_string($client['name'] ?? null) ? $client['name'] : '', new DatePoint());
+        $this->entityManager->flush();
+
+        return [$game, $found];
+    }
+
+    private function findRound(?string $round, ?RequestContext $context): Round
+    {
+        return $this->find($round, $context)[1] ?? throw new ToolCallException('The game has not started: the player is in the lobby. Call round_status until it starts.');
     }
 
     /**

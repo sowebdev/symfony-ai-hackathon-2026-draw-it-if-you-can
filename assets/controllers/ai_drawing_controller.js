@@ -36,13 +36,9 @@ export default class extends Controller {
         }
     }
 
-    // A hint of the copilot goes to the answer field: the player decides whether to send it.
-    fill({ detail: { word } }) {
-        if (this.overValue) {
-            return;
-        }
-        this.wordTarget.value = word;
-        this.wordTarget.focus();
+    // The player clicks a hint of the copilot: that is the answer. The copilot never answers by itself.
+    answerHint({ detail: { word } }) {
+        this.send(word);
     }
 
     // The time is up: no more answers.
@@ -105,13 +101,17 @@ export default class extends Controller {
         }
     }
 
-    async answer(event) {
+    answer(event) {
         event.preventDefault();
         const word = this.wordTarget.value.trim();
+        this.wordTarget.value = '';
+        this.send(word);
+    }
+
+    async send(word) {
         if (word === '' || this.overValue) {
             return;
         }
-        this.wordTarget.value = '';
         const response = await fetch(this.answerUrlValue, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

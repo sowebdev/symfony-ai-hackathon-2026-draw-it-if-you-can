@@ -23,6 +23,13 @@ class Game
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
+    /** The name the MCP client of the copilot gave, e.g. "claude-code". */
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $copilotName = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $copilotSeenAt = null;
+
     public function __construct(
         #[ORM\Column(enumType: Theme::class)]
         private Theme $theme,
@@ -32,6 +39,9 @@ class Game
         private int $roundCount = 6,
         #[ORM\Column(length: 10, enumType: DrawnBy::class, options: ['default' => 'player'])]
         private DrawnBy $firstDrawnBy = DrawnBy::Ai,
+        /** Played with a copilot, an agent connected over MCP: the game waits for it in a lobby. */
+        #[ORM\Column(options: ['default' => false])]
+        private bool $withCopilot = false,
     ) {
         if ($roundCount < 1) {
             throw new \InvalidArgumentException('A game has at least one round.');
@@ -76,5 +86,34 @@ class Game
     public function drawnByInRound(int $number): DrawnBy
     {
         return 1 === $number % 2 ? $this->firstDrawnBy : $this->firstDrawnBy->other();
+    }
+
+    public function isWithCopilot(): bool
+    {
+        return $this->withCopilot;
+    }
+
+    /**
+     * The copilot called a tool: it is connected.
+     */
+    public function copilotSeen(string $name, \DateTimeImmutable $at): void
+    {
+        $this->copilotName = mb_substr('' === trim($name) ? 'MCP client' : $name, 0, 100);
+        $this->copilotSeenAt = $at;
+    }
+
+    public function isCopilotConnected(): bool
+    {
+        return null !== $this->copilotSeenAt;
+    }
+
+    public function getCopilotName(): ?string
+    {
+        return $this->copilotName;
+    }
+
+    public function getCopilotSeenAt(): ?\DateTimeImmutable
+    {
+        return $this->copilotSeenAt;
     }
 }
