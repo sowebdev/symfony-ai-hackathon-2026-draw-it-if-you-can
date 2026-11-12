@@ -41,7 +41,7 @@ final readonly class ModelHealth
                 try {
                     $problem = $this->check->check($role);
                 } catch (\Throwable $exception) {
-                    $problem = 'The call failed: '.$exception->getMessage();
+                    $problem = self::explain($exception);
                 }
                 $item->expiresAfter(null === $problem ? self::HEALTHY_TTL_S : self::SICK_TTL_S);
 
@@ -51,5 +51,21 @@ final readonly class ModelHealth
         }
 
         return $report;
+    }
+
+    /**
+     * What a failed call means for the player, when the cause is a common one.
+     */
+    public static function explain(\Throwable $exception): string
+    {
+        $message = $exception->getMessage();
+        if (str_contains($message, 'Failed to connect') || str_contains($message, 'Could not resolve host') || str_contains($message, 'Connection refused')) {
+            return 'Nothing answers at this address: start the model server (with Ollama: ollama serve), or set another address.';
+        }
+        if (preg_match('/\b40[13]\b/', $message) || stripos($message, 'unauthorized') !== false) {
+            return 'The server refused the API key: check AI_<ROLE>_API_KEY. '.$message;
+        }
+
+        return 'The call failed: '.$message;
     }
 }
