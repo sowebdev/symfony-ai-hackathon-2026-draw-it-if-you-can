@@ -7,7 +7,7 @@
     </h2>
     <p class="round-end-word">{{ 'result.word_was'|trans({'%word%': '<strong>' ~ round.targetWord|e ~ '</strong>'})|raw }}</p>
     {% if round.found %}
-        <p class="round-end-time">{{ 'result.found_in'|trans({'%seconds%': '<strong>' ~ (round.foundAfterMs / 1000)|number_format(1) ~ '</strong>'})|raw }}</p>
+        <p class="round-end-time">{{ 'result.found_in'|trans({'%seconds%': '<strong>' ~ (round.foundAfterMs / 1000)|number_format(1, 'label.decimal_separator'|trans) ~ '</strong>'})|raw }}</p>
     {% endif %}
     <p class="round-end-points">{{ 'result.points_won'|trans({'%points%': points}) }}</p>
     {% if round.last %}

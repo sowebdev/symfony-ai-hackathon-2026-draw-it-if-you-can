@@ -1,4 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
+import { seconds } from '../seconds.js';
 
 // The words of the AI, received as server-sent events while the player draws.
 // "Yes!" accepts a near word; the exact word is recognised by the server. The stream ends with
@@ -53,7 +54,7 @@ export default class extends Controller {
     finish(foundAfterMs, item = this.listTarget.lastElementChild) {
         this.stop();
         item?.classList.add('accepted');
-        this.timeTarget.textContent = (foundAfterMs / 1000).toFixed(1);
+        this.timeTarget.textContent = seconds(foundAfterMs);
         this.resultTarget.hidden = false;
         this.dispatch('found');
     }

@@ -20,7 +20,7 @@
                         <td>{{ row.round.number }}</td>
                         <td>{{ ('drawer.' ~ row.round.drawnBy.value)|trans }}</td>
                         <td>{{ row.round.targetWord }}</td>
-                        <td>{{ row.round.found ? (row.round.foundAfterMs / 1000)|number_format(1) ~ ' s' : 'result.not_found'|trans }}</td>
+                        <td>{{ row.round.found ? (row.round.foundAfterMs / 1000)|number_format(1, 'label.decimal_separator'|trans) ~ ' s' : 'result.not_found'|trans }}</td>
                         <td>{{ row.points }}</td>
                     </tr>
                 {% endfor %}

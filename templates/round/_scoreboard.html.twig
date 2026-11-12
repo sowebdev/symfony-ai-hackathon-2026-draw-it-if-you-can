@@ -1,14 +1,10 @@
-{# Round number, team score, and, while the round is played, the clock and the gauge of points.
+{# The bar above a round: its number and theme, the team score, and the clock while it is played.
    The round-timer controller is on the main element (round/_timer.html.twig), so that the other
    controllers of the round can act on it. #}
 <header class="scoreboard">
-    <p class="round-number">{{ 'label.round'|trans({'%number%': round.number, '%count%': round.game.roundCount}) }}</p>
+    <p class="round-number">{{ 'label.round'|trans({'%number%': round.number, '%count%': round.game.roundCount}) }} · {{ round.game.theme|trans }}</p>
     <p class="team-score">{{ 'label.team_score'|trans }} <strong>{{ team_score }}</strong></p>
     {% if not round.over %}
-        <p class="clock">{{ 'label.time_left'|trans }} <strong data-round-timer-target="seconds">{{ (round.remainingMs / 1000)|round(0, 'ceil') }}</strong> s</p>
-        <div class="gauge" role="meter" aria-label="{{ 'label.points_at_stake'|trans }}" aria-valuemin="0" aria-valuemax="{{ gauge[0][1] }}" aria-valuenow="{{ gauge[0][1] }}" data-round-timer-target="gauge">
-            <div class="gauge-fill" data-round-timer-target="fill"></div>
-            <span class="gauge-points"><strong data-round-timer-target="points">{{ gauge[0][1] }}</strong> {{ 'label.points_at_stake'|trans }}</span>
-        </div>
+        <p class="clock" aria-label="{{ 'label.time_left'|trans }}">⏱ <strong data-round-timer-target="seconds">{{ (round.remainingMs / 1000)|round(0, 'ceil') }}</strong> s</p>
     {% endif %}
 </header>

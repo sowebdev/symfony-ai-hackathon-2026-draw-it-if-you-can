@@ -115,7 +115,7 @@ export default class extends Controller {
         pen.lineWidth = 6;
         pen.lineCap = 'round';
         pen.lineJoin = 'round';
-        pen.strokeStyle = '#111';
+        pen.strokeStyle = '#2b2b2b';
 
         for (const points of this.current ? [...this.strokes, this.current] : this.strokes) {
             pen.beginPath();

@@ -1,9 +1,12 @@
 import { Controller } from '@hotwired/stimulus';
+import { seconds } from '../seconds.js';
 
 // The AI draws, the player guesses. The strokes come as server-sent events, in the canonical
 // format; a new stroke is drawn point by point, following its t, like a pen. Answers are typed
 // by the player and judged by the server. "over" tells the round timer the round is won or lost.
 const SIZE = 1000;
+const PEN = '#2b2b2b';
+const PEN_NOW = '#e8590c';
 
 export default class extends Controller {
     static targets = ['canvas', 'status', 'form', 'word', 'list', 'result', 'time', 'reveal', 'targetWord', 'giveUp'];
@@ -81,9 +84,9 @@ export default class extends Controller {
         pen.lineWidth = 6;
         pen.lineCap = 'round';
         pen.lineJoin = 'round';
-        pen.strokeStyle = '#111';
-
         for (const points of current ? [...this.strokes, current] : this.strokes) {
+            // The stroke being drawn is in orange, like the pencil of the sketchbook.
+            pen.strokeStyle = points === current ? PEN_NOW : PEN;
             pen.beginPath();
             pen.moveTo(points[0][0], points[0][1]);
             for (const [x, y] of points.length > 1 ? points.slice(1) : points) {
@@ -118,7 +121,7 @@ export default class extends Controller {
         item.classList.toggle('accepted', result.found);
         this.listTarget.append(item);
         if (result.found) {
-            this.timeTarget.textContent = (result.foundAfterMs / 1000).toFixed(1);
+            this.timeTarget.textContent = seconds(result.foundAfterMs);
             this.resultTarget.hidden = false;
             this.overValue = true;
             this.dispatch('over');

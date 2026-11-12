@@ -47,7 +47,7 @@ final class GameControllerTest extends WebTestCase
         self::assertSelectorExists('html[lang="fr"]');
         self::assertSelectorTextContains('.target', 'À dessiner');
         self::assertSelectorTextContains('.target strong', 'girafe');
-        self::assertSelectorTextContains('.target .theme', 'Animaux');
+        self::assertSelectorTextContains('.round-number', 'Animaux');
         self::assertSelectorExists('canvas[data-canvas-target="canvas"]');
     }
 

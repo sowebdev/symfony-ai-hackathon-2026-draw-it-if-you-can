@@ -15,12 +15,16 @@
           data-guesses-over-value="{{ round.over ? 'true' : 'false' }}"
           data-action="guesses:found->canvas#lock guesses:found->round-timer#finish round-timer:up->canvas#lock round-timer:up->guesses#stop">
         {{ include('round/_scoreboard.html.twig') }}
-        <p class="target">{{ 'instruction.draw'|trans }} <strong>{{ round.targetWord }}</strong> <span class="theme">({{ round.game.theme|trans }})</span></p>
+        <p class="target">{{ 'instruction.draw'|trans }} <strong>{{ round.targetWord }}</strong></p>
 
         <div class="board">
-            <canvas class="canvas" width="1000" height="1000" data-canvas-target="canvas"></canvas>
+            <div class="stage">
+                <canvas class="canvas" width="1000" height="1000" data-canvas-target="canvas"></canvas>
+                {% if round.over %}{{ include('round/_end.html.twig') }}{% endif %}
+            </div>
 
-            <section class="guesses" aria-live="polite">
+            <section class="side guesses" aria-live="polite">
+                {{ include('round/_gauge.html.twig') }}
                 <h2>{{ 'heading.ai_guesses'|trans }}</h2>
                 <ol data-guesses-target="list">
                     {% for guess in guesses %}
@@ -33,14 +37,12 @@
                 <p class="result" data-guesses-target="result" hidden>
                     {{ 'result.found_in'|trans({'%seconds%': '<strong data-guesses-target="time"></strong>'})|raw }}
                 </p>
+
+                <div class="toolbar">
+                    {% if not round.over %}<button type="button" data-action="canvas#undo" data-canvas-target="undo">{{ 'action.undo'|trans }}</button>{% endif %}
+                    <a href="{{ path('home', {_locale: app.locale}) }}">{{ 'action.new_game'|trans }}</a>
+                </div>
             </section>
-        </div>
-
-        {% if round.over %}{{ include('round/_end.html.twig') }}{% endif %}
-
-        <div class="toolbar">
-            {% if not round.over %}<button type="button" data-action="canvas#undo" data-canvas-target="undo">{{ 'action.undo'|trans }}</button>{% endif %}
-            <a href="{{ path('home', {_locale: app.locale}) }}">{{ 'action.new_game'|trans }}</a>
         </div>
     </main>
 {% endblock %}

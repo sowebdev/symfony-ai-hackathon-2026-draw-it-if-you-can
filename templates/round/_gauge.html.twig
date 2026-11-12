@@ -1,0 +1,9 @@
+{# What the word is worth now, and the gauge that empties with the points. #}
+{% if not round.over %}
+    <div class="worth">
+        <p class="points">{{ 'label.points_at_stake'|trans }} <strong data-round-timer-target="points">{{ gauge[0][1] }}</strong></p>
+        <div class="gauge" role="meter" aria-label="{{ 'label.points_at_stake'|trans }}" aria-valuemin="0" aria-valuemax="{{ gauge[0][1] }}" aria-valuenow="{{ gauge[0][1] }}" data-round-timer-target="gauge">
+            <div class="gauge-fill" data-round-timer-target="fill"></div>
+        </div>
+    </div>
+{% endif %}

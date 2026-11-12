@@ -145,8 +145,8 @@
             </trans-unit>
             <trans-unit id="label.points_at_stake" resname="label.points_at_stake">
                 <source>label.points_at_stake</source>
-                <target>points en jeu</target>
-                <note>After the points a word is worth now, on the gauge</note>
+                <target>Ce mot vaut</target>
+                <note>Before the points the word is worth now, above the gauge</note>
             </trans-unit>
             <trans-unit id="label.who_starts" resname="label.who_starts">
                 <source>label.who_starts</source>
@@ -242,6 +242,11 @@
                 <source>drawer.ai</source>
                 <target>l'IA</target>
                 <note>Who drew a round: the AI</note>
+            </trans-unit>
+            <trans-unit id="label.decimal_separator" resname="label.decimal_separator">
+                <source>label.decimal_separator</source>
+                <target>,</target>
+                <note>Between the units and the tenths of a number of seconds</note>
             </trans-unit>
         </body>
     </file>
