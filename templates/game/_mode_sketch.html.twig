@@ -1,11 +1,15 @@
 {# A small sketch of who plays in a mode: the player (round head), the AI of the game (square head,
-   antenna), an agent connected over MCP (a screen for a head, a cable, in orange). #}
+   antenna), an agent connected over MCP (a screen for a head, a cable, in orange). "agent" draws
+   the agent alone, for the bar of a round. #}
 {% set ink = 'fill="none" stroke="#2b2b2b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"' %}
 {% set pen = 'fill="none" stroke="#e8590c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"' %}
 {% macro player(x, ink) %}<g transform="translate({{ x }} 0)" {{ ink|raw }}><circle cx="0" cy="-30" r="10"/><path d="M0 -20 L0 6 M0 6 L-9 26 M0 6 L9 26 M0 -12 L-13 -1 M0 -12 L13 -2"/></g>{% endmacro %}
 {% macro ai(x, ink) %}<g transform="translate({{ x }} 0)" {{ ink|raw }}><rect x="-11" y="-41" width="22" height="20" rx="3"/><circle cx="0" cy="-51" r="2.5"/><path d="M0 -41 L0 -48.5 M-4 -33 L-4 -32 M4 -33 L4 -32 M0 -21 L0 6 M0 6 L-9 26 M0 6 L9 26 M0 -12 L-13 -2 M0 -12 L13 -1"/></g>{% endmacro %}
 {% macro agent(x, pen) %}<g transform="translate({{ x }} 0)" {{ pen|raw }}><rect x="-13" y="-42" width="26" height="20" rx="2"/><path d="M-6 -34 L-2 -30 L-6 -26 M2 -26 L7 -26 M0 -22 L0 6 M0 6 L-9 26 M0 6 L9 26 M0 -12 L-13 -2 M0 -12 L13 -2 M13 -32 C24 -32 22 -14 30 -12"/></g>{% endmacro %}
-<svg width="150" height="90" viewBox="-75 -60 150 90" aria-hidden="true">
+{% if mode == 'agent' %}
+<svg class="agent-sketch" width="30" height="40" viewBox="-18 -56 52 86" aria-hidden="true">{{ _self.agent(0, pen) }}</svg>
+{% else %}
+<svg class="mode-sketch" width="150" height="90" viewBox="-75 -60 150 90" aria-hidden="true">
     {% if mode == 'solo' %}
         {{ _self.player(-28, ink) }}{{ _self.ai(28, ink) }}
         <path {{ pen|raw }} d="M-8 -8 C-4 -16 4 -16 8 -8 C4 -2 0 2 0 2 C0 2 -4 -2 -8 -8 Z"/>
@@ -18,3 +22,4 @@
         {{ _self.agent(38, pen) }}
     {% endif %}
 </svg>
+{% endif %}

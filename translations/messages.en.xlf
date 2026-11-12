@@ -250,23 +250,13 @@
             </trans-unit>
             <trans-unit id="heading.copilot_hints" resname="heading.copilot_hints">
                 <source>heading.copilot_hints</source>
-                <target>Your copilot whispers…</target>
+                <target>%name% whispers…</target>
                 <note>Above the words an agent connected over MCP suggests to the player</note>
-            </trans-unit>
-            <trans-unit id="label.copilot" resname="label.copilot">
-                <source>label.copilot</source>
-                <target>Copilot:</target>
-                <note>Before the name of the copilot, in the bar of a round</note>
             </trans-unit>
             <trans-unit id="heading.lobby" resname="heading.lobby">
                 <source>heading.lobby</source>
                 <target>Connect your copilot</target>
                 <note>Title of the lobby of a game with a copilot</note>
-            </trans-unit>
-            <trans-unit id="lobby.intro" resname="lobby.intro">
-                <source>lobby.intro</source>
-                <target>When the AI draws, your copilot watches the drawing and whispers words in the margin. A click on a word answers it.</target>
-                <note>First paragraph of the lobby</note>
             </trans-unit>
             <trans-unit id="lobby.step_add" resname="lobby.step_add">
                 <source>lobby.step_add</source>
@@ -295,7 +285,7 @@
             </trans-unit>
             <trans-unit id="status.copilot_absent" resname="status.copilot_absent">
                 <source>status.copilot_absent</source>
-                <target>not connected yet</target>
+                <target>Your copilot is not connected</target>
                 <note>In the bar of a round, when the copilot never called the game</note>
             </trans-unit>
             <trans-unit id="action.start_game" resname="action.start_game">
@@ -363,11 +353,6 @@
                 <target>Connect your rival</target>
                 <note>Title of the lobby of a duel</note>
             </trans-unit>
-            <trans-unit id="lobby.intro_duel" resname="lobby.intro_duel">
-                <source>lobby.intro_duel</source>
-                <target>Your rival guesses the same drawings as you: those of the AI, and yours, which your AI guesses for you. The first one to find the word wins its points. It answers once every 3 seconds at most, and only the exact word counts for it.</target>
-                <note>First paragraph of the lobby of a duel</note>
-            </trans-unit>
             <trans-unit id="status.rival_waiting" resname="status.rival_waiting">
                 <source>status.rival_waiting</source>
                 <target>Waiting for your rival…</target>
@@ -390,7 +375,7 @@
             </trans-unit>
             <trans-unit id="heading.rival_answers" resname="heading.rival_answers">
                 <source>heading.rival_answers</source>
-                <target>%name% answers…</target>
+                <target>%name% guesses against you…</target>
                 <note>Above the answers of the rival in a duel; %name% is the name of its MCP client</note>
             </trans-unit>
             <trans-unit id="heading.round_found_by_rival" resname="heading.round_found_by_rival">
@@ -440,7 +425,7 @@
             </trans-unit>
             <trans-unit id="label.copilot_unknown" resname="label.copilot_unknown">
                 <source>label.copilot_unknown</source>
-                <target>your copilot</target>
+                <target>Your copilot</target>
                 <note>Name of the copilot when its MCP client gives none</note>
             </trans-unit>
             <trans-unit id="heading.round_found_by_you" resname="heading.round_found_by_you">
@@ -482,6 +467,76 @@
                 <source>mode.via_mcp</source>
                 <target>over MCP</target>
                 <note>Home page, on the cards of the modes with an agent</note>
+            </trans-unit>
+            <trans-unit id="lobby.copilot_does" resname="lobby.copilot_does">
+                <source>lobby.copilot_does</source>
+                <target>What your copilot does</target>
+                <note>Lobby of a game with a copilot, above the list of what the agent does</note>
+            </trans-unit>
+            <trans-unit id="lobby.copilot_does_1" resname="lobby.copilot_does_1">
+                <source>lobby.copilot_does_1</source>
+                <target>When the AI draws, it looks at the drawing, like you.</target>
+                <note>Lobby, what the copilot does</note>
+            </trans-unit>
+            <trans-unit id="lobby.copilot_does_2" resname="lobby.copilot_does_2">
+                <source>lobby.copilot_does_2</source>
+                <target>It whispers words in the margin, 5 per round at most.</target>
+                <note>Lobby, what the copilot does</note>
+            </trans-unit>
+            <trans-unit id="lobby.copilot_does_3" resname="lobby.copilot_does_3">
+                <source>lobby.copilot_does_3</source>
+                <target>You click a word to answer it: you always decide.</target>
+                <note>Lobby, what the copilot does</note>
+            </trans-unit>
+            <trans-unit id="lobby.copilot_does_4" resname="lobby.copilot_does_4">
+                <source>lobby.copilot_does_4</source>
+                <target>When you draw, it waits for the next round.</target>
+                <note>Lobby, what the copilot does</note>
+            </trans-unit>
+            <trans-unit id="lobby.duel_does" resname="lobby.duel_does">
+                <source>lobby.duel_does</source>
+                <target>What your rival does</target>
+                <note>Lobby of a duel, above the list of what the agent does</note>
+            </trans-unit>
+            <trans-unit id="lobby.duel_does_1" resname="lobby.duel_does_1">
+                <source>lobby.duel_does_1</source>
+                <target>It guesses the same drawings as you, the AI's and yours.</target>
+                <note>Lobby, what the rival does</note>
+            </trans-unit>
+            <trans-unit id="lobby.duel_does_2" resname="lobby.duel_does_2">
+                <source>lobby.duel_does_2</source>
+                <target>When you draw, your AI guesses for you.</target>
+                <note>Lobby, what the rival does</note>
+            </trans-unit>
+            <trans-unit id="lobby.duel_does_3" resname="lobby.duel_does_3">
+                <source>lobby.duel_does_3</source>
+                <target>The first one to find the word wins its points.</target>
+                <note>Lobby, what the rival does</note>
+            </trans-unit>
+            <trans-unit id="lobby.duel_does_4" resname="lobby.duel_does_4">
+                <source>lobby.duel_does_4</source>
+                <target>It answers once every 3 seconds at most, and only the exact word counts for it.</target>
+                <note>Lobby, what the rival does</note>
+            </trans-unit>
+            <trans-unit id="lobby.connect" resname="lobby.connect">
+                <source>lobby.connect</source>
+                <target>Connect it</target>
+                <note>Lobby, above the steps to connect the agent</note>
+            </trans-unit>
+            <trans-unit id="status.copilot_connected_unnamed" resname="status.copilot_connected_unnamed">
+                <source>status.copilot_connected_unnamed</source>
+                <target>Your copilot is connected.</target>
+                <note>In the lobby, once the agent called the game, when it has no name</note>
+            </trans-unit>
+            <trans-unit id="status.rival_connected_unnamed" resname="status.rival_connected_unnamed">
+                <source>status.rival_connected_unnamed</source>
+                <target>Your rival is connected.</target>
+                <note>In the lobby of a duel, once the agent called the game, when it has no name</note>
+            </trans-unit>
+            <trans-unit id="label.copilot_named" resname="label.copilot_named">
+                <source>label.copilot_named</source>
+                <target>%name%, your copilot</target>
+                <note>In the bar of a round with a copilot</note>
             </trans-unit>
         </body>
     </file>

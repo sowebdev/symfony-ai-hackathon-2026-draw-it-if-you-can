@@ -409,7 +409,8 @@ button:focus-visible,
 
 .hints button {
     padding: 0.15rem 0.7rem;
-    background: #e7f5ff;
+    background: #fff4e6;
+    border-color: var(--pencil);
     border-style: dashed;
     border-radius: 18px 18px 4px 18px;
     box-shadow: none;
@@ -706,13 +707,21 @@ button:focus-visible,
 
 .agent-status.connected {
     border-style: solid;
-    border-color: var(--found);
-    color: var(--found);
-    background: #ebfbee;
+    border-color: var(--pencil);
+    color: var(--pencil);
+    background: #fff4e6;
 }
 
 .agent-status.connected::before {
     content: '✓ ';
+}
+
+/* The agent is in orange everywhere, the side of the player in green: who is who at a glance. */
+.copilot-badge,
+.rival-score {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
 }
 
 .copilot-badge {
@@ -720,7 +729,57 @@ button:focus-visible,
 }
 
 .copilot-badge.connected {
+    color: var(--pencil);
+}
+
+.agent-sketch {
+    height: 2.2rem;
+    width: auto;
+}
+
+.side-score {
     color: var(--found);
+    margin-right: 0.8rem;
+}
+
+.hints h2,
+.rival-answers h2 {
+    color: var(--pencil);
+}
+
+.lobby-role {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 1rem 1.2rem;
+    background: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 8px 5px 10px 6px;
+    box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.08);
+}
+
+.lobby-role h2 {
+    margin: 0 0 0.3rem;
+    font-size: 1.4rem;
+}
+
+.lobby-role ul {
+    margin: 0;
+    padding-left: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.lobby > h2 {
+    margin: 0.4rem 0 0;
+    font-size: 1.4rem;
+}
+
+@media (max-width: 40rem) {
+    .lobby-role {
+        flex-direction: column;
+    }
 }
 
 /* "New game" inside a game: a form, so that the game knows the player left, drawn as a link. */
@@ -846,21 +905,16 @@ button.link:hover {
 }
 
 /* A duel: the score of each side in the bar, and the answers of the rival in its own column. */
-.duel-score strong {
-    margin-right: 0.6rem;
-}
-
 .rival-score {
     color: var(--pencil);
 }
 
-.rival-answers ol {
-    margin: 0;
-    padding-left: 1.4rem;
-    color: var(--pencil);
+.guesses .rival-answers ol li {
+    color: #d9a07a;
+    border-color: #f2c4a2;
 }
 
-.rival-answers li.accepted {
-    font-weight: bold;
-    text-decoration: underline;
+.guesses .rival-answers ol li.accepted {
+    color: var(--pencil);
+    border-color: var(--pencil);
 }

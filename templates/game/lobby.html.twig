@@ -5,16 +5,27 @@
 {% set prompt = duel ? 'duel' : 'copilot' %}
 {% set waiting = duel ? 'status.rival_waiting' : 'status.copilot_waiting' %}
 {% set connected = duel ? 'status.rival_connected' : 'status.copilot_connected' %}
-{% set unnamed = (duel ? 'label.rival_unknown' : 'label.copilot_unknown')|trans %}
+{% set unnamed = duel ? 'status.rival_connected_unnamed' : 'status.copilot_connected_unnamed' %}
+{% set mode = game.mode.value %}
 {% block body %}
     <main class="lobby"
           data-controller="agent-status"
           data-agent-status-url-value="{{ path('game_agent', {id: game.id}) }}"
           data-agent-status-connected-value="{{ game.agentConnected ? 'true' : 'false' }}"
           data-agent-status-connected-label-value="{{ connected|trans }}"
-          data-agent-status-unnamed-value="{{ unnamed }}">
+          data-agent-status-unnamed-label-value="{{ unnamed|trans }}">
         <h1>{{ (duel ? 'heading.lobby_duel' : 'heading.lobby')|trans }}</h1>
-        <p>{{ (duel ? 'lobby.intro_duel' : 'lobby.intro')|trans }}</p>
+        <section class="lobby-role">
+            {{ include('game/_mode_sketch.html.twig') }}
+            <div>
+                <h2>{{ ('lobby.' ~ mode ~ '_does')|trans }}</h2>
+                <ul>
+                    {% for line in 1..4 %}<li>{{ ('lobby.' ~ mode ~ '_does_' ~ line)|trans }}</li>{% endfor %}
+                </ul>
+            </div>
+        </section>
+
+        <h2>{{ 'lobby.connect'|trans }}</h2>
 
         <ol class="lobby-steps">
             <li>
@@ -29,7 +40,7 @@
         <p class="lobby-other">{{ 'lobby.other_clients'|trans({'%url%': url('_mcp_endpoint_default'), '%prompt%': prompt}) }}</p>
 
         <p class="agent-status {{ game.agentConnected ? 'connected' }}" role="status" data-agent-status-target="status">
-            {{ game.agentConnected ? connected|trans({'%name%': game.agentDisplayName ?? unnamed}) : waiting|trans }}
+            {% if not game.agentConnected %}{{ waiting|trans }}{% elseif game.agentDisplayName %}{{ connected|trans({'%name%': game.agentDisplayName}) }}{% else %}{{ unnamed|trans }}{% endif %}
         </p>
 
         <form method="post" action="{{ path('game_next_round', {id: game.id}) }}" data-controller="loading" data-action="loading#show">

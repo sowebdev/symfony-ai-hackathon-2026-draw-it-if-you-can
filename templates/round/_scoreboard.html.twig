@@ -5,11 +5,16 @@
 <header class="scoreboard">
     <p class="round-number">{{ 'label.round'|trans({'%number%': round.number, '%count%': round.game.roundCount}) }} · {{ round.game.theme|trans }}</p>
     {% if round.game.withCopilot %}
-        <p class="copilot-badge {{ round.game.agentConnected ? 'connected' }}">{{ 'label.copilot'|trans }} {{ round.game.agentConnected ? round.game.agentDisplayName ?? 'label.copilot_unknown'|trans : 'status.copilot_absent'|trans }}</p>
+        <p class="copilot-badge {{ round.game.agentConnected ? 'connected' }}">
+            {{ include('game/_mode_sketch.html.twig', {mode: 'agent'}) }}
+            {% if not round.game.agentConnected %}{{ 'status.copilot_absent'|trans }}
+            {% elseif round.game.agentDisplayName %}{{ 'label.copilot_named'|trans({'%name%': round.game.agentDisplayName}) }}
+            {% else %}{{ 'label.copilot_unknown'|trans }}{% endif %}
+        </p>
     {% endif %}
     {% if round.game.duel %}
-        <p class="duel-score">{{ 'label.you'|trans }} <strong>{{ team_score }}</strong>
-            <span class="rival-score">{{ round.game.agentDisplayName ?? 'label.rival_unknown'|trans }} <strong>{{ rival_score }}</strong></span></p>
+        <p class="duel-score"><span class="side-score">{{ 'label.you'|trans }} <strong>{{ team_score }}</strong></span>
+            <span class="rival-score">{{ include('game/_mode_sketch.html.twig', {mode: 'agent'}) }}{{ round.game.agentDisplayName ?? 'label.rival_unknown'|trans }} <strong>{{ rival_score }}</strong></span></p>
     {% else %}
         <p class="team-score">{{ 'label.team_score'|trans }} <strong>{{ team_score }}</strong></p>
     {% endif %}

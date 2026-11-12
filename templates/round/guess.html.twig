@@ -33,7 +33,7 @@
                 </form>
                 {% if round.game.withCopilot %}
                     <div class="hints" {{ hints is empty ? 'hidden' }} data-agent-target="hints">
-                        <h2>{{ 'heading.copilot_hints'|trans }}</h2>
+                        <h2>{{ 'heading.copilot_hints'|trans({'%name%': round.game.agentDisplayName ?? 'label.copilot_unknown'|trans}) }}</h2>
                         <ul data-agent-target="hintList">
                             {% for hint in hints %}
                                 <li data-hint-id="{{ hint.id }}"><button type="button" data-action="agent#pick" {{ round.over ? 'disabled' }}>{{ hint.word }}</button></li>
