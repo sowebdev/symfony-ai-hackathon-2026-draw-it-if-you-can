@@ -11,7 +11,12 @@ use App\Game\Theme;
 interface DrawsStrokes
 {
     /**
-     * @return iterable<GridStroke> Each stroke as soon as it is written
+     * A first sketch, or, when strokes are already drawn, details that make it clearer.
+     *
+     * @param list<GridStroke> $drawn        Strokes already on the canvas, in order
+     * @param list<string>     $wrongAnswers What the player answered so far, all wrong
+     *
+     * @return iterable<GridStroke> Each new stroke as soon as it is written
      */
-    public function draw(string $word, Theme $theme): iterable;
+    public function draw(string $word, Theme $theme, array $drawn = [], array $wrongAnswers = []): iterable;
 }

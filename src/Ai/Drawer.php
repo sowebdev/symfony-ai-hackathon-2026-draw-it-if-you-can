@@ -28,16 +28,21 @@ final readonly class Drawer implements DrawsStrokes
     {
     }
 
-    public function draw(string $word, Theme $theme): \Generator
+    /**
+     * Strokes for one call: the first sketch, then a few details at a time.
+     */
+    public const int MAX_DETAIL_STROKES = 6;
+
+    public function draw(string $word, Theme $theme, array $drawn = [], array $wrongAnswers = []): \Generator
     {
-        $max = self::MAX_STROKES;
+        $max = [] === $drawn ? self::MAX_STROKES : self::MAX_DETAIL_STROKES;
         $messages = new MessageBag(
             Message::forSystem(<<<PROMPT
                 You draw quick sketches for a drawing and guessing game, like a person with a pen. Someone watches the strokes appear one by one and tries to guess what you draw.
                 The canvas is a grid of 50 x 50 cells. A cell is named xNyM: x goes from 1 (left) to 50 (right), y goes from 1 (top) to 50 (bottom), like screen coordinates. The centre is x25y25.
                 Draw with the draw_stroke tool, ONE call per stroke: the cells the pen goes through, in order, comma-separated (e.g. "x10y12,x15y20,x18y25"). Repeat a cell for a sharp corner, end on the starting cell to close a shape.
-                Use the whole canvas, 5 to {$max} strokes, no letters, digits or words. Start with the main shape, then the details that make it recognizable.
-                When the sketch is done, answer "done" without calling the tool.
+                No letters, digits or words.
+                {$this->task($drawn, $wrongAnswers, $max)}
                 PROMPT),
             Message::ofUser("Theme: {$theme->description()}. Draw: {$word}"),
         );
@@ -64,6 +69,36 @@ final readonly class Drawer implements DrawsStrokes
                 ++$drawn;
             }
         }
+    }
+
+    /**
+     * @param list<GridStroke> $drawn
+     * @param list<string>     $wrongAnswers
+     */
+    private function task(array $drawn, array $wrongAnswers, int $max): string
+    {
+        if ([] === $drawn) {
+            return <<<TASK
+                Use the whole canvas, 5 to {$max} strokes. Start with the main shape, then the details that make it recognizable.
+                When the sketch is done, answer "done" without calling the tool.
+                TASK;
+        }
+
+        $strokes = implode("\n", array_map(
+            static fn (GridStroke $stroke): string => \sprintf('- %s: %s', '' === $stroke->part ? 'stroke' : $stroke->part, $stroke->written),
+            $drawn,
+        ));
+        $answers = [] === $wrongAnswers
+            ? 'The player has not answered yet.'
+            : 'The player answered, wrongly: '.implode(', ', $wrongAnswers).'. Make the difference clear.';
+
+        return <<<TASK
+            You already drew these strokes, they stay on the canvas:
+            {$strokes}
+            Nobody has guessed it yet. {$answers}
+            Add 1 to {$max} strokes that make the drawing easier to recognize: a telling detail, something the thing is usually seen with, or a clearer outline of a part. Do not redraw what is there.
+            When you have added them, answer "done" without calling the tool.
+            TASK;
     }
 
     /**

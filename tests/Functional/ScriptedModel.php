@@ -16,8 +16,9 @@ trait ScriptedModel
      * @param list<string>                $guesses
      * @param list<array{string, string}> $strokes        [part, cells] pairs, as the model writes them
      * @param \Throwable|null             $drawingFailure Thrown by the drawing model after its strokes
+     * @param list<array{string, string}> $details        Strokes drawn each time the AI is asked for details
      */
-    private static function scriptModel(KernelBrowser $client, array $guesses = [], string $word = 'cat', array $strokes = [], ?\Throwable $drawingFailure = null): ScriptedDrawer
+    private static function scriptModel(KernelBrowser $client, array $guesses = [], string $word = 'cat', array $strokes = [], ?\Throwable $drawingFailure = null, array $details = []): ScriptedDrawer
     {
         // The model lives in the container: it must survive from one request to the next.
         $client->disableReboot();
@@ -33,7 +34,7 @@ trait ScriptedModel
         );
         $client->getContainer()->set('ai.platform.generic.guesser', $platform);
         $client->getContainer()->set('ai.platform.generic.drawer', $platform);
-        $client->getContainer()->set(Drawer::class, $drawer = new ScriptedDrawer($strokes, $drawingFailure));
+        $client->getContainer()->set(Drawer::class, $drawer = new ScriptedDrawer($strokes, $drawingFailure, $details));
 
         return $drawer;
     }

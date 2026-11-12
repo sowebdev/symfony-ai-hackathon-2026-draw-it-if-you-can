@@ -55,6 +55,29 @@ final class AiDrawingTest extends WebTestCase
         self::assertCount(1, $this->drawer->drawn);
     }
 
+    public function testTheAiAddsDetailsUntilTheEndOfTheRound(): void
+    {
+        $this->restartWith(self::STROKES, details: [['tail', 'x40y40,x45y45']]);
+        $round = $this->startRound();
+        $this->answer($round, 'cheval');
+
+        $events = self::readEvents($this->client, $round.'/drawing');
+
+        // Nobody finds the word: the AI adds a stroke at each pass, up to the technical guard.
+        self::assertSame([...array_fill(0, 9, 'stroke'), 'finished'], array_column($events, 'type'));
+        self::assertCount(1, $this->drawer->drawn, 'One first sketch');
+        self::assertSame([2, ['cheval']], $this->drawer->detailed[0], 'Details are asked with the strokes drawn and the wrong answers');
+        self::assertSame([8, ['cheval']], $this->drawer->detailed[6]);
+    }
+
+    public function testTheAiStopsWhenItHasNothingToAdd(): void
+    {
+        $round = $this->startRound();
+
+        self::assertSame(['stroke', 'stroke', 'finished'], array_column(self::readEvents($this->client, $round.'/drawing'), 'type'));
+        self::assertCount(2, $this->drawer->detailed, 'Two passes without a stroke, then the drawing is finished');
+    }
+
     public function testThePlayerGuessesAndTheCodeJudges(): void
     {
         $round = $this->startRound();
@@ -126,12 +149,13 @@ final class AiDrawingTest extends WebTestCase
 
     /**
      * @param list<array{string, string}> $strokes
+     * @param list<array{string, string}> $details
      */
-    private function restartWith(array $strokes, \Throwable $failure): void
+    private function restartWith(array $strokes, ?\Throwable $failure = null, array $details = []): void
     {
         self::ensureKernelShutdown();
         $this->client = self::createClient();
-        $this->drawer = self::scriptModel($this->client, word: 'girafe', strokes: $strokes, drawingFailure: $failure);
+        $this->drawer = self::scriptModel($this->client, word: 'girafe', strokes: $strokes, drawingFailure: $failure, details: $details);
     }
 
     private function startRound(): string
