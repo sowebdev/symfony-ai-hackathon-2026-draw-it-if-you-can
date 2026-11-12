@@ -380,7 +380,7 @@
             </trans-unit>
             <trans-unit id="label.you" resname="label.you">
                 <source>label.you</source>
-                <target>You</target>
+                <target>You and your AI</target>
                 <note>In the bar of a duel, before the score of the player</note>
             </trans-unit>
             <trans-unit id="label.rival_unknown" resname="label.rival_unknown">
@@ -405,12 +405,12 @@
             </trans-unit>
             <trans-unit id="result.duel_score" resname="result.duel_score">
                 <source>result.duel_score</source>
-                <target>You %you% points, %name% %rival% points</target>
+                <target>You and your AI %you% points, %name% %rival% points</target>
                 <note>Final screen of a duel</note>
             </trans-unit>
             <trans-unit id="result.duel_won" resname="result.duel_won">
                 <source>result.duel_won</source>
-                <target>You win the duel!</target>
+                <target>You and your AI win the duel!</target>
                 <note>Final screen of a duel</note>
             </trans-unit>
             <trans-unit id="result.duel_lost" resname="result.duel_lost">
@@ -435,13 +435,33 @@
             </trans-unit>
             <trans-unit id="found_by.ai" resname="found_by.ai">
                 <source>found_by.ai</source>
-                <target>the AI</target>
+                <target>your AI</target>
                 <note>Who found the word of a round: the AI of the player</note>
             </trans-unit>
             <trans-unit id="label.copilot_unknown" resname="label.copilot_unknown">
                 <source>label.copilot_unknown</source>
                 <target>your copilot</target>
                 <note>Name of the copilot when its MCP client gives none</note>
+            </trans-unit>
+            <trans-unit id="heading.round_found_by_you" resname="heading.round_found_by_you">
+                <source>heading.round_found_by_you</source>
+                <target>You found it!</target>
+                <note>End of a round of a duel, when the player found the word</note>
+            </trans-unit>
+            <trans-unit id="heading.round_found_by_your_ai" resname="heading.round_found_by_your_ai">
+                <source>heading.round_found_by_your_ai</source>
+                <target>Your AI found it!</target>
+                <note>End of a round of a duel, when the AI of the player found the word</note>
+            </trans-unit>
+            <trans-unit id="result.points_won_by_you" resname="result.points_won_by_you">
+                <source>result.points_won_by_you</source>
+                <target>+%points% points for you and your AI</target>
+                <note>End of a round of a duel, when the side of the player found the word</note>
+            </trans-unit>
+            <trans-unit id="heading.your_ai_guesses" resname="heading.your_ai_guesses">
+                <source>heading.your_ai_guesses</source>
+                <target>Your AI says…</target>
+                <note>In a duel, above the words of the AI of the player while the player draws</note>
             </trans-unit>
         </body>
     </file>

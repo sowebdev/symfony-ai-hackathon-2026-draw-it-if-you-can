@@ -22,7 +22,7 @@ final class DuelTest extends WebTestCase
     protected function setUp(): void
     {
         $this->client = self::createClient();
-        self::scriptModel($this->client, guesses: ['chien'], word: 'girafe', strokes: [['neck', 'x25y45,x25y10']]);
+        self::scriptModel($this->client, guesses: ['chien', 'lion', 'girafe'], word: 'girafe', strokes: [['neck', 'x25y45,x25y10']]);
         self::mockTime();
         $this->connect();
     }
@@ -83,7 +83,7 @@ final class DuelTest extends WebTestCase
         $this->client->request('GET', $round);
         self::assertSelectorTextContains('.round-end h2', 'Test a trouvé !');
         self::assertSelectorTextContains('.round-end-points', 'points pour Test');
-        self::assertSelectorTextContains('.duel-score', 'Toi 0');
+        self::assertSelectorTextContains('.duel-score', 'Toi et ton IA 0');
         self::assertSelectorTextContains('.rival-score strong', '1000');
         self::assertSelectorTextContains('.rival-answers', 'zèbre');
 
@@ -123,6 +123,21 @@ final class DuelTest extends WebTestCase
         self::assertSelectorTextContains('.round-end h2', 'Test a trouvé !');
         self::assertSelectorExists('.rival-answers li.accepted');
         self::assertSelectorTextNotContains('.guesses ol', 'girafe', 'The answers of the rival are not those of the AI');
+    }
+
+    public function testTheEndOfARoundSaysWhichSideFound(): void
+    {
+        $round = $this->startRound('player', 'duel');
+        // The AI of the player says two words on a drawing, then waits for a new stroke: "girafe" is its third.
+        foreach (['[[100, 100, 0], [500, 500, 300]]', '[[100, 500, 400], [500, 100, 700]]'] as $points) {
+            $this->client->request('POST', $round.'/strokes', server: ['CONTENT_TYPE' => 'application/json'], content: '{"points": '.$points.'}');
+            self::readEvents($this->client, $round.'/guesses');
+        }
+
+        $this->client->request('GET', $round);
+        self::assertSelectorTextContains('.guesses h2', 'Ton IA propose');
+        self::assertSelectorTextContains('.round-end h2', 'Ton IA a trouvé !');
+        self::assertSelectorTextContains('.round-end-points', 'pour toi et ton IA');
     }
 
     public function testACopilotDoesNotAnswerAndARivalDoesNotWhisper(): void
@@ -170,7 +185,7 @@ final class DuelTest extends WebTestCase
 
         $this->client->followRedirect();
         self::assertSelectorTextContains('.final-score', 'Test gagne le duel.');
-        self::assertSelectorTextContains('.duel-final', 'Toi 0 points, Test 3000 points');
+        self::assertSelectorTextContains('.duel-final', 'Toi et ton IA 0 points, Test 3000 points');
         self::assertSelectorTextContains('table', 'Trouvé par');
     }
 }

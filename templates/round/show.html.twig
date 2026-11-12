@@ -26,7 +26,7 @@
 
             <section class="side guesses" aria-live="polite">
                 {{ include('round/_gauge.html.twig') }}
-                <h2>{{ 'heading.ai_guesses'|trans }}</h2>
+                <h2>{{ (round.game.duel ? 'heading.your_ai_guesses' : 'heading.ai_guesses')|trans }}</h2>
                 <ol data-guesses-target="list">
                     {% for guess in guesses %}
                         <li data-guess-id="{{ guess.id }}" class="{{ guess.accepted ? 'accepted' }}">
