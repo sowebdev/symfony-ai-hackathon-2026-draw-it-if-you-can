@@ -1,18 +1,20 @@
 import { Controller } from '@hotwired/stimulus';
 
 // The words of the AI, received as server-sent events while the player draws.
-// "Yes!" accepts a near word; the exact word is recognised by the server.
+// "Yes!" accepts a near word; the exact word is recognised by the server. The stream ends with
+// the round: "found", or "over" when the time is up.
 export default class extends Controller {
     static targets = ['list', 'result', 'time'];
-    static values = { streamUrl: String, acceptUrl: String, found: Boolean, yesLabel: String };
+    static values = { streamUrl: String, acceptUrl: String, over: Boolean, yesLabel: String };
 
     connect() {
-        if (this.foundValue) {
+        if (this.overValue) {
             return;
         }
         this.source = new EventSource(this.streamUrlValue);
         this.source.addEventListener('guess', (event) => this.add(JSON.parse(event.data)));
         this.source.addEventListener('found', (event) => this.finish(JSON.parse(event.data).foundAfterMs));
+        this.source.addEventListener('over', () => this.stop());
     }
 
     disconnect() {
@@ -41,11 +43,16 @@ export default class extends Controller {
         }
     }
 
-    finish(foundAfterMs, item = this.listTarget.lastElementChild) {
+    // The time is up: no more guesses, nor "Yes!".
+    stop() {
         this.source?.close();
-        this.foundValue = true;
-        item?.classList.add('accepted');
+        this.overValue = true;
         this.listTarget.querySelectorAll('button').forEach((button) => button.remove());
+    }
+
+    finish(foundAfterMs, item = this.listTarget.lastElementChild) {
+        this.stop();
+        item?.classList.add('accepted');
         this.timeTarget.textContent = (foundAfterMs / 1000).toFixed(1);
         this.resultTarget.hidden = false;
         this.dispatch('found');

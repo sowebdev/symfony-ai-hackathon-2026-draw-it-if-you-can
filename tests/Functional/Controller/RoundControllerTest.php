@@ -151,7 +151,7 @@ final class RoundControllerTest extends WebTestCase
     }
 
     /**
-     * Starts a game whose word is "cat", and returns the URL of its round.
+     * Starts a game whose word is "cat", drawn by the player, and returns the URL of its round.
      *
      * @param list<string> $guesses
      * @param bool         $scripted False to keep the model of a round already started
@@ -161,7 +161,7 @@ final class RoundControllerTest extends WebTestCase
         if ($scripted) {
             self::scriptModel($this->client, $guesses);
         }
-        $this->client->request('POST', '/en/games', ['theme' => 'animals']);
+        $this->client->request('POST', '/en/games', ['theme' => 'animals', 'drawnBy' => 'player']);
         self::assertResponseRedirects();
 
         return (string) $this->client->getResponse()->headers->get('Location');

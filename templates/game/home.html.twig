@@ -22,9 +22,10 @@
                     {% endfor %}
                 </select>
             </label>
+            <p class="who-starts">{{ 'label.who_starts'|trans }}</p>
             <div class="modes">
-                <button type="submit" name="drawnBy" value="player">{{ 'action.player_draws'|trans }}</button>
                 <button type="submit" name="drawnBy" value="ai">{{ 'action.ai_draws'|trans }}</button>
+                <button type="submit" name="drawnBy" value="player">{{ 'action.player_draws'|trans }}</button>
             </div>
         </form>
     </main>

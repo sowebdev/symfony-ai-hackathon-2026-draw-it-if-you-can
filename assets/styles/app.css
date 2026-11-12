@@ -134,3 +134,104 @@ body {
     color: #666;
     margin: 0 0 0.8rem;
 }
+
+/* The scoreboard of a round: number, team score, clock and gauge of points. */
+.scoreboard {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.scoreboard p {
+    margin: 0;
+}
+
+.clock strong {
+    font-size: 1.6rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.gauge {
+    position: relative;
+    width: 16rem;
+    height: 1.8rem;
+    border: 2px solid #111;
+    border-radius: 0.4rem;
+    background: #fff;
+    overflow: hidden;
+}
+
+.gauge-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 100%;
+    background: #f2c94c;
+    transition: width 0.1s linear;
+}
+
+.gauge-points {
+    position: relative;
+    display: block;
+    text-align: center;
+    line-height: 1.8rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.round-ending .gauge-fill {
+    background: #bbb;
+}
+
+/* The end of a round, and the final score. */
+.round-end {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    border: 2px solid #111;
+    border-radius: 0.6rem;
+    background: #fff;
+}
+
+.round-end h2 {
+    margin: 0;
+}
+
+.round-end p {
+    margin: 0;
+}
+
+.round-end-points {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #1a7f37;
+}
+
+.game-over {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.final-score {
+    font-size: 1.6rem;
+}
+
+.game-over table {
+    border-collapse: collapse;
+}
+
+.game-over th,
+.game-over td {
+    padding: 0.3rem 0.8rem;
+    border-bottom: 1px solid #ccc;
+    text-align: left;
+}
+
+.who-starts {
+    margin: 0;
+}

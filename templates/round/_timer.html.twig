@@ -1,0 +1,6 @@
+{# Attributes of the round-timer controller, on the main element of a round. #}
+data-round-timer-remaining-ms-value="{{ round.remainingMs }}"
+          data-round-timer-duration-ms-value="{{ round.durationMs }}"
+          data-round-timer-grace-ms-value="{{ constant('App\\Entity\\Round::GRACE_MS') }}"
+          data-round-timer-gauge-value="{{ gauge|json_encode }}"
+          data-round-timer-over-value="{{ round.over ? 'true' : 'false' }}"

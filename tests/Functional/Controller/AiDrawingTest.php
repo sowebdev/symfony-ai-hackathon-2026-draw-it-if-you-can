@@ -86,7 +86,7 @@ final class AiDrawingTest extends WebTestCase
         $this->answer($round, 'girafe');
         self::assertResponseStatusCodeSame(409);
         $this->client->request('GET', $round);
-        self::assertSelectorTextContains('.reveal strong', 'girafe');
+        self::assertSelectorTextContains('.round-end-word strong', 'girafe');
     }
 
     public function testThePlayerCannotDrawInARoundOfTheAi(): void

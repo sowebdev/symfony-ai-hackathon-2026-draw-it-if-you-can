@@ -2,7 +2,7 @@ import { Controller } from '@hotwired/stimulus';
 
 // The AI draws, the player guesses. The strokes come as server-sent events, in the canonical
 // format; a new stroke is drawn point by point, following its t, like a pen. Answers are typed
-// by the player and judged by the server.
+// by the player and judged by the server. "over" tells the round timer the round is won or lost.
 const SIZE = 1000;
 
 export default class extends Controller {
@@ -31,6 +31,11 @@ export default class extends Controller {
         if (this.hasGiveUpTarget) {
             this.giveUpTarget.hidden = this.overValue;
         }
+    }
+
+    // The time is up: no more answers.
+    stop() {
+        this.overValue = true;
     }
 
     end(label) {
@@ -100,6 +105,10 @@ export default class extends Controller {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ word }),
         });
+        if (response.status === 409) {
+            this.stop();
+            return;
+        }
         if (!response.ok) {
             return;
         }
@@ -112,6 +121,7 @@ export default class extends Controller {
             this.timeTarget.textContent = (result.foundAfterMs / 1000).toFixed(1);
             this.resultTarget.hidden = false;
             this.overValue = true;
+            this.dispatch('over');
         } else {
             this.wordTarget.focus();
         }
@@ -128,5 +138,6 @@ export default class extends Controller {
             this.revealTarget.hidden = false;
         }
         this.overValue = true;
+        this.dispatch('over');
     }
 }

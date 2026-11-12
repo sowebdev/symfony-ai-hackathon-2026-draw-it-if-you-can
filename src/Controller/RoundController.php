@@ -9,8 +9,10 @@ use App\Entity\Round;
 use App\Entity\Stroke;
 use App\Game\DrawingLoop;
 use App\Game\GuessLoop;
+use App\Game\ScoreGauge;
 use App\Game\WordMatcher;
 use App\Repository\GuessRepository;
+use App\Repository\RoundRepository;
 use App\Repository\StrokeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
@@ -30,6 +32,8 @@ final class RoundController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly StrokeRepository $strokes,
         private readonly GuessRepository $guesses,
+        private readonly RoundRepository $rounds,
+        private readonly ScoreGauge $gauge,
         private readonly LocaleSwitcher $localeSwitcher,
     ) {
     }
@@ -43,6 +47,9 @@ final class RoundController extends AbstractController
         return $this->render($round->isDrawnByAi() ? 'round/guess.html.twig' : 'round/show.html.twig', [
             'round' => $round,
             'guesses' => $this->guesses->findByRound($round),
+            'gauge' => $this->gauge->steps($round->getDurationMs()),
+            'points' => $this->gauge->pointsOf($round),
+            'team_score' => $this->gauge->total($this->rounds->findByGame($round->getGame())),
         ]);
     }
 
@@ -59,6 +66,9 @@ final class RoundController extends AbstractController
     public function addStroke(Round $round, #[MapRequestPayload] NewStroke $payload): JsonResponse
     {
         $this->denyUnlessPlayerDraws($round);
+        if ($round->isOver()) {
+            return $this->roundIsOver();
+        }
         try {
             $points = StrokePoints::fromArray($payload->points);
         } catch (InvalidStroke $exception) {
@@ -76,6 +86,9 @@ final class RoundController extends AbstractController
     public function undo(Round $round): Response
     {
         $this->denyUnlessPlayerDraws($round);
+        if ($round->isOver()) {
+            return $this->roundIsOver();
+        }
         $stroke = $this->strokes->findLast($round) ?? throw $this->createNotFoundException('No stroke to undo.');
         $this->entityManager->remove($stroke);
         $this->entityManager->flush();
@@ -103,7 +116,11 @@ final class RoundController extends AbstractController
         if ($guess->getRound() !== $round) {
             throw $this->createNotFoundException('This guess belongs to another round.');
         }
-        $round->markFound($guess);
+        if ($round->isOver()) {
+            return $this->roundIsOver();
+        }
+        // The points count from the click: that is when the answer is validated.
+        $round->markFound($guess, $round->elapsedMs());
         $this->entityManager->flush();
 
         return $this->json(['foundAfterMs' => $round->getFoundAfterMs()]);
@@ -128,7 +145,7 @@ final class RoundController extends AbstractController
     {
         $this->denyUnlessAiDraws($round);
         if ($round->isOver()) {
-            return $this->json(['error' => 'The round is over.'], Response::HTTP_CONFLICT);
+            return $this->roundIsOver();
         }
 
         $guess = new Guess($round, trim($payload->word), $round->elapsedMs());
@@ -157,6 +174,14 @@ final class RoundController extends AbstractController
         $this->entityManager->flush();
 
         return $this->json(['targetWord' => $round->getTargetWord(), 'found' => $round->isFound()]);
+    }
+
+    /**
+     * Found, given up or out of time: the player is told to look at the result.
+     */
+    private function roundIsOver(): JsonResponse
+    {
+        return $this->json(['error' => 'The round is over.'], Response::HTTP_CONFLICT);
     }
 
     private function denyUnlessPlayerDraws(Round $round): void

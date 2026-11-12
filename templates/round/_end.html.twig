@@ -1,0 +1,22 @@
+{# Shown once the round is over: what happened, the word, the points won, and what comes next. #}
+<section class="round-end" aria-live="assertive">
+    <h2>
+        {% if round.found %}{{ 'heading.round_found'|trans }}
+        {% elseif round.givenUp %}{{ 'heading.round_given_up'|trans }}
+        {% else %}{{ 'heading.round_time_up'|trans }}{% endif %}
+    </h2>
+    <p class="round-end-word">{{ 'result.word_was'|trans({'%word%': '<strong>' ~ round.targetWord|e ~ '</strong>'})|raw }}</p>
+    {% if round.found %}
+        <p class="round-end-time">{{ 'result.found_in'|trans({'%seconds%': '<strong>' ~ (round.foundAfterMs / 1000)|number_format(1) ~ '</strong>'})|raw }}</p>
+    {% endif %}
+    <p class="round-end-points">{{ 'result.points_won'|trans({'%points%': points}) }}</p>
+    {% if round.last %}
+        <a class="button" href="{{ path('game_show', {id: round.game.id}) }}">{{ 'action.final_score'|trans }}</a>
+    {% else %}
+        <form method="post" action="{{ path('game_next_round', {id: round.game.id}) }}">
+            <button type="submit" autofocus>
+                {{ (round.game.drawnByInRound(round.number + 1).value == 'player' ? 'action.next_round_player' : 'action.next_round_ai')|trans }}
+            </button>
+        </form>
+    {% endif %}
+</section>

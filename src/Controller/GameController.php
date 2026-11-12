@@ -2,28 +2,33 @@
 
 namespace App\Controller;
 
-use App\Ai\Role;
-use App\Ai\WordPicker;
 use App\Entity\Game;
-use App\Entity\Round;
-use App\Game\DrawnBy;
 use App\Game\Language;
+use App\Game\RoundStarter;
+use App\Game\ScoreGauge;
 use App\Game\Theme;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\RoundRepository;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\EnumRequirement;
+use Symfony\Component\Routing\Requirement\Requirement;
+use Symfony\Component\Translation\LocaleSwitcher;
 
 final class GameController extends AbstractController
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly WordPicker $wordPicker,
+        private readonly RoundStarter $starter,
+        private readonly RoundRepository $rounds,
+        private readonly ScoreGauge $gauge,
+        private readonly LocaleSwitcher $localeSwitcher,
         private readonly LoggerInterface $logger,
+        #[Autowire('%game.rounds%')]
+        private readonly int $roundCount,
     ) {
     }
 
@@ -45,29 +50,75 @@ final class GameController extends AbstractController
     }
 
     /**
-     * The game is played in the language of the page: the interface, the word and the guesses.
+     * The game is played in the language of the page: the interface, the words and the guesses.
      */
     #[Route('/{_locale}/games', name: 'game_create', requirements: ['_locale' => new EnumRequirement(Language::class)], methods: ['POST'])]
     public function create(Request $request, #[MapRequestPayload] NewGame $payload): Response
     {
-        $game = new Game($payload->theme, Language::from($request->getLocale()));
-
+        $game = new Game($payload->theme, Language::from($request->getLocale()), $this->roundCount, $payload->drawnBy);
         try {
-            // The AI that does not guess picks the word: the guesser when the player draws, the drawer otherwise.
-            $role = DrawnBy::Ai === $payload->drawnBy ? Role::Drawer : Role::Guesser;
-            $word = $this->wordPicker->pick($game->getTheme(), $game->getLanguage(), $role);
+            $round = $this->starter->startGame($game);
         } catch (\Throwable $exception) {
-            $this->logger->error('No word to draw: {message}', ['message' => $exception->getMessage(), 'exception' => $exception]);
-
-            return $this->renderHome('error.no_word', Response::HTTP_SERVICE_UNAVAILABLE);
+            return $this->noWord($exception, fn (string $error, int $status): Response => $this->renderHome($error, $status));
         }
 
-        $round = new Round($game, $word, $payload->drawnBy);
-        $this->entityManager->persist($game);
-        $this->entityManager->persist($round);
-        $this->entityManager->flush();
-
         return $this->redirectToRoute('round_show', ['id' => $round->getId()]);
+    }
+
+    /**
+     * "Next round": the other one draws. After the last round, the final score.
+     */
+    #[Route('/games/{id}/rounds', name: 'game_next_round', requirements: ['id' => Requirement::UUID_V7], methods: ['POST'])]
+    public function nextRound(Game $game): Response
+    {
+        $this->speak($game);
+        try {
+            $round = $this->starter->startNext($game);
+        } catch (\Throwable $exception) {
+            return $this->noWord($exception, fn (string $error, int $status): Response => $this->render('game/no_word.html.twig', ['game' => $game, 'error' => $error], new Response(status: $status)));
+        }
+
+        return null === $round
+            ? $this->redirectToRoute('game_show', ['id' => $game->getId()])
+            : $this->redirectToRoute('round_show', ['id' => $round->getId()]);
+    }
+
+    /**
+     * The final score, once the last round is over; until then, the round being played.
+     */
+    #[Route('/games/{id}', name: 'game_show', requirements: ['id' => Requirement::UUID_V7], methods: ['GET'])]
+    public function show(Game $game): Response
+    {
+        $rounds = $this->rounds->findByGame($game);
+        $last = $rounds[array_key_last($rounds)] ?? throw $this->createNotFoundException('A game starts with its first round.');
+        if (!$last->isLast() || !$last->isOver()) {
+            return $this->redirectToRoute('round_show', ['id' => $last->getId()]);
+        }
+        $this->speak($game);
+
+        return $this->render('game/show.html.twig', [
+            'game' => $game,
+            'rounds' => array_map(fn ($round): array => ['round' => $round, 'points' => $this->gauge->pointsOf($round)], $rounds),
+            'total' => $this->gauge->total($rounds),
+        ]);
+    }
+
+    /**
+     * A game speaks its own language, whatever the browser says.
+     */
+    private function speak(Game $game): void
+    {
+        $this->localeSwitcher->setLocale($game->getLanguage()->value);
+    }
+
+    /**
+     * @param \Closure(string, int): Response $render
+     */
+    private function noWord(\Throwable $exception, \Closure $render): Response
+    {
+        $this->logger->error('No word to draw: {message}', ['message' => $exception->getMessage(), 'exception' => $exception]);
+
+        return $render('error.no_word', Response::HTTP_SERVICE_UNAVAILABLE);
     }
 
     private function renderHome(?string $error = null, int $status = Response::HTTP_OK): Response

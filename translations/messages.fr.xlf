@@ -128,6 +128,121 @@
                 <target>L'IA n'a pas pu dessiner. « make check » dit ce qui ne va pas.</target>
                 <note>The model could not draw</note>
             </trans-unit>
+            <trans-unit id="label.round" resname="label.round">
+                <source>label.round</source>
+                <target>Manche %number% / %count%</target>
+                <note>Number of the round being played</note>
+            </trans-unit>
+            <trans-unit id="label.team_score" resname="label.team_score">
+                <source>label.team_score</source>
+                <target>Score d'équipe</target>
+                <note>Points of the player and the AI together</note>
+            </trans-unit>
+            <trans-unit id="label.time_left" resname="label.time_left">
+                <source>label.time_left</source>
+                <target>Temps restant</target>
+                <note>Before the seconds left in the round</note>
+            </trans-unit>
+            <trans-unit id="label.points_at_stake" resname="label.points_at_stake">
+                <source>label.points_at_stake</source>
+                <target>points en jeu</target>
+                <note>After the points a word is worth now, on the gauge</note>
+            </trans-unit>
+            <trans-unit id="label.who_starts" resname="label.who_starts">
+                <source>label.who_starts</source>
+                <target>Qui dessine en premier ?</target>
+                <note>Above the buttons that start a game</note>
+            </trans-unit>
+            <trans-unit id="heading.round_found" resname="heading.round_found">
+                <source>heading.round_found</source>
+                <target>Trouvé !</target>
+                <note>End of a round: the word was found</note>
+            </trans-unit>
+            <trans-unit id="heading.round_time_up" resname="heading.round_time_up">
+                <source>heading.round_time_up</source>
+                <target>Temps écoulé !</target>
+                <note>End of a round: nobody found the word in time</note>
+            </trans-unit>
+            <trans-unit id="heading.round_given_up" resname="heading.round_given_up">
+                <source>heading.round_given_up</source>
+                <target>Pas cette fois</target>
+                <note>End of a round: the player gave up</note>
+            </trans-unit>
+            <trans-unit id="result.points_won" resname="result.points_won">
+                <source>result.points_won</source>
+                <target>+%points% points</target>
+                <note>Points won in the round</note>
+            </trans-unit>
+            <trans-unit id="action.next_round_player" resname="action.next_round_player">
+                <source>action.next_round_player</source>
+                <target>Manche suivante : à toi de dessiner</target>
+                <note>Starts the next round, drawn by the player</note>
+            </trans-unit>
+            <trans-unit id="action.next_round_ai" resname="action.next_round_ai">
+                <source>action.next_round_ai</source>
+                <target>Manche suivante : l'IA dessine</target>
+                <note>Starts the next round, drawn by the AI</note>
+            </trans-unit>
+            <trans-unit id="action.final_score" resname="action.final_score">
+                <source>action.final_score</source>
+                <target>Voir le score final</target>
+                <note>After the last round</note>
+            </trans-unit>
+            <trans-unit id="action.retry" resname="action.retry">
+                <source>action.retry</source>
+                <target>Réessayer</target>
+                <note>Asks again for a word to draw</note>
+            </trans-unit>
+            <trans-unit id="heading.game_over" resname="heading.game_over">
+                <source>heading.game_over</source>
+                <target>Partie terminée</target>
+                <note>Title of the final score page</note>
+            </trans-unit>
+            <trans-unit id="result.final_score" resname="result.final_score">
+                <source>result.final_score</source>
+                <target>Score d'équipe : %points% points</target>
+                <note>Final score; %points% is a number in an HTML element</note>
+            </trans-unit>
+            <trans-unit id="result.not_found" resname="result.not_found">
+                <source>result.not_found</source>
+                <target>pas trouvé</target>
+                <note>In the table of the final score, for a word nobody found</note>
+            </trans-unit>
+            <trans-unit id="column.round" resname="column.round">
+                <source>column.round</source>
+                <target>Manche</target>
+                <note>Column of the final score table</note>
+            </trans-unit>
+            <trans-unit id="column.drawer" resname="column.drawer">
+                <source>column.drawer</source>
+                <target>Dessin de</target>
+                <note>Column of the final score table</note>
+            </trans-unit>
+            <trans-unit id="column.word" resname="column.word">
+                <source>column.word</source>
+                <target>Mot</target>
+                <note>Column of the final score table</note>
+            </trans-unit>
+            <trans-unit id="column.found_in" resname="column.found_in">
+                <source>column.found_in</source>
+                <target>Trouvé en</target>
+                <note>Column of the final score table</note>
+            </trans-unit>
+            <trans-unit id="column.points" resname="column.points">
+                <source>column.points</source>
+                <target>Points</target>
+                <note>Column of the final score table</note>
+            </trans-unit>
+            <trans-unit id="drawer.player" resname="drawer.player">
+                <source>drawer.player</source>
+                <target>toi</target>
+                <note>Who drew a round: the player</note>
+            </trans-unit>
+            <trans-unit id="drawer.ai" resname="drawer.ai">
+                <source>drawer.ai</source>
+                <target>l'IA</target>
+                <note>Who drew a round: the AI</note>
+            </trans-unit>
         </body>
     </file>
 </xliff>

@@ -2,13 +2,16 @@
 
 {% block body %}
     <main class="round"
-          data-controller="ai-drawing"
+          data-controller="ai-drawing round-timer"
+          {{ include('round/_timer.html.twig') }}
           data-ai-drawing-stream-url-value="{{ path('round_drawing', {id: round.id}) }}"
           data-ai-drawing-answer-url-value="{{ path('round_answer', {id: round.id}) }}"
           data-ai-drawing-give-up-url-value="{{ path('round_give_up', {id: round.id}) }}"
           data-ai-drawing-over-value="{{ round.over ? 'true' : 'false' }}"
           data-ai-drawing-finished-label-value="{{ 'status.ai_finished'|trans }}"
-          data-ai-drawing-failed-label-value="{{ 'error.ai_drawing'|trans }}">
+          data-ai-drawing-failed-label-value="{{ 'error.ai_drawing'|trans }}"
+          data-action="ai-drawing:over->round-timer#finish round-timer:up->ai-drawing#stop">
+        {{ include('round/_scoreboard.html.twig') }}
         <p class="target">{{ 'instruction.guess'|trans }} <span class="theme">({{ round.game.theme|trans }})</span></p>
 
         <div class="board">
@@ -29,14 +32,16 @@
                         <li class="{{ guess.accepted ? 'accepted' }}">{{ guess.word }}</li>
                     {% endfor %}
                 </ol>
-                <p class="result" data-ai-drawing-target="result" {{ round.found ? '' : 'hidden' }}>
-                    {{ 'result.found_in'|trans({'%seconds%': '<strong data-ai-drawing-target="time">' ~ (round.found ? (round.foundAfterMs / 1000)|number_format(1) : '') ~ '</strong>'})|raw }}
+                <p class="result" data-ai-drawing-target="result" hidden>
+                    {{ 'result.found_in'|trans({'%seconds%': '<strong data-ai-drawing-target="time"></strong>'})|raw }}
                 </p>
-                <p class="reveal" data-ai-drawing-target="reveal" {{ round.givenUp ? '' : 'hidden' }}>
-                    {{ 'result.word_was'|trans({'%word%': '<strong data-ai-drawing-target="targetWord">' ~ (round.givenUp ? round.targetWord|e : '') ~ '</strong>'})|raw }}
+                <p class="reveal" data-ai-drawing-target="reveal" hidden>
+                    {{ 'result.word_was'|trans({'%word%': '<strong data-ai-drawing-target="targetWord"></strong>'})|raw }}
                 </p>
             </section>
         </div>
+
+        {% if round.over %}{{ include('round/_end.html.twig') }}{% endif %}
 
         <div class="toolbar">
             <button type="button" data-action="ai-drawing#giveUp" data-ai-drawing-target="giveUp">{{ 'action.give_up'|trans }}</button>

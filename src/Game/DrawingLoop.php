@@ -77,7 +77,7 @@ final readonly class DrawingLoop
 
         try {
             foreach ($this->drawer->draw($round->getTargetWord(), $round->getGame()->getTheme()) as $written) {
-                // The player may have found the word, or given up, in another request.
+                // The player may have found the word, or given up, in another request; or the time is up.
                 $this->entityManager->clear();
                 $round = $this->rounds->find($roundId) ?? throw new \LogicException('The round is gone.');
                 if ($round->isOver()) {

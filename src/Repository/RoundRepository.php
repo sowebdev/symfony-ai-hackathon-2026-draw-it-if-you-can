@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Game;
 use App\Entity\Round;
 use App\Game\Language;
 use App\Game\Theme;
@@ -56,5 +57,18 @@ class RoundRepository extends ServiceEntityRepository
             ->execute();
 
         return 1 === $claimed;
+    }
+
+    /**
+     * @return list<Round>
+     */
+    public function findByGame(Game $game): array
+    {
+        return $this->findBy(['game' => $game], ['number' => 'ASC']);
+    }
+
+    public function findLastOfGame(Game $game): ?Round
+    {
+        return $this->findOneBy(['game' => $game], ['number' => 'DESC']);
     }
 }

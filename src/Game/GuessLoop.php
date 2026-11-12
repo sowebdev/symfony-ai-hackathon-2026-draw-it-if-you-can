@@ -53,7 +53,8 @@ final readonly class GuessLoop
         // Bounded by the deadline below, not by PHP's 30 s: the stream lasts longer.
         set_time_limit(0);
         $roundId = $round->getId();
-        $deadline = microtime(true) + $this->maxDurationS;
+        // The stream ends with the round, or before: the browser reconnects by itself.
+        $deadline = microtime(true) + min($this->maxDurationS, ($round->remainingMs() + Round::GRACE_MS) / 1000);
         $lastDrawing = null;
         $guessesOnDrawing = 0;
 
@@ -61,8 +62,8 @@ final readonly class GuessLoop
             // Strokes and "Yes!" come from other requests: read them fresh at each turn.
             $this->entityManager->clear();
             $round = $this->rounds->find($roundId) ?? throw new \LogicException('The round is gone.');
-            if ($round->isFound()) {
-                yield $this->foundEvent($round);
+            if ($round->isOver()) {
+                yield $this->overEvent($round);
 
                 return;
             }
@@ -85,7 +86,7 @@ final readonly class GuessLoop
             if (null !== $guess) {
                 yield new ServerEvent((string) json_encode(['id' => $guess->getId(), 'word' => $guess->getWord()]), type: 'guess');
                 if ($round->isFound()) {
-                    yield $this->foundEvent($round);
+                    yield $this->overEvent($round);
 
                     return;
                 }
@@ -104,7 +105,8 @@ final readonly class GuessLoop
         $png = $this->renderer->toPng(array_map(static fn (Stroke $stroke): array => $stroke->getPoints(), $strokes));
 
         $word = $this->guesser->guess($png, $game->getTheme(), $game->getLanguage(), $said);
-        if (null === $word || \in_array(WordMatcher::normalize($word), array_map(WordMatcher::normalize(...), $said), true)) {
+        // A slow model may answer after the end of the round: too late.
+        if (null === $word || $round->isTimeUp() || \in_array(WordMatcher::normalize($word), array_map(WordMatcher::normalize(...), $said), true)) {
             return null;
         }
 
@@ -118,9 +120,14 @@ final readonly class GuessLoop
         return $guess;
     }
 
-    private function foundEvent(Round $round): ServerEvent
+    /**
+     * "found" when the AI found the word, "over" otherwise (out of time).
+     */
+    private function overEvent(Round $round): ServerEvent
     {
-        return new ServerEvent((string) json_encode(['foundAfterMs' => $round->getFoundAfterMs()]), type: 'found');
+        return $round->isFound()
+            ? new ServerEvent((string) json_encode(['foundAfterMs' => $round->getFoundAfterMs()]), type: 'found')
+            : new ServerEvent('{}', type: 'over');
     }
 
     /**

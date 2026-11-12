@@ -10,11 +10,20 @@ use Symfony\Component\Clock\DatePoint;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * One drawing to guess: the player draws and the AI guesses, or the other way round.
+ * One drawing to guess: the player draws and the AI guesses, or the other way round, against
+ * the clock. The round is over when the word is found, when the player gives up, or when the
+ * time is up.
  */
 #[ORM\Entity(repositoryClass: RoundRepository::class)]
+#[ORM\UniqueConstraint(columns: ['game_id', 'number'])]
 class Round
 {
+    /**
+     * After the end, a word or a stroke still counts for this long: it was sent at the last
+     * second, and the network took the rest.
+     */
+    public const int GRACE_MS = 1000;
+
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME)]
     private Uuid $id;
@@ -26,7 +35,7 @@ class Round
     private int $startedAtMs;
 
     /**
-     * Milliseconds from the start of the round to the right guess, null until found.
+     * Milliseconds from the start of the round to the validation of the right answer, null until found.
      */
     #[ORM\Column(nullable: true)]
     private ?int $foundAfterMs = null;
@@ -46,17 +55,61 @@ class Round
     #[ORM\Column(options: ['default' => false])]
     private bool $givenUp = false;
 
+    #[ORM\Column(length: 10, enumType: DrawnBy::class, options: ['default' => 'player'])]
+    private DrawnBy $drawnBy;
+
+    /**
+     * @param int $number     Order of the round in the game, from 1: it tells who draws
+     * @param int $durationMs Kept on the round, so that a change of configuration does not change it
+     */
     public function __construct(
         #[ORM\ManyToOne]
         #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
         private Game $game,
+        #[ORM\Column(options: ['default' => 1])]
+        private int $number,
         #[ORM\Column(length: 100)]
         private string $targetWord,
-        #[ORM\Column(length: 10, enumType: DrawnBy::class, options: ['default' => 'player'])]
-        private DrawnBy $drawnBy = DrawnBy::Player,
+        #[ORM\Column(options: ['default' => 60000])]
+        private int $durationMs,
     ) {
+        if ($number < 1 || $number > $game->getRoundCount()) {
+            throw new \InvalidArgumentException(\sprintf('Round %d is not in a game of %d rounds.', $number, $game->getRoundCount()));
+        }
         $this->id = Uuid::v7();
+        $this->drawnBy = $game->drawnByInRound($number);
         $this->startedAtMs = self::toMs(new DatePoint());
+    }
+
+    public function getNumber(): int
+    {
+        return $this->number;
+    }
+
+    public function isLast(): bool
+    {
+        return $this->number >= $this->game->getRoundCount();
+    }
+
+    public function getDurationMs(): int
+    {
+        return $this->durationMs;
+    }
+
+    /**
+     * Milliseconds left on the clock, 0 once the time is up.
+     */
+    public function remainingMs(?\DateTimeImmutable $now = null): int
+    {
+        return max(0, $this->durationMs - $this->elapsedMs($now));
+    }
+
+    /**
+     * The time is up, grace included: nothing more counts.
+     */
+    public function isTimeUp(?\DateTimeImmutable $now = null): bool
+    {
+        return $this->elapsedMs($now) > $this->durationMs + self::GRACE_MS;
     }
 
     public function getId(): Uuid
@@ -102,13 +155,21 @@ class Round
         return $this->foundAfterMs;
     }
 
-    public function markFound(Guess $guess): void
+    /**
+     * The word is found when the answer is validated: at once when the code recognises it, when
+     * the player clicks "Yes!" for a near word. The points count from that moment. A validation
+     * after the time, grace included, finds nothing.
+     *
+     * @param int|null $validatedAfterMs Null when the code recognised the word as it was said
+     */
+    public function markFound(Guess $guess, ?int $validatedAfterMs = null): void
     {
-        if ($this->isFound()) {
+        $validatedAfterMs ??= $guess->getSaidAfterMs();
+        if ($this->isFound() || $this->givenUp || $validatedAfterMs > $this->durationMs + self::GRACE_MS) {
             return;
         }
         $guess->accept();
-        $this->foundAfterMs = $guess->getSaidAfterMs();
+        $this->foundAfterMs = $validatedAfterMs;
     }
 
     public function getDrawnBy(): DrawnBy
@@ -122,11 +183,11 @@ class Round
     }
 
     /**
-     * Found or given up: nothing more to draw nor to guess.
+     * Found, given up or out of time: nothing more to draw nor to guess.
      */
-    public function isOver(): bool
+    public function isOver(?\DateTimeImmutable $now = null): bool
     {
-        return $this->isFound() || $this->givenUp;
+        return $this->isFound() || $this->givenUp || $this->isTimeUp($now);
     }
 
     public function isGivenUp(): bool
@@ -136,7 +197,7 @@ class Round
 
     public function giveUp(): void
     {
-        if (!$this->isFound()) {
+        if (!$this->isOver()) {
             $this->givenUp = true;
         }
     }
