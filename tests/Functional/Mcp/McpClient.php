@@ -6,7 +6,8 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 /**
  * An agent connected over MCP, as a client such as Claude Code would talk to the game: JSON-RPC
- * over HTTP on /mcp, in a session. connect() opens another session, as a second agent would.
+ * over HTTP on /mcp, in a session opened by "initialize", or without one on the stateless
+ * protocol (2026-07-28) that recent clients speak.
  */
 trait McpClient
 {
@@ -25,6 +26,35 @@ trait McpClient
         $this->rpc('notifications/initialized');
 
         return $this->session;
+    }
+
+    /**
+     * A tool called on the stateless protocol: no session, the client says who it is with each request.
+     *
+     * @param array<string, mixed> $arguments
+     *
+     * @return array<string, mixed>
+     */
+    private function callStateless(string $tool, string $clientName, array $arguments = []): array
+    {
+        $meta = [
+            'io.modelcontextprotocol/protocolVersion' => '2026-07-28',
+            'io.modelcontextprotocol/clientInfo' => ['name' => $clientName, 'version' => '1'],
+            'io.modelcontextprotocol/clientCapabilities' => (object) [],
+        ];
+        $message = ['jsonrpc' => '2.0', 'id' => 1, 'method' => 'tools/call', 'params' => ['name' => $tool, 'arguments' => (object) $arguments, '_meta' => $meta]];
+        $this->client->request('POST', '/mcp', server: [
+            'CONTENT_TYPE' => 'application/json',
+            'HTTP_ACCEPT' => 'application/json, text/event-stream',
+            'HTTP_MCP_PROTOCOL_VERSION' => '2026-07-28',
+            'HTTP_MCP_METHOD' => 'tools/call',
+            'HTTP_MCP_NAME' => $tool,
+        ], content: json_encode($message, \JSON_THROW_ON_ERROR));
+        self::assertResponseIsSuccessful();
+        $response = json_decode((string) $this->client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
+        self::assertArrayHasKey('result', $response, (string) json_encode($response));
+
+        return $response['result'];
     }
 
     /**

@@ -24,6 +24,7 @@ use Mcp\Exception\ToolCallException;
 use Mcp\Schema\Content\ImageContent;
 use Mcp\Schema\Content\TextContent;
 use Mcp\Server\RequestContext;
+use Mcp\Server\Stateless\RequestMeta;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Clock\DatePoint;
 use Symfony\Component\Uid\Uuid;
@@ -31,15 +32,12 @@ use Symfony\Component\Uid\Uuid;
 /**
  * The game as seen by an agent connected over MCP: the state of the round and the drawing in
  * progress. The copilot acts by a hint to the player, the rival of a duel by its own answers.
- * The word to find is never given. One agent plays a game: the first one to call it.
+ * The word to find is never given.
  */
 final readonly class AgentTools
 {
     /** A round over, and no next one for this long: the player has probably stopped. */
     public const int IDLE_S = 120;
-
-    /** Silent for this long, the agent of a game may be replaced by another one, e.g. after a restart. */
-    public const int SILENT_S = 30;
 
     public function __construct(
         private EntityManagerInterface $entityManager,
@@ -64,11 +62,7 @@ final readonly class AgentTools
         ?string $round = null,
         ?RequestContext $context = null,
     ): array {
-        try {
-            [$game, $current] = $this->find($round, $context);
-        } catch (AnotherAgent $another) {
-            return ['state' => 'another agent plays this game', 'stop' => true, 'what_you_can_do' => $another->getMessage()];
-        }
+        [$game, $current] = $this->find($round, $context);
         [$stop, $advice] = $this->advice($game, $current);
         if (null === $current) {
             return [
@@ -184,8 +178,6 @@ final readonly class AgentTools
      * The game and round asked for, by default the last ones; the agent is marked as seen on the game.
      *
      * @return array{Game, ?Round} No round yet while the game waits in its lobby
-     *
-     * @throws AnotherAgent When another agent plays this game
      */
     private function find(?string $round, ?RequestContext $context): array
     {
@@ -199,28 +191,34 @@ final readonly class AgentTools
             $game = $found->getGame();
         }
 
-        $session = $context?->getSession();
-        $now = new DatePoint();
-        if (null !== $session && $game->isWithAgent() && !$game->mayBePlayedBy($session->getId()->toRfc4122(), null === $found, $now, self::SILENT_S)) {
-            throw new AnotherAgent(\sprintf('Another agent, %s, already plays this game: stop playing, and tell your user so.', $game->getAgentName()));
-        }
-        $client = $session?->get('client_info');
-        $game->agentSeen(\is_array($client) && \is_string($client['name'] ?? null) ? $client['name'] : '', $session?->getId()->toRfc4122(), $now);
+        $game->agentSeen(self::clientName($context), new DatePoint());
         $this->entityManager->flush();
 
         return [$game, $found];
     }
 
     /**
-     * The round to look at or to play: only in a game played with an agent, and by this agent.
+     * The name the MCP client gives itself, e.g. "claude-code": in the session opened by
+     * "initialize", or with each request on the stateless protocol (2026-07-28), which has no session.
+     */
+    private static function clientName(?RequestContext $context): string
+    {
+        $session = $context?->getSession();
+        $meta = $session?->get(RequestMeta::class);
+        if ($meta instanceof RequestMeta && null !== $meta->clientInfo) {
+            return $meta->clientInfo->name;
+        }
+        $client = $session?->get('client_info');
+
+        return \is_array($client) && \is_string($client['name'] ?? null) ? $client['name'] : '';
+    }
+
+    /**
+     * The round to look at or to play: only in a game played with an agent.
      */
     private function findRound(?string $round, ?RequestContext $context): Round
     {
-        try {
-            [$game, $found] = $this->find($round, $context);
-        } catch (AnotherAgent $another) {
-            throw new ToolCallException($another->getMessage(), previous: $another);
-        }
+        [$game, $found] = $this->find($round, $context);
         if (!$game->isWithAgent()) {
             throw new ToolCallException('The player plays this game alone, without an agent: stop playing.');
         }

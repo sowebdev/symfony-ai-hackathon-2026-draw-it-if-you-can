@@ -10,7 +10,7 @@ use Symfony\Component\Clock\Test\ClockSensitiveTrait;
 
 /**
  * The duel: an agent connected over MCP guesses the same drawings as the side of the player, and
- * wins the points of the words it finds first. One agent plays a game.
+ * wins the points of the words it finds first.
  */
 final class DuelTest extends WebTestCase
 {
@@ -119,33 +119,16 @@ final class DuelTest extends WebTestCase
         self::assertStringContainsString('not a duel', $answer['content'][0]['text']);
     }
 
-    public function testOneAgentPlaysAGame(): void
+    public function testAClientWithoutSessionPlaysUnderItsOwnName(): void
     {
-        $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'mode' => 'duel']);
-        $lobby = (string) $this->client->getResponse()->headers->get('Location');
-        $game = substr($lobby, 0, -\strlen('/lobby'));
-        $first = $this->session;
-        $this->roundStatus();
+        $round = $this->startRound('ai', 'duel');
 
-        // In the lobby, the last agent to call takes the game: the player sees who it is.
-        $this->connect('other');
-        self::assertFalse($this->roundStatus()['stop']);
-        $this->client->request('GET', $game.'/agent');
-        self::assertSame(['connected' => true, 'name' => 'other'], json_decode((string) $this->client->getResponse()->getContent(), true));
+        $status = json_decode($this->callStateless('round_status', 'claude-code')['content'][0]['text'], true, flags: \JSON_THROW_ON_ERROR);
+        self::assertSame('playing', $status['state']);
+        self::assertFalse($this->callStateless('submit_answer', 'claude-code', ['word' => 'zèbre'])['isError'] ?? false);
 
-        // Once the game started, another agent is turned away.
-        $this->client->request('POST', $game.'/rounds');
-        $this->session = $first;
-        $status = $this->roundStatus();
-        self::assertTrue($status['stop']);
-        self::assertStringContainsString('Another agent, other, already plays this game', $status['what_you_can_do']);
-        self::assertTrue($this->call('submit_answer', ['word' => 'girafe'])['isError']);
-
-        // Unless the agent of the game has been silent for a while, e.g. after a restart.
-        Clock::get()->sleep(31);
-        self::assertFalse($this->roundStatus()['stop']);
-        $this->client->request('GET', $game.'/agent');
-        self::assertSame('test', json_decode((string) $this->client->getResponse()->getContent(), true)['name']);
+        $this->client->request('GET', $round);
+        self::assertSelectorTextContains('.rival-score', 'claude-code');
     }
 
     public function testTheFinalScoreOfADuelSaysWhoWon(): void

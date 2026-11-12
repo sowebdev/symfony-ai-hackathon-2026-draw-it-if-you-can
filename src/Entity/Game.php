@@ -32,10 +32,6 @@ class Game
     #[ORM\Column(name: 'copilot_seen_at', nullable: true)]
     private ?\DateTimeImmutable $agentSeenAt = null;
 
-    /** The MCP session of the agent that plays this game: one agent per game. */
-    #[ORM\Column(length: 36, nullable: true)]
-    private ?string $agentSession = null;
-
     /** The player left the game before its end: the copilot is told to stop. */
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $leftAt = null;
@@ -119,26 +115,11 @@ class Game
     }
 
     /**
-     * Whether the agent of this MCP session may play this game: the first one to call it takes it.
-     * Another one takes its place in the lobby, where the player sees who is connected, or once the
-     * agent has been silent for $silentS seconds, after a restart of its client for instance.
+     * The agent called a tool: it is connected.
      */
-    public function mayBePlayedBy(string $session, bool $inLobby, \DateTimeImmutable $now, int $silentS): bool
-    {
-        return null === $this->agentSession
-            || $this->agentSession === $session
-            || $inLobby
-            || null === $this->agentSeenAt
-            || $now->getTimestamp() - $this->agentSeenAt->getTimestamp() > $silentS;
-    }
-
-    /**
-     * The agent called a tool: it is connected, and plays this game.
-     */
-    public function agentSeen(string $name, ?string $session, \DateTimeImmutable $at): void
+    public function agentSeen(string $name, \DateTimeImmutable $at): void
     {
         $this->agentName = mb_substr('' === trim($name) ? 'MCP client' : $name, 0, 100);
-        $this->agentSession = $session ?? $this->agentSession;
         $this->agentSeenAt = $at;
     }
 

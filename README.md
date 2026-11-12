@@ -66,7 +66,7 @@ Four tools and two prompts:
 - `submit_answer`: for a rival, an answer of its own.
 - the `copilot` and `duel` prompts tell the agent how to play. A client without prompts can start from `round_status`, which explains the rules too.
 
-One agent plays a game: the first one to call it from the lobby. In the lobby, another agent may take its place, and the page shows which one is connected. Once the game has started, another agent is turned away, unless the agent of the game has been silent for 30 seconds, after a restart for instance. The name shown is the one the MCP client gives itself, e.g. `claude-code`.
+The name shown is the one the MCP client gives itself, e.g. `claude-code`, never checked. The game does not tell two agents apart: recent clients such as Claude Code speak the stateless protocol (2026-07-28), which has no session. Connect one agent at a time.
 
 With Claude Code, over HTTP while the game runs:
 
