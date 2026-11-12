@@ -2,12 +2,36 @@
 
 namespace App\Tests\Unit\Game;
 
+use App\Entity\Game;
+use App\Entity\Guess;
+use App\Entity\Round;
+use App\Game\Author;
+use App\Game\DrawnBy;
+use App\Game\Language;
+use App\Game\Mode;
 use App\Game\ScoreGauge;
+use App\Game\Theme;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class ScoreGaugeTest extends TestCase
 {
+    public function testInADuelEachSideHasTheWordsItFound(): void
+    {
+        $game = new Game(Theme::Animals, Language::English, 6, DrawnBy::Ai, Mode::Duel);
+        $byPlayer = new Round($game, 1, 'cat', 60_000);
+        $byPlayer->markFound(new Guess($byPlayer, 'cat', 0, Author::Player));
+        $byAi = new Round($game, 2, 'dog', 60_000);
+        $byAi->markFound(new Guess($byAi, 'dog', 35_000, Author::Ai));
+        $byRival = new Round($game, 3, 'cow', 60_000);
+        $byRival->markFound(new Guess($byRival, 'cow', 60_000, Author::Agent));
+        $nobody = new Round($game, 4, 'owl', 60_000);
+        $gauge = new ScoreGauge(1000, 10, 100);
+
+        self::assertSame(1550, $gauge->total([$byPlayer, $byAi, $byRival, $nobody]), 'The player and the AI play together');
+        self::assertSame(100, $gauge->rivalTotal([$byPlayer, $byAi, $byRival, $nobody]));
+    }
+
     /**
      * @return iterable<string, array{int, int}>
      */

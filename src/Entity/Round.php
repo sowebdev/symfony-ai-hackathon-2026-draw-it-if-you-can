@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Game\Author;
 use App\Game\DrawnBy;
 use App\Repository\RoundRepository;
 use Doctrine\ORM\Mapping as ORM;
@@ -39,6 +40,12 @@ class Round
      */
     #[ORM\Column(nullable: true)]
     private ?int $foundAfterMs = null;
+
+    /**
+     * Who said the right word, null until found: in a duel, it tells which side wins the points.
+     */
+    #[ORM\Column(length: 10, nullable: true, enumType: Author::class)]
+    private ?Author $foundBy = null;
 
     /**
      * Whether a request has started the drawing of the AI: only one may run it.
@@ -183,6 +190,20 @@ class Round
         }
         $guess->accept();
         $this->foundAfterMs = $validatedAfterMs;
+        $this->foundBy = $guess->getAuthor();
+    }
+
+    public function getFoundBy(): ?Author
+    {
+        return $this->foundBy;
+    }
+
+    /**
+     * Found by the rival agent of a duel: the points go to the other side.
+     */
+    public function isFoundByRival(): bool
+    {
+        return true === $this->foundBy?->isRival();
     }
 
     public function getDrawnBy(): DrawnBy

@@ -19,7 +19,7 @@ parameters:
     # A guesses stream ends after this; the browser reconnects by itself (EventSource).
     game.guess_stream_max_s: 120
     # A stream of the hints of the copilot ends after this; the browser reconnects by itself.
-    game.hint_stream_max_s: 120
+    game.agent_stream_max_s: 120
     # Longest drawing of the AI: Qwen takes 30 to 50 s (test B, 10/11/2026).
     game.drawing_stream_max_s: 180
     # A faster model waits between strokes, to draw at the rhythm of a hand.
@@ -43,6 +43,6 @@ when@test:
     parameters:
         game.guess_pause_ms: 0
         game.guess_stream_max_s: 1
-        game.hint_stream_max_s: 1
+        game.agent_stream_max_s: 1
         game.drawing_stream_max_s: 1
         game.pen_rhythm: false

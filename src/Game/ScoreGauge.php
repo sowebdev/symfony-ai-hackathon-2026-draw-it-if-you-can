@@ -43,13 +43,30 @@ final readonly class ScoreGauge
     }
 
     /**
+     * The score of the player and the AI, who play together: the words the rival of a duel found are not theirs.
+     *
      * @param iterable<Round> $rounds
      */
     public function total(iterable $rounds): int
     {
         $total = 0;
         foreach ($rounds as $round) {
-            $total += $this->pointsOf($round);
+            $total += $round->isFoundByRival() ? 0 : $this->pointsOf($round);
+        }
+
+        return $total;
+    }
+
+    /**
+     * The score of the rival in a duel: the words it found first.
+     *
+     * @param iterable<Round> $rounds
+     */
+    public function rivalTotal(iterable $rounds): int
+    {
+        $total = 0;
+        foreach ($rounds as $round) {
+            $total += $round->isFoundByRival() ? $this->pointsOf($round) : 0;
         }
 
         return $total;

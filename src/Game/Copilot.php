@@ -22,34 +22,37 @@ final readonly class Copilot
     }
 
     /**
-     * @throws CopilotRefusal When the round does not take this hint, with the reason for the agent
+     * @throws AgentRefusal When the round does not take this hint, with the reason for the agent
      */
     public function suggest(Round $round, string $word): Hint
     {
         $word = trim($word);
         if ('' === $word || mb_strlen($word) > 100) {
-            throw new CopilotRefusal('A hint is one word or a short phrase, at most 100 characters.');
+            throw new AgentRefusal('A hint is one word or a short phrase, at most 100 characters.');
+        }
+        if ($round->getGame()->isDuel()) {
+            throw new AgentRefusal('This game is a duel: you play against the player, not for them. Answer with submit_answer.');
         }
         if (!$round->getGame()->isWithCopilot()) {
-            throw new CopilotRefusal('The player plays this game alone, without a copilot: stop playing.');
+            throw new AgentRefusal('The player plays this game alone, without a copilot: stop playing.');
         }
         if ($round->getGame()->hasLeft()) {
-            throw new CopilotRefusal('The player left the game: stop playing.');
+            throw new AgentRefusal('The player left the game: stop playing.');
         }
         if (!$round->isDrawnByAi()) {
-            throw new CopilotRefusal('The player draws this round and knows the word: there is nothing to guess. Wait for the next round, drawn by the AI.');
+            throw new AgentRefusal('The player draws this round and knows the word: there is nothing to guess. Wait for the next round, drawn by the AI.');
         }
         if ($round->isOver()) {
-            throw new CopilotRefusal('This round is over. Look for the next one with round_status.');
+            throw new AgentRefusal('This round is over. Look for the next one with round_status.');
         }
 
         $given = $this->hints->findByRound($round);
         if (\count($given) >= self::MAX_HINTS) {
-            throw new CopilotRefusal(\sprintf('You gave the %d hints of this round: let the player guess.', self::MAX_HINTS));
+            throw new AgentRefusal(\sprintf('You gave the %d hints of this round: let the player guess.', self::MAX_HINTS));
         }
         foreach ($given as $hint) {
             if (WordMatcher::normalize($hint->getWord()) === WordMatcher::normalize($word)) {
-                throw new CopilotRefusal(\sprintf('You already suggested "%s" in this round.', $hint->getWord()));
+                throw new AgentRefusal(\sprintf('You already suggested "%s" in this round.', $hint->getWord()));
             }
         }
 

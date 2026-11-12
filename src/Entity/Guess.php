@@ -2,11 +2,13 @@
 
 namespace App\Entity;
 
+use App\Game\Author;
 use App\Repository\GuessRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * A word the AI called out while the player was drawing.
+ * A word said to guess a drawing: by the AI while the player draws, by the player while the AI
+ * draws, and in a duel by the rival agent in both.
  */
 #[ORM\Entity(repositoryClass: GuessRepository::class)]
 class Guess
@@ -27,6 +29,8 @@ class Guess
         private string $word,
         #[ORM\Column]
         private int $saidAfterMs,
+        #[ORM\Column(length: 10, enumType: Author::class, options: ['default' => 'player'])]
+        private Author $author,
     ) {
     }
 
@@ -48,6 +52,11 @@ class Guess
     public function getSaidAfterMs(): int
     {
         return $this->saidAfterMs;
+    }
+
+    public function getAuthor(): Author
+    {
+        return $this->author;
     }
 
     public function isAccepted(): bool

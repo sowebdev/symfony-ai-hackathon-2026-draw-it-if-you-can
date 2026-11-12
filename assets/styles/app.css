@@ -555,14 +555,27 @@ button:focus-visible,
     color: #777;
 }
 
-/* A game with a copilot: the checkbox, the lobby, and the badge in the bar. */
-.new-game .with-copilot {
-    justify-content: flex-start;
-    gap: 0.6rem;
-    max-width: 22rem;
+/* A game with an agent, copilot or rival: the choice of the mode, the lobby, and the bar. */
+.game-mode {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
 }
 
-.with-copilot input {
+.game-mode legend {
+    margin-bottom: 0.4rem;
+}
+
+.new-game .game-mode label {
+    justify-content: flex-start;
+    gap: 0.6rem;
+    max-width: 24rem;
+}
+
+.game-mode input {
     width: 1.3rem;
     height: 1.3rem;
     flex: none;
@@ -610,7 +623,7 @@ button:focus-visible,
     color: #777;
 }
 
-.copilot-status {
+.agent-status {
     padding: 0.8rem 1rem;
     font-size: 1.4rem;
     border: 2px dashed var(--ink);
@@ -618,18 +631,18 @@ button:focus-visible,
     background: #fff;
 }
 
-.copilot-status::before {
+.agent-status::before {
     content: '⏳ ';
 }
 
-.copilot-status.connected {
+.agent-status.connected {
     border-style: solid;
     border-color: var(--found);
     color: var(--found);
     background: #ebfbee;
 }
 
-.copilot-status.connected::before {
+.agent-status.connected::before {
     content: '✓ ';
 }
 
@@ -761,4 +774,24 @@ button.link:hover {
 .loading-note {
     margin: 0.3rem 0 0;
     color: #777;
+}
+
+/* A duel: the score of each side in the bar, and the answers of the rival in its own column. */
+.duel-score strong {
+    margin-right: 0.6rem;
+}
+
+.rival-score {
+    color: var(--pencil);
+}
+
+.rival-answers ol {
+    margin: 0;
+    padding-left: 1.4rem;
+    color: var(--pencil);
+}
+
+.rival-answers li.accepted {
+    font-weight: bold;
+    text-decoration: underline;
 }

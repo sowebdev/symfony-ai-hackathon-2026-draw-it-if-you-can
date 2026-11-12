@@ -1,7 +1,10 @@
-{# Shown once the round is over: what happened, the word, the points won, and what comes next. #}
+{# Shown once the round is over: what happened, the word, the points won, and what comes next.
+   In a duel, the rival may have found the word: the points are its own. #}
+{% set rival = round.game.agentName ?? 'label.rival_unknown'|trans %}
 <section class="round-end" aria-live="assertive">
     <h2>
-        {% if round.found %}{{ 'heading.round_found'|trans }}
+        {% if round.foundByRival %}{{ 'heading.round_found_by_rival'|trans({'%name%': rival}) }}
+        {% elseif round.found %}{{ 'heading.round_found'|trans }}
         {% elseif round.givenUp %}{{ 'heading.round_given_up'|trans }}
         {% else %}{{ 'heading.round_time_up'|trans }}{% endif %}
     </h2>
@@ -9,7 +12,7 @@
     {% if round.found %}
         <p class="round-end-time">{{ 'result.found_in'|trans({'%seconds%': '<strong>' ~ (round.foundAfterMs / 1000)|number_format(1, 'label.decimal_separator'|trans) ~ '</strong>'})|raw }}</p>
     {% endif %}
-    <p class="round-end-points">{{ 'result.points_won'|trans({'%points%': points}) }}</p>
+    <p class="round-end-points">{{ round.foundByRival ? 'result.points_won_by_rival'|trans({'%points%': points, '%name%': rival}) : 'result.points_won'|trans({'%points%': points}) }}</p>
     {% if round.last %}
         <a class="button" href="{{ path('game_show', {id: round.game.id}) }}">{{ 'action.final_score'|trans }}</a>
     {% else %}

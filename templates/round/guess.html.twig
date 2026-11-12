@@ -2,7 +2,7 @@
 
 {% block body %}
     <main class="round"
-          data-controller="ai-drawing round-timer"
+          data-controller="ai-drawing round-timer{{ round.game.withAgent ? ' agent' }}"
           {{ include('round/_timer.html.twig') }}
           data-ai-drawing-stream-url-value="{{ path('round_drawing', {id: round.id}) }}"
           data-ai-drawing-answer-url-value="{{ path('round_answer', {id: round.id}) }}"
@@ -10,7 +10,8 @@
           data-ai-drawing-over-value="{{ round.over ? 'true' : 'false' }}"
           data-ai-drawing-finished-label-value="{{ 'status.ai_finished'|trans }}"
           data-ai-drawing-failed-label-value="{{ 'error.ai_drawing'|trans }}"
-          data-action="ai-drawing:over->round-timer#finish round-timer:up->ai-drawing#stop">
+          {{ include('round/_agent.html.twig') }}
+          data-action="ai-drawing:over->round-timer#finish round-timer:up->ai-drawing#stop agent:pick->ai-drawing#answerHint agent:found->ai-drawing#stop agent:found->round-timer#finish">
         {{ include('round/_scoreboard.html.twig') }}
         <p class="target">{{ 'instruction.guess'|trans }}</p>
 
@@ -30,18 +31,26 @@
                     </label>
                     <button type="submit">{{ 'action.answer'|trans }}</button>
                 </form>
-                <div class="hints" data-controller="hints"
-                     data-hints-stream-url-value="{{ path('round_hints', {id: round.id}) }}"
-                     data-hints-over-value="{{ round.over ? 'true' : 'false' }}"
-                     data-action="hints:pick->ai-drawing#answerHint"
-                     {{ hints is empty ? 'hidden' }}>
-                    <h2>{{ 'heading.copilot_hints'|trans }}</h2>
-                    <ul data-hints-target="list">
-                        {% for hint in hints %}
-                            <li data-hint-id="{{ hint.id }}"><button type="button" data-action="hints#pick" {{ round.over ? 'disabled' }}>{{ hint.word }}</button></li>
-                        {% endfor %}
-                    </ul>
-                </div>
+                {% if round.game.withCopilot %}
+                    <div class="hints" {{ hints is empty ? 'hidden' }} data-agent-target="hints">
+                        <h2>{{ 'heading.copilot_hints'|trans }}</h2>
+                        <ul data-agent-target="hintList">
+                            {% for hint in hints %}
+                                <li data-hint-id="{{ hint.id }}"><button type="button" data-action="agent#pick" {{ round.over ? 'disabled' }}>{{ hint.word }}</button></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                {% if round.game.duel %}
+                    <div class="rival-answers">
+                        <h2>{{ 'heading.rival_answers'|trans({'%name%': round.game.agentName ?? 'label.rival_unknown'|trans}) }}</h2>
+                        <ol data-agent-target="answers">
+                            {% for answer in rival_answers %}
+                                <li data-answer-id="{{ answer.id }}" class="{{ answer.accepted ? 'accepted' }}">{{ answer.word }}</li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                {% endif %}
                 <h2>{{ 'heading.player_guesses'|trans }}</h2>
                 <ol data-ai-drawing-target="list">
                     {% for guess in guesses %}

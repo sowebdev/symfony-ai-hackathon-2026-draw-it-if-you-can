@@ -5,6 +5,7 @@ namespace App\Tests\Unit\Entity;
 use App\Entity\Game;
 use App\Entity\Guess;
 use App\Entity\Round;
+use App\Game\Author;
 use App\Game\DrawnBy;
 use App\Game\Language;
 use App\Game\Theme;
@@ -57,10 +58,10 @@ final class RoundTest extends TestCase
         self::mockTime();
         $round = new Round(new Game(Theme::Animals, Language::English), 1, 'cat', 60_000);
 
-        $round->markFound(new Guess($round, 'cat', 61_001));
+        $round->markFound(new Guess($round, 'cat', 61_001, Author::Player));
         self::assertFalse($round->isFound());
 
-        $round->markFound(new Guess($round, 'cat', 60_900));
+        $round->markFound(new Guess($round, 'cat', 60_900, Author::Player));
         self::assertSame(60_900, $round->getFoundAfterMs());
     }
 
@@ -68,7 +69,7 @@ final class RoundTest extends TestCase
     {
         self::mockTime();
         $round = new Round(new Game(Theme::Animals, Language::English), 1, 'cat', 60_000);
-        $guess = new Guess($round, 'kitten', 5_000);
+        $guess = new Guess($round, 'kitten', 5_000, Author::Ai);
 
         $round->markFound($guess, 61_500);
         self::assertFalse($round->isFound(), 'Validated too late');

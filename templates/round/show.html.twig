@@ -2,7 +2,7 @@
 
 {% block body %}
     <main class="round"
-          data-controller="canvas guesses round-timer"
+          data-controller="canvas guesses round-timer{{ round.game.duel ? ' agent' }}"
           {{ include('round/_timer.html.twig') }}
           data-canvas-elapsed-ms-value="{{ round.elapsedMs }}"
           data-canvas-strokes-url-value="{{ path('round_strokes', {id: round.id}) }}"
@@ -13,7 +13,8 @@
           data-guesses-accept-url-value="{{ path('round_guess_accept', {id: round.id, guessId: 0}) }}"
           data-guesses-yes-label-value="{{ 'action.accept_guess'|trans }}"
           data-guesses-over-value="{{ round.over ? 'true' : 'false' }}"
-          data-action="guesses:found->canvas#lock guesses:found->round-timer#finish round-timer:up->canvas#lock round-timer:up->guesses#stop">
+          {% if round.game.duel %}{{ include('round/_agent.html.twig') }}{% endif %}
+          data-action="guesses:found->canvas#lock guesses:found->round-timer#finish round-timer:up->canvas#lock round-timer:up->guesses#stop agent:found->canvas#lock agent:found->guesses#stop agent:found->round-timer#finish">
         {{ include('round/_scoreboard.html.twig') }}
         <p class="target">{{ 'instruction.draw'|trans }} <strong>{{ round.targetWord }}</strong></p>
 
@@ -37,6 +38,17 @@
                 <p class="result" data-guesses-target="result" hidden>
                     {{ 'result.found_in'|trans({'%seconds%': '<strong data-guesses-target="time"></strong>'})|raw }}
                 </p>
+
+                {% if round.game.duel %}
+                    <div class="rival-answers">
+                        <h2>{{ 'heading.rival_answers'|trans({'%name%': round.game.agentName ?? 'label.rival_unknown'|trans}) }}</h2>
+                        <ol data-agent-target="answers">
+                            {% for answer in rival_answers %}
+                                <li data-answer-id="{{ answer.id }}" class="{{ answer.accepted ? 'accepted' }}">{{ answer.word }}</li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                {% endif %}
 
                 <div class="toolbar">
                     {% if not round.over %}<button type="button" data-action="canvas#undo" data-canvas-target="undo">{{ 'action.undo'|trans }}</button>{% endif %}

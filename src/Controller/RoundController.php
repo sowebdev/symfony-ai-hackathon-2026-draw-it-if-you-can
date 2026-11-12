@@ -7,9 +7,10 @@ use App\Drawing\StrokePoints;
 use App\Entity\Guess;
 use App\Entity\Round;
 use App\Entity\Stroke;
+use App\Game\Author;
 use App\Game\DrawingLoop;
 use App\Game\GuessLoop;
-use App\Game\HintLoop;
+use App\Game\AgentLoop;
 use App\Game\ScoreGauge;
 use App\Game\WordMatcher;
 use App\Repository\GuessRepository;
@@ -47,13 +48,18 @@ final class RoundController extends AbstractController
         // A round speaks the language of its game, whatever the browser says.
         $this->localeSwitcher->setLocale($round->getGame()->getLanguage()->value);
 
+        $guesses = $this->guesses->findByRound($round);
+        $rounds = $this->rounds->findByGame($round->getGame());
+
         return $this->render($round->isDrawnByAi() ? 'round/guess.html.twig' : 'round/show.html.twig', [
             'round' => $round,
-            'guesses' => $this->guesses->findByRound($round),
+            'guesses' => array_values(array_filter($guesses, static fn (Guess $guess): bool => !$guess->getAuthor()->isRival())),
+            'rival_answers' => array_values(array_filter($guesses, static fn (Guess $guess): bool => $guess->getAuthor()->isRival())),
             'hints' => $this->hints->findByRound($round),
             'gauge' => $this->gauge->steps($round->getDurationMs()),
             'points' => $this->gauge->pointsOf($round),
-            'team_score' => $this->gauge->total($this->rounds->findByGame($round->getGame())),
+            'team_score' => $this->gauge->total($rounds),
+            'rival_score' => $this->gauge->rivalTotal($rounds),
         ]);
     }
 
@@ -117,8 +123,8 @@ final class RoundController extends AbstractController
     public function accept(Round $round, #[MapEntity(id: 'guessId')] Guess $guess): JsonResponse
     {
         $this->denyUnlessPlayerDraws($round);
-        if ($guess->getRound() !== $round) {
-            throw $this->createNotFoundException('This guess belongs to another round.');
+        if ($guess->getRound() !== $round || Author::Ai !== $guess->getAuthor()) {
+            throw $this->createNotFoundException('This guess is not one of the AI in this round.');
         }
         if ($round->isOver()) {
             return $this->roundIsOver();
@@ -142,13 +148,12 @@ final class RoundController extends AbstractController
     }
 
     /**
-     * The hints of the copilot, pushed to the browser as server-sent events while the player guesses.
+     * The hints of the copilot, or the answers of the rival in a duel, pushed to the browser as
+     * server-sent events.
      */
-    #[Route('/hints', name: 'round_hints', methods: ['GET'])]
-    public function hints(Round $round, HintLoop $loop): EventStreamResponse
+    #[Route('/agent', name: 'round_agent', methods: ['GET'])]
+    public function agent(Round $round, AgentLoop $loop): EventStreamResponse
     {
-        $this->denyUnlessAiDraws($round);
-
         return new EventStreamResponse(static fn (): \Generator => $loop->run($round));
     }
 
@@ -163,7 +168,7 @@ final class RoundController extends AbstractController
             return $this->roundIsOver();
         }
 
-        $guess = new Guess($round, trim($payload->word), $round->elapsedMs());
+        $guess = new Guess($round, trim($payload->word), $round->elapsedMs(), Author::Player);
         $this->entityManager->persist($guess);
         if ($matcher->matches($guess->getWord(), $round->getTargetWord())) {
             $round->markFound($guess);

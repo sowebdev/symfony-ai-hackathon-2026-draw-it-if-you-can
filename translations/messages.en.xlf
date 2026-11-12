@@ -253,11 +253,6 @@
                 <target>Your copilot whispers…</target>
                 <note>Above the words an agent connected over MCP suggests to the player</note>
             </trans-unit>
-            <trans-unit id="label.with_copilot" resname="label.with_copilot">
-                <source>label.with_copilot</source>
-                <target>With a copilot: an agent connected over MCP helps me guess</target>
-                <note>Checkbox on the home page</note>
-            </trans-unit>
             <trans-unit id="label.copilot" resname="label.copilot">
                 <source>label.copilot</source>
                 <target>Copilot:</target>
@@ -280,12 +275,12 @@
             </trans-unit>
             <trans-unit id="lobby.step_prompt" resname="lobby.step_prompt">
                 <source>lobby.step_prompt</source>
-                <target>Open Claude Code in that folder, then run the copilot prompt:</target>
+                <target>Open Claude Code in that folder, then run this prompt:</target>
                 <note>Second step of the lobby, before a command</note>
             </trans-unit>
             <trans-unit id="lobby.other_clients" resname="lobby.other_clients">
                 <source>lobby.other_clients</source>
-                <target>Another MCP client: connect it to %url%, then ask it to play the copilot prompt.</target>
+                <target>Another MCP client: connect it to %url%, then ask it to play the %prompt% prompt. If it knows no prompts, tell it to call the round_status tool, which explains the rules.</target>
                 <note>Under the steps of the lobby</note>
             </trans-unit>
             <trans-unit id="status.copilot_waiting" resname="status.copilot_waiting">
@@ -342,6 +337,106 @@
                 <source>status.picking_word_note</source>
                 <target>With a local model, it may take a few seconds.</target>
                 <note>Loading screen, under the title</note>
+            </trans-unit>
+            <trans-unit id="label.mode" resname="label.mode">
+                <source>label.mode</source>
+                <target>How I play</target>
+                <note>Home page, above the choice of the mode</note>
+            </trans-unit>
+            <trans-unit id="mode.solo" resname="mode.solo">
+                <source>mode.solo</source>
+                <target>Alone against the AI</target>
+                <note>Home page, a mode of the game</note>
+            </trans-unit>
+            <trans-unit id="mode.copilot" resname="mode.copilot">
+                <source>mode.copilot</source>
+                <target>With a copilot: an agent connected over MCP helps me guess</target>
+                <note>Home page, a mode of the game</note>
+            </trans-unit>
+            <trans-unit id="mode.duel" resname="mode.duel">
+                <source>mode.duel</source>
+                <target>In a duel: an agent connected over MCP guesses against me</target>
+                <note>Home page, a mode of the game</note>
+            </trans-unit>
+            <trans-unit id="heading.lobby_duel" resname="heading.lobby_duel">
+                <source>heading.lobby_duel</source>
+                <target>Connect your rival</target>
+                <note>Title of the lobby of a duel</note>
+            </trans-unit>
+            <trans-unit id="lobby.intro_duel" resname="lobby.intro_duel">
+                <source>lobby.intro_duel</source>
+                <target>Your rival guesses the same drawings as you: those of the AI, and yours, which your AI guesses for you. The first one to find the word wins its points. It answers once every 3 seconds at most, and only the exact word counts for it.</target>
+                <note>First paragraph of the lobby of a duel</note>
+            </trans-unit>
+            <trans-unit id="status.rival_waiting" resname="status.rival_waiting">
+                <source>status.rival_waiting</source>
+                <target>Waiting for your rival…</target>
+                <note>In the lobby of a duel, until the agent calls the game</note>
+            </trans-unit>
+            <trans-unit id="status.rival_connected" resname="status.rival_connected">
+                <source>status.rival_connected</source>
+                <target>Rival connected: %name%</target>
+                <note>In the lobby of a duel, once the agent called the game; %name% is the name of its MCP client</note>
+            </trans-unit>
+            <trans-unit id="label.you" resname="label.you">
+                <source>label.you</source>
+                <target>You</target>
+                <note>In the bar of a duel, before the score of the player</note>
+            </trans-unit>
+            <trans-unit id="label.rival_unknown" resname="label.rival_unknown">
+                <source>label.rival_unknown</source>
+                <target>your rival</target>
+                <note>Name of the rival of a duel before it called the game</note>
+            </trans-unit>
+            <trans-unit id="heading.rival_answers" resname="heading.rival_answers">
+                <source>heading.rival_answers</source>
+                <target>%name% answers…</target>
+                <note>Above the answers of the rival in a duel; %name% is the name of its MCP client</note>
+            </trans-unit>
+            <trans-unit id="heading.round_found_by_rival" resname="heading.round_found_by_rival">
+                <source>heading.round_found_by_rival</source>
+                <target>%name% found it!</target>
+                <note>End of a round of a duel, when the rival found the word</note>
+            </trans-unit>
+            <trans-unit id="result.points_won_by_rival" resname="result.points_won_by_rival">
+                <source>result.points_won_by_rival</source>
+                <target>+%points% points for %name%</target>
+                <note>End of a round of a duel, when the rival found the word</note>
+            </trans-unit>
+            <trans-unit id="result.duel_score" resname="result.duel_score">
+                <source>result.duel_score</source>
+                <target>You %you% points, %name% %rival% points</target>
+                <note>Final screen of a duel</note>
+            </trans-unit>
+            <trans-unit id="result.duel_won" resname="result.duel_won">
+                <source>result.duel_won</source>
+                <target>You win the duel!</target>
+                <note>Final screen of a duel</note>
+            </trans-unit>
+            <trans-unit id="result.duel_lost" resname="result.duel_lost">
+                <source>result.duel_lost</source>
+                <target>%name% wins the duel.</target>
+                <note>Final screen of a duel</note>
+            </trans-unit>
+            <trans-unit id="result.duel_tie" resname="result.duel_tie">
+                <source>result.duel_tie</source>
+                <target>A tie!</target>
+                <note>Final screen of a duel</note>
+            </trans-unit>
+            <trans-unit id="column.found_by" resname="column.found_by">
+                <source>column.found_by</source>
+                <target>Found by</target>
+                <note>Final screen of a duel, a column</note>
+            </trans-unit>
+            <trans-unit id="found_by.player" resname="found_by.player">
+                <source>found_by.player</source>
+                <target>you</target>
+                <note>Who found the word of a round: the player</note>
+            </trans-unit>
+            <trans-unit id="found_by.ai" resname="found_by.ai">
+                <source>found_by.ai</source>
+                <target>the AI</target>
+                <note>Who found the word of a round: the AI of the player</note>
             </trans-unit>
         </body>
     </file>

@@ -8,8 +8,11 @@ use App\Entity\Guess;
 use App\Entity\Hint;
 use App\Entity\Round;
 use App\Entity\Stroke;
+use App\Game\AgentRefusal;
+use App\Game\Author;
 use App\Game\Copilot;
-use App\Game\CopilotRefusal;
+use App\Game\Duel;
+use App\Game\ScoreGauge;
 use App\Repository\GameRepository;
 use App\Repository\GuessRepository;
 use App\Repository\HintRepository;
@@ -26,13 +29,17 @@ use Symfony\Component\Clock\DatePoint;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * The game as seen by the copilot, an agent connected over MCP: the state of the round, the
- * drawing in progress, and one way to act, a hint to the player. The word to find is never given.
+ * The game as seen by an agent connected over MCP: the state of the round and the drawing in
+ * progress. The copilot acts by a hint to the player, the rival of a duel by its own answers.
+ * The word to find is never given. One agent plays a game: the first one to call it.
  */
-final readonly class CopilotTools
+final readonly class AgentTools
 {
     /** A round over, and no next one for this long: the player has probably stopped. */
     public const int IDLE_S = 120;
+
+    /** Silent for this long, the agent of a game may be replaced by another one, e.g. after a restart. */
+    public const int SILENT_S = 30;
 
     public function __construct(
         private EntityManagerInterface $entityManager,
@@ -42,24 +49,31 @@ final readonly class CopilotTools
         private GuessRepository $guesses,
         private HintRepository $hints,
         private StrokeRenderer $renderer,
+        private ScoreGauge $gauge,
         private Copilot $copilot,
+        private Duel $duel,
     ) {
     }
 
     /**
      * @return array<string, mixed>
      */
-    #[McpTool(name: 'round_status', description: 'The round being played in Draw It If You Can: who draws, the theme, the time left, the wrong answers of the player and your hints so far. Never the word to find.')]
+    #[McpTool(name: 'round_status', description: 'Start here. The round being played in Draw It If You Can: whether you are the copilot of the player or their rival in a duel, who draws, the theme, the time left, the wrong answers so far, and what you can do now. Never the word to find. Call it again and again, until it answers "stop": true.')]
     public function roundStatus(
         #[Schema(description: 'Id of a round; leave empty for the round being played')]
         ?string $round = null,
         ?RequestContext $context = null,
     ): array {
-        [$game, $current] = $this->find($round, $context);
+        try {
+            [$game, $current] = $this->find($round, $context);
+        } catch (AnotherAgent $another) {
+            return ['state' => 'another agent plays this game', 'stop' => true, 'what_you_can_do' => $another->getMessage()];
+        }
         [$stop, $advice] = $this->advice($game, $current);
         if (null === $current) {
             return [
                 'game' => $game->getId()->toRfc4122(),
+                'you_are' => $this->role($game),
                 'state' => $game->hasLeft() ? 'the player left' : 'waiting for the player to start the game',
                 'theme' => $game->getTheme()->description(),
                 'language' => $game->getLanguage()->nameInEnglish(),
@@ -68,7 +82,8 @@ final readonly class CopilotTools
             ];
         }
 
-        return [
+        $status = [
+            'you_are' => $this->role($game),
             'round' => $current->getId()->toRfc4122(),
             'number' => $current->getNumber(),
             'of' => $game->getRoundCount(),
@@ -84,18 +99,30 @@ final readonly class CopilotTools
                 default => 'playing',
             },
             'strokes' => \count($this->strokes->findByRound($current)),
-            'wrong_answers' => $current->isDrawnByAi() ? $this->wrongAnswers($current) : [],
-            'your_hints' => array_map(static fn (Hint $hint): string => $hint->getWord(), $this->hints->findByRound($current)),
-            'hints_left' => max(0, Copilot::MAX_HINTS - \count($this->hints->findByRound($current))),
-            'stop' => $stop,
-            'what_you_can_do' => $advice,
         ];
+        if ($game->isDuel()) {
+            $rounds = $this->rounds->findByGame($game);
+            $status += [
+                'found_by' => $current->getFoundBy()?->value,
+                'wrong_answers_of_the_others' => $this->wrongAnswers($current, [Author::Player, Author::Ai]),
+                'your_answers' => $this->wrongAnswers($current, [Author::Agent]),
+                'score' => ['you' => $this->gauge->rivalTotal($rounds), 'the_player' => $this->gauge->total($rounds)],
+            ];
+        } else {
+            $status += [
+                'wrong_answers' => $current->isDrawnByAi() ? $this->wrongAnswers($current, [Author::Player]) : [],
+                'your_hints' => array_map(static fn (Hint $hint): string => $hint->getWord(), $this->hints->findByRound($current)),
+                'hints_left' => max(0, Copilot::MAX_HINTS - \count($this->hints->findByRound($current))),
+            ];
+        }
+
+        return $status + ['stop' => $stop, 'what_you_can_do' => $advice];
     }
 
     /**
      * @return list<TextContent|ImageContent>
      */
-    #[McpTool(name: 'look_at_drawing', description: 'The drawing of the round as it is now, as a PNG image, black strokes on white. The AI may still be adding strokes: look again later.')]
+    #[McpTool(name: 'look_at_drawing', description: 'The drawing of the round as it is now, as a PNG image, black strokes on white. Strokes may still be coming: look again later.')]
     public function lookAtDrawing(
         #[Schema(description: 'Id of a round; leave empty for the round being played')]
         ?string $round = null,
@@ -115,7 +142,7 @@ final readonly class CopilotTools
         ];
     }
 
-    #[McpTool(name: 'suggest_word', description: 'Whisper a word to the player who guesses the drawing of the AI: it appears on screen, and only the player can answer it. At most 5 per round, in the language of the game.')]
+    #[McpTool(name: 'suggest_word', description: 'For a copilot only. Whisper a word to the player who guesses the drawing of the AI: it appears on screen, and only the player can answer it. At most 5 per round, in the language of the game.')]
     public function suggestWord(
         #[Schema(description: 'The word you think the AI is drawing, in the language of the game, e.g. "girafe" in French')]
         string $word,
@@ -126,22 +153,44 @@ final readonly class CopilotTools
         $current = $this->findRound($round, $context);
         try {
             $hint = $this->copilot->suggest($current, $word);
-        } catch (CopilotRefusal $refusal) {
+        } catch (AgentRefusal $refusal) {
             throw new ToolCallException($refusal->getMessage(), previous: $refusal);
         }
 
         return \sprintf('"%s" is shown to the player, who decides. %d hints left in this round.', $hint->getWord(), Copilot::MAX_HINTS - \count($this->hints->findByRound($current)));
     }
 
+    #[McpTool(name: 'submit_answer', description: 'For a rival in a duel only. Answer the drawing of the round, whoever draws it: the first side to find the word wins its points. Only the exact word counts, in the language of the game. One answer every 3 seconds at most.')]
+    public function submitAnswer(
+        #[Schema(description: 'The word you think is drawn, in the language of the game, e.g. "girafe" in French')]
+        string $word,
+        #[Schema(description: 'Id of a round; leave empty for the round being played')]
+        ?string $round = null,
+        ?RequestContext $context = null,
+    ): string {
+        $current = $this->findRound($round, $context);
+        try {
+            $answer = $this->duel->answer($current, $word);
+        } catch (AgentRefusal $refusal) {
+            throw new ToolCallException($refusal->getMessage(), previous: $refusal);
+        }
+
+        return $current->isFound() && $answer->isAccepted()
+            ? \sprintf('Right! "%s" was the word: you win %d points. Call round_status for the next round.', $current->getTargetWord(), $this->gauge->pointsOf($current))
+            : \sprintf('"%s" is wrong. Look at the drawing again, and try another word in %d s.', $answer->getWord(), intdiv(Duel::ANSWER_GAP_MS, 1000));
+    }
+
     /**
-     * The game and round asked for, by default the last ones; the copilot is marked as seen on the game.
+     * The game and round asked for, by default the last ones; the agent is marked as seen on the game.
      *
      * @return array{Game, ?Round} No round yet while the game waits in its lobby
+     *
+     * @throws AnotherAgent When another agent plays this game
      */
     private function find(?string $round, ?RequestContext $context): array
     {
         if (null === $round || '' === trim($round)) {
-            $game = $this->games->findLatest() ?? throw new ToolCallException('No game has started yet: the player starts one at http://127.0.0.1:8040, with a copilot.');
+            $game = $this->games->findLatest() ?? throw new ToolCallException('No game has started yet: the player starts one at http://127.0.0.1:8040, with a copilot or in a duel.');
             $found = $this->rounds->findLastOfGame($game);
         } elseif (!Uuid::isValid($round)) {
             throw new ToolCallException('A round id looks like 019a6e2c-0000-7000-8000-000000000000; leave it empty for the round being played.');
@@ -150,39 +199,57 @@ final readonly class CopilotTools
             $game = $found->getGame();
         }
 
-        $client = $context?->getSession()->get('client_info');
-        $game->copilotSeen(\is_array($client) && \is_string($client['name'] ?? null) ? $client['name'] : '', new DatePoint());
+        $session = $context?->getSession();
+        $now = new DatePoint();
+        if (null !== $session && $game->isWithAgent() && !$game->mayBePlayedBy($session->getId()->toRfc4122(), null === $found, $now, self::SILENT_S)) {
+            throw new AnotherAgent(\sprintf('Another agent, %s, already plays this game: stop playing, and tell your user so.', $game->getAgentName()));
+        }
+        $client = $session?->get('client_info');
+        $game->agentSeen(\is_array($client) && \is_string($client['name'] ?? null) ? $client['name'] : '', $session?->getId()->toRfc4122(), $now);
         $this->entityManager->flush();
 
         return [$game, $found];
     }
 
     /**
-     * The round to look at or to help with: only in a game played with a copilot.
+     * The round to look at or to play: only in a game played with an agent, and by this agent.
      */
     private function findRound(?string $round, ?RequestContext $context): Round
     {
-        [$game, $found] = $this->find($round, $context);
-        if (!$game->isWithCopilot()) {
-            throw new ToolCallException('The player plays this game alone, without a copilot: stop playing.');
+        try {
+            [$game, $found] = $this->find($round, $context);
+        } catch (AnotherAgent $another) {
+            throw new ToolCallException($another->getMessage(), previous: $another);
+        }
+        if (!$game->isWithAgent()) {
+            throw new ToolCallException('The player plays this game alone, without an agent: stop playing.');
         }
 
         return $found ?? throw new ToolCallException('The game has not started: the player is in the lobby. Call round_status until it starts.');
     }
 
     /**
+     * @param list<Author> $authors
+     *
      * @return list<string>
      */
-    private function wrongAnswers(Round $round): array
+    private function wrongAnswers(Round $round, array $authors): array
     {
         return array_values(array_map(
             static fn (Guess $guess): string => $guess->getWord(),
-            array_filter($this->guesses->findByRound($round), static fn (Guess $guess): bool => !$guess->isAccepted()),
+            array_filter($this->guesses->findByRound($round), static fn (Guess $guess): bool => !$guess->isAccepted() && \in_array($guess->getAuthor(), $authors, true)),
         ));
     }
 
+    private function role(Game $game): string
+    {
+        return $game->isDuel()
+            ? 'the rival of the player in a duel: you guess the same drawings, and the first side to find the word wins its points'
+            : 'the copilot of the player: you whisper words, and the player decides';
+    }
+
     /**
-     * Whether the copilot should stop, and what it can do.
+     * Whether the agent should stop, and what it can do.
      *
      * @return array{bool, string}
      */
@@ -192,11 +259,12 @@ final readonly class CopilotTools
 
         return match (true) {
             $game->hasLeft() => [true, 'The player left the game. Stop playing; the player will call you again for another game.'],
-            !$game->isWithCopilot() => [true, 'The player now plays alone, without a copilot. Stop playing.'],
+            !$game->isWithAgent() => [true, 'The player now plays alone, without an agent. Stop playing.'],
             null === $round => [false, 'You are connected: the player sees it in the lobby. Call round_status again in a few seconds, until the game starts.'],
             $round->isOver() && $round->isLast() => [true, 'The game is over. Stop playing.'],
             null !== $idle && $idle > self::IDLE_S * 1000 => [true, \sprintf('No new round for %d minutes: the player has probably stopped. Stop playing; the player will call you again.', intdiv(self::IDLE_S, 60))],
             $round->isOver() => [false, 'This round is over: wait for the player to start the next one, then call round_status again.'],
+            $game->isDuel() => [false, \sprintf('%s: call look_at_drawing, then submit_answer with your best guess, one word in the language of the game. Wrong? Look again as the drawing grows, and answer again, every %d seconds at most. Play fair: see the game through these tools only.', $round->isDrawnByAi() ? 'The AI draws, the player and you guess' : 'The player draws, the AI of the player and you guess', intdiv(Duel::ANSWER_GAP_MS, 1000))],
             !$round->isDrawnByAi() => [false, 'The player draws and the AI guesses: nothing for you to do in this round. Call round_status again later.'],
             default => [false, 'The AI draws and the player guesses: call look_at_drawing, then suggest_word with your best guess. Look again as the drawing grows.'],
         };

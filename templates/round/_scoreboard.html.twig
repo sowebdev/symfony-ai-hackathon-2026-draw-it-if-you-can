@@ -1,12 +1,18 @@
-{# The bar above a round: its number and theme, the team score, and the clock while it is played.
+{# The bar above a round: its number and theme, the team score (in a duel, the score of each
+   side), and the clock while it is played.
    The round-timer controller is on the main element (round/_timer.html.twig), so that the other
    controllers of the round can act on it. #}
 <header class="scoreboard">
     <p class="round-number">{{ 'label.round'|trans({'%number%': round.number, '%count%': round.game.roundCount}) }} · {{ round.game.theme|trans }}</p>
     {% if round.game.withCopilot %}
-        <p class="copilot-badge {{ round.game.copilotConnected ? 'connected' }}">{{ 'label.copilot'|trans }} {{ round.game.copilotName ?? 'status.copilot_absent'|trans }}</p>
+        <p class="copilot-badge {{ round.game.agentConnected ? 'connected' }}">{{ 'label.copilot'|trans }} {{ round.game.agentName ?? 'status.copilot_absent'|trans }}</p>
     {% endif %}
-    <p class="team-score">{{ 'label.team_score'|trans }} <strong>{{ team_score }}</strong></p>
+    {% if round.game.duel %}
+        <p class="duel-score">{{ 'label.you'|trans }} <strong>{{ team_score }}</strong>
+            <span class="rival-score">{{ round.game.agentName ?? 'label.rival_unknown'|trans }} <strong>{{ rival_score }}</strong></span></p>
+    {% else %}
+        <p class="team-score">{{ 'label.team_score'|trans }} <strong>{{ team_score }}</strong></p>
+    {% endif %}
     {% if not round.over %}
         <p class="clock" aria-label="{{ 'label.time_left'|trans }}">⏱ <strong data-round-timer-target="seconds">{{ (round.remainingMs / 1000)|round(0, 'ceil') }}</strong> s</p>
     {% endif %}

@@ -1,14 +1,18 @@
 {% extends 'base.html.twig' %}
 
+{# Before a game with an agent connected over MCP, copilot or rival: how to connect it, and whether it is there. #}
+{% set duel = game.duel %}
+{% set prompt = duel ? 'duel' : 'copilot' %}
+{% set waiting = duel ? 'status.rival_waiting' : 'status.copilot_waiting' %}
+{% set connected = duel ? 'status.rival_connected' : 'status.copilot_connected' %}
 {% block body %}
     <main class="lobby"
-          data-controller="copilot-status"
-          data-copilot-status-url-value="{{ path('game_copilot', {id: game.id}) }}"
-          data-copilot-status-connected-value="{{ game.copilotConnected ? 'true' : 'false' }}"
-          data-copilot-status-waiting-label-value="{{ 'status.copilot_waiting'|trans }}"
-          data-copilot-status-connected-label-value="{{ 'status.copilot_connected'|trans }}">
-        <h1>{{ 'heading.lobby'|trans }}</h1>
-        <p>{{ 'lobby.intro'|trans }}</p>
+          data-controller="agent-status"
+          data-agent-status-url-value="{{ path('game_agent', {id: game.id}) }}"
+          data-agent-status-connected-value="{{ game.agentConnected ? 'true' : 'false' }}"
+          data-agent-status-connected-label-value="{{ connected|trans }}">
+        <h1>{{ (duel ? 'heading.lobby_duel' : 'heading.lobby')|trans }}</h1>
+        <p>{{ (duel ? 'lobby.intro_duel' : 'lobby.intro')|trans }}</p>
 
         <ol class="lobby-steps">
             <li>
@@ -17,17 +21,17 @@
             </li>
             <li>
                 {{ 'lobby.step_prompt'|trans }}
-                <pre><code>/mcp__draw-it__copilot</code></pre>
+                <pre><code>/mcp__draw-it__{{ prompt }}</code></pre>
             </li>
         </ol>
-        <p class="lobby-other">{{ 'lobby.other_clients'|trans({'%url%': url('_mcp_endpoint_default')}) }}</p>
+        <p class="lobby-other">{{ 'lobby.other_clients'|trans({'%url%': url('_mcp_endpoint_default'), '%prompt%': prompt}) }}</p>
 
-        <p class="copilot-status {{ game.copilotConnected ? 'connected' }}" role="status" data-copilot-status-target="status">
-            {{ game.copilotConnected ? 'status.copilot_connected'|trans({'%name%': game.copilotName}) : 'status.copilot_waiting'|trans }}
+        <p class="agent-status {{ game.agentConnected ? 'connected' }}" role="status" data-agent-status-target="status">
+            {{ game.agentConnected ? connected|trans({'%name%': game.agentName}) : waiting|trans }}
         </p>
 
         <form method="post" action="{{ path('game_next_round', {id: game.id}) }}" data-controller="loading" data-action="loading#show">
-            <button type="submit" data-copilot-status-target="start">{{ 'action.start_game'|trans }}</button>
+            <button type="submit">{{ 'action.start_game'|trans }}</button>
         </form>
         <form method="post" action="{{ path('game_leave', {id: game.id}) }}" class="leave"><button type="submit" class="link">{{ 'action.new_game'|trans }}</button></form>
     </main>

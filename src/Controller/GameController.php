@@ -71,8 +71,8 @@ final class GameController extends AbstractController
     #[Route('/{_locale}/games', name: 'game_create', requirements: ['_locale' => new EnumRequirement(Language::class)], methods: ['POST'])]
     public function create(Request $request, #[MapRequestPayload] NewGame $payload): Response
     {
-        $game = new Game($payload->theme, Language::from($request->getLocale()), $this->roundCount, $payload->drawnBy, $payload->copilot);
-        if ($game->isWithCopilot()) {
+        $game = new Game($payload->theme, Language::from($request->getLocale()), $this->roundCount, $payload->drawnBy, $payload->mode);
+        if ($game->isWithAgent()) {
             $this->starter->openLobby($game);
 
             return $this->redirectToRoute('game_lobby', ['id' => $game->getId()]);
@@ -124,11 +124,12 @@ final class GameController extends AbstractController
             'game' => $game,
             'rounds' => array_map(fn ($round): array => ['round' => $round, 'points' => $this->gauge->pointsOf($round)], $rounds),
             'total' => $this->gauge->total($rounds),
+            'rival_total' => $this->gauge->rivalTotal($rounds),
         ]);
     }
 
     /**
-     * Before a game with a copilot: how to connect the agent, and whether it is there.
+     * Before a game with a copilot or in a duel: how to connect the agent, and whether it is there.
      */
     #[Route('/games/{id}/lobby', name: 'game_lobby', requirements: ['id' => Requirement::UUID_V7], methods: ['GET'])]
     public function lobby(Game $game): Response
@@ -143,7 +144,7 @@ final class GameController extends AbstractController
     }
 
     /**
-     * The player leaves the game for the home page: the copilot is told to stop.
+     * The player leaves the game for the home page: the agent is told to stop.
      */
     #[Route('/games/{id}/leave', name: 'game_leave', requirements: ['id' => Requirement::UUID_V7], methods: ['POST'])]
     public function leave(Game $game): Response
@@ -155,12 +156,12 @@ final class GameController extends AbstractController
     }
 
     /**
-     * Whether the copilot has called the game yet, for the lobby and the scoreboard.
+     * Whether the agent, copilot or rival, has called the game yet, and its name: for the lobby.
      */
-    #[Route('/games/{id}/copilot', name: 'game_copilot', requirements: ['id' => Requirement::UUID_V7], methods: ['GET'])]
-    public function copilot(Game $game): JsonResponse
+    #[Route('/games/{id}/agent', name: 'game_agent', requirements: ['id' => Requirement::UUID_V7], methods: ['GET'])]
+    public function agent(Game $game): JsonResponse
     {
-        return $this->json(['connected' => $game->isCopilotConnected(), 'name' => $game->getCopilotName()]);
+        return $this->json(['connected' => $game->isAgentConnected(), 'name' => $game->getAgentName()]);
     }
 
     /**

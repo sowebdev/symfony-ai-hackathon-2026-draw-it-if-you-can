@@ -110,7 +110,7 @@ final readonly class GuessLoop
             return null;
         }
 
-        $guess = new Guess($round, $word, $round->elapsedMs());
+        $guess = new Guess($round, $word, $round->elapsedMs(), Author::Ai);
         $this->entityManager->persist($guess);
         if ($this->matcher->matches($word, $round->getTargetWord())) {
             $round->markFound($guess);
@@ -121,11 +121,11 @@ final readonly class GuessLoop
     }
 
     /**
-     * "found" when the AI found the word, "over" otherwise (out of time).
+     * "found" when the AI found the word, "over" otherwise: out of time, or found by the rival of a duel.
      */
     private function overEvent(Round $round): ServerEvent
     {
-        return $round->isFound()
+        return $round->isFound() && Author::Ai === $round->getFoundBy()
             ? new ServerEvent((string) json_encode(['foundAfterMs' => $round->getFoundAfterMs()]), type: 'found')
             : new ServerEvent('{}', type: 'over');
     }

@@ -1,5 +1,5 @@
-# The copilot: an agent connected over MCP watches the drawing of the AI and whispers words to the
-# player (src/Mcp). Over HTTP at http://127.0.0.1:8040/mcp, or over STDIO with bin/console mcp:server.
+# An agent connected over MCP plays along: as a copilot it whispers words to the player, as a rival
+# in a duel it guesses against them (src/Mcp). Over HTTP at http://127.0.0.1:8040/mcp, or over STDIO with bin/console mcp:server.
 mcp:
     servers:
         default:

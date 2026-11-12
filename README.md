@@ -5,6 +5,7 @@ A solo drawing and guessing game against an AI, built with Symfony AI and MCP.
 - **You draw, the AI guesses**: it calls out single words as your drawing takes shape, like a player around the table.
 - **The AI draws, you guess**: the model draws stroke by stroke, rendered to look hand-drawn.
 - **A copilot over MCP**: an external agent connects to the game to see the drawing in progress and give you hints.
+- **A duel over MCP**: the agent guesses against you instead, and the first side to find the word wins its points.
 
 The game speaks English and French: the whole game follows the language of the page, the interface, the word to draw and the words of the AI.
 
@@ -50,14 +51,22 @@ Then `make check` tries each model on a tiny task whose answer is known (the gue
 
 By default both roles use [Ollama](https://ollama.com) on your machine (`http://host.docker.internal:11434`) with `gemma3`, a model that reads images: `ollama pull gemma3`. Any other OpenAI-compatible server works, llama.cpp, LM Studio or a provider's API. If the game must join a Docker network of yours to reach it, put that in a `compose.override.yaml` (not committed).
 
-## The copilot, over MCP
+## An agent over MCP: copilot or duel
 
-When the AI draws, an agent can help you guess. The game is an MCP server (Symfony MCP Bundle) with three tools and one prompt:
+The game is an MCP server (Symfony MCP Bundle). An agent connected to it plays along, in one of two modes chosen on the home page:
 
-- `round_status`: the round being played, who draws, the theme, the time left, your wrong answers and the hints given. Never the word to find.
+- **With a copilot**: when the AI draws, the agent looks at the drawing and whispers words in the margin. A click on one answers it: you decide, the copilot never answers by itself.
+- **In a duel**: the agent guesses the same drawings as your side, those of the AI and yours, which your AI guesses for you. The first side to find the word wins its points. The agent answers once every 3 seconds at most, and only the exact word counts for it. Its answers show next to yours.
+
+Four tools and two prompts:
+
+- `round_status`: the round being played, the role of the agent, who draws, the theme, the time left, the wrong answers so far, the score of a duel, and what to do now. Never the word to find. It also tells the agent to stop, when the game is over or the player left.
 - `look_at_drawing`: the drawing as it is now, as a PNG image.
-- `suggest_word`: a word shown to you in the margin, at most 5 per round. A click on it answers it: you decide, the copilot never answers by itself.
-- the `copilot` prompt tells the agent how to play.
+- `suggest_word`: for a copilot, a word shown to you, at most 5 per round.
+- `submit_answer`: for a rival, an answer of its own.
+- the `copilot` and `duel` prompts tell the agent how to play. A client without prompts can start from `round_status`, which explains the rules too.
+
+One agent plays a game: the first one to call it from the lobby. In the lobby, another agent may take its place, and the page shows which one is connected. Once the game has started, another agent is turned away, unless the agent of the game has been silent for 30 seconds, after a restart for instance. The name shown is the one the MCP client gives itself, e.g. `claude-code`.
 
 With Claude Code, over HTTP while the game runs:
 
@@ -65,7 +74,9 @@ With Claude Code, over HTTP while the game runs:
 claude mcp add --transport http draw-it http://127.0.0.1:8040/mcp
 ```
 
-Then tick "With a copilot" on the home page: the game waits in a lobby, which repeats these steps and tells you when the agent is connected. Open Claude Code in the folder of the game and run the `copilot` prompt of the `draw-it` server (`/mcp__draw-it__copilot`), then start the game. Clients that start their servers themselves can use STDIO instead: `docker compose exec -T php php bin/console mcp:server`. The HTTP endpoint only answers on localhost.
+Then choose the mode on the home page: the game waits in a lobby, which repeats these steps and tells you when the agent is connected. Open Claude Code in the folder of the game and run the prompt of the `draw-it` server, `/mcp__draw-it__copilot` or `/mcp__draw-it__duel`, then start the game. Clients that start their servers themselves can use STDIO instead: `docker compose exec -T php php bin/console mcp:server`. The HTTP endpoint only answers on localhost.
+
+The rival of a duel is asked to play fair, and nothing more: an agent opened in the folder of the game could read the word in the SQLite database. Run it from another folder to rule that out.
 
 ## Licence and credits
 

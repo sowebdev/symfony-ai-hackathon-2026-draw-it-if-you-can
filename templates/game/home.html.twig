@@ -22,10 +22,15 @@
                     {% endfor %}
                 </select>
             </label>
-            <label class="with-copilot">
-                <input type="checkbox" name="copilot" value="1">
-                <span>{{ 'label.with_copilot'|trans }}</span>
-            </label>
+            <fieldset class="game-mode">
+                <legend>{{ 'label.mode'|trans }}</legend>
+                {% for mode in ['solo', 'copilot', 'duel'] %}
+                    <label class="mode-{{ mode }}">
+                        <input type="radio" name="mode" value="{{ mode }}" {{ loop.first ? 'checked' }}>
+                        <span>{{ ('mode.' ~ mode)|trans }}</span>
+                    </label>
+                {% endfor %}
+            </fieldset>
             <p class="who-starts">{{ 'label.who_starts'|trans }}</p>
             <div class="modes">
                 <button type="submit" name="drawnBy" value="ai">{{ 'action.ai_draws'|trans }}</button>
