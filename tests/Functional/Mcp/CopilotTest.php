@@ -135,12 +135,81 @@ final class CopilotTest extends WebTestCase
         self::assertResponseRedirects(message: 'The lobby is behind once the game started');
     }
 
-    private function startRound(string $drawnBy): string
+    public function testTheCopilotIsToldToStopWhenThePlayerLeaves(): void
     {
-        $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'drawnBy' => $drawnBy]);
+        $lobby = $this->openLobby();
+        self::assertFalse($this->roundStatus()['stop']);
+
+        $this->client->request('POST', substr($lobby, 0, -\strlen('/lobby')).'/leave');
+        self::assertResponseRedirects('/fr');
+
+        $status = $this->roundStatus();
+        self::assertTrue($status['stop']);
+        self::assertSame('the player left', $status['state']);
+    }
+
+    public function testTheCopilotIsToldToStopWhenThePlayerLeavesDuringARound(): void
+    {
+        $round = $this->startRound('ai');
+        $this->client->request('GET', $round);
+        $this->client->submitForm('Nouvelle partie');
+
+        self::assertTrue($this->roundStatus()['stop']);
+        self::assertStringContainsString('left the game', $this->call('suggest_word', ['word' => 'girafe'])['content'][0]['text']);
+    }
+
+    public function testTheCopilotIsToldToStopWhenNoRoundFollowsForTwoMinutes(): void
+    {
+        $this->startRound('ai');
+        Clock::get()->sleep(62);
+        self::assertFalse($this->roundStatus()['stop'], 'The player reads the result of the round');
+
+        Clock::get()->sleep(120);
+        $status = $this->roundStatus();
+        self::assertTrue($status['stop']);
+        self::assertStringContainsString('probably stopped', $status['what_you_can_do']);
+    }
+
+    public function testTheCopilotIsToldToStopWhenThePlayerPlaysAlone(): void
+    {
+        $this->startRound('ai');
+        $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'drawnBy' => 'player']);
+
+        $status = $this->roundStatus();
+        self::assertTrue($status['stop']);
+        self::assertStringContainsString('alone', $status['what_you_can_do']);
+    }
+
+    /**
+     * Opens a game with a copilot, and returns the URL of its lobby.
+     */
+    private function openLobby(): string
+    {
+        $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'copilot' => '1']);
         self::assertResponseRedirects();
 
         return (string) $this->client->getResponse()->headers->get('Location');
+    }
+
+    /**
+     * Starts a game with a copilot, past the lobby, and returns the URL of its first round.
+     */
+    private function startRound(string $drawnBy): string
+    {
+        $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'drawnBy' => $drawnBy, 'copilot' => '1']);
+        $lobby = (string) $this->client->getResponse()->headers->get('Location');
+        $this->client->request('POST', substr($lobby, 0, -\strlen('/lobby')).'/rounds');
+        self::assertResponseRedirects();
+
+        return (string) $this->client->getResponse()->headers->get('Location');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function roundStatus(): array
+    {
+        return json_decode($this->call('round_status')['content'][0]['text'], true, flags: \JSON_THROW_ON_ERROR);
     }
 
     private function answer(string $round, string $word): void

@@ -40,7 +40,7 @@
 
                 <div class="toolbar">
                     {% if not round.over %}<button type="button" data-action="canvas#undo" data-canvas-target="undo">{{ 'action.undo'|trans }}</button>{% endif %}
-                    <a href="{{ path('home', {_locale: app.locale}) }}">{{ 'action.new_game'|trans }}</a>
+                    <form method="post" action="{{ path('game_leave', {id: round.game.id}) }}" class="leave"><button type="submit" class="link">{{ 'action.new_game'|trans }}</button></form>
                 </div>
             </section>
         </div>

@@ -29,6 +29,6 @@
         <form method="post" action="{{ path('game_next_round', {id: game.id}) }}">
             <button type="submit" data-copilot-status-target="start">{{ 'action.start_game'|trans }}</button>
         </form>
-        <a href="{{ path('home', {_locale: app.locale}) }}">{{ 'action.new_game'|trans }}</a>
+        <form method="post" action="{{ path('game_leave', {id: game.id}) }}" class="leave"><button type="submit" class="link">{{ 'action.new_game'|trans }}</button></form>
     </main>
 {% endblock %}

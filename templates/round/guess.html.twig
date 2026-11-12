@@ -57,7 +57,7 @@
 
                 <div class="toolbar">
                     <button type="button" data-action="ai-drawing#giveUp" data-ai-drawing-target="giveUp">{{ 'action.give_up'|trans }}</button>
-                    <a href="{{ path('home', {_locale: app.locale}) }}">{{ 'action.new_game'|trans }}</a>
+                    <form method="post" action="{{ path('game_leave', {id: round.game.id}) }}" class="leave"><button type="submit" class="link">{{ 'action.new_game'|trans }}</button></form>
                 </div>
             </section>
         </div>

@@ -105,6 +105,19 @@ class Round
     }
 
     /**
+     * Milliseconds since the round ended, null while it is played. A round given up counts as
+     * ended at the end of its time: when it was given up is not kept.
+     */
+    public function msSinceEnd(?\DateTimeImmutable $now = null): ?int
+    {
+        if (!$this->isOver($now)) {
+            return null;
+        }
+
+        return max(0, $this->elapsedMs($now) - ($this->foundAfterMs ?? $this->durationMs));
+    }
+
+    /**
      * The time is up, grace included: nothing more counts.
      */
     public function isTimeUp(?\DateTimeImmutable $now = null): bool

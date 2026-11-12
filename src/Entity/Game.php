@@ -30,6 +30,10 @@ class Game
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $copilotSeenAt = null;
 
+    /** The player left the game before its end: the copilot is told to stop. */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $leftAt = null;
+
     public function __construct(
         #[ORM\Column(enumType: Theme::class)]
         private Theme $theme,
@@ -115,5 +119,15 @@ class Game
     public function getCopilotSeenAt(): ?\DateTimeImmutable
     {
         return $this->copilotSeenAt;
+    }
+
+    public function leave(\DateTimeImmutable $at): void
+    {
+        $this->leftAt ??= $at;
+    }
+
+    public function hasLeft(): bool
+    {
+        return null !== $this->leftAt;
     }
 }

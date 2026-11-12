@@ -31,6 +31,9 @@ use Symfony\Component\Uid\Uuid;
  */
 final readonly class CopilotTools
 {
+    /** A round over, and no next one for this long: the player has probably stopped. */
+    public const int IDLE_S = 120;
+
     public function __construct(
         private EntityManagerInterface $entityManager,
         private GameRepository $games,
@@ -53,13 +56,15 @@ final readonly class CopilotTools
         ?RequestContext $context = null,
     ): array {
         [$game, $current] = $this->find($round, $context);
+        [$stop, $advice] = $this->advice($game, $current);
         if (null === $current) {
             return [
                 'game' => $game->getId()->toRfc4122(),
-                'state' => 'waiting for the player to start the game',
+                'state' => $game->hasLeft() ? 'the player left' : 'waiting for the player to start the game',
                 'theme' => $game->getTheme()->description(),
                 'language' => $game->getLanguage()->nameInEnglish(),
-                'what_you_can_do' => 'You are connected: the player sees it. Call round_status again in a few seconds, until the game starts.',
+                'stop' => $stop,
+                'what_you_can_do' => $advice,
             ];
         }
 
@@ -72,6 +77,7 @@ final readonly class CopilotTools
             'language' => $game->getLanguage()->nameInEnglish(),
             'time_left_s' => intdiv($current->remainingMs(), 1000),
             'state' => match (true) {
+                $game->hasLeft() => 'the player left',
                 $current->isFound() => 'found',
                 $current->isGivenUp() => 'given up',
                 $current->isOver() => 'time is up',
@@ -81,7 +87,8 @@ final readonly class CopilotTools
             'wrong_answers' => $current->isDrawnByAi() ? $this->wrongAnswers($current) : [],
             'your_hints' => array_map(static fn (Hint $hint): string => $hint->getWord(), $this->hints->findByRound($current)),
             'hints_left' => max(0, Copilot::MAX_HINTS - \count($this->hints->findByRound($current))),
-            'what_you_can_do' => $this->advice($current),
+            'stop' => $stop,
+            'what_you_can_do' => $advice,
         ];
     }
 
@@ -166,13 +173,24 @@ final readonly class CopilotTools
         ));
     }
 
-    private function advice(Round $round): string
+    /**
+     * Whether the copilot should stop, and what it can do.
+     *
+     * @return array{bool, string}
+     */
+    private function advice(Game $game, ?Round $round): array
     {
+        $idle = $round?->msSinceEnd();
+
         return match (true) {
-            $round->isOver() && $round->isLast() => 'The game is over.',
-            $round->isOver() => 'This round is over: wait for the player to start the next one, then call round_status again.',
-            !$round->isDrawnByAi() => 'The player draws and the AI guesses: nothing for you to do in this round. Call round_status again later.',
-            default => 'The AI draws and the player guesses: call look_at_drawing, then suggest_word with your best guess. Look again as the drawing grows.',
+            $game->hasLeft() => [true, 'The player left the game. Stop playing; the player will call you again for another game.'],
+            !$game->isWithCopilot() => [true, 'The player now plays alone, without a copilot. Stop playing.'],
+            null === $round => [false, 'You are connected: the player sees it in the lobby. Call round_status again in a few seconds, until the game starts.'],
+            $round->isOver() && $round->isLast() => [true, 'The game is over. Stop playing.'],
+            null !== $idle && $idle > self::IDLE_S * 1000 => [true, \sprintf('No new round for %d minutes: the player has probably stopped. Stop playing; the player will call you again.', intdiv(self::IDLE_S, 60))],
+            $round->isOver() => [false, 'This round is over: wait for the player to start the next one, then call round_status again.'],
+            !$round->isDrawnByAi() => [false, 'The player draws and the AI guesses: nothing for you to do in this round. Call round_status again later.'],
+            default => [false, 'The AI draws and the player guesses: call look_at_drawing, then suggest_word with your best guess. Look again as the drawing grows.'],
         };
     }
 }

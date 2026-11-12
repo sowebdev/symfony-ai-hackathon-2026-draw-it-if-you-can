@@ -8,6 +8,8 @@ use App\Game\RoundStarter;
 use App\Game\ScoreGauge;
 use App\Game\Theme;
 use App\Repository\RoundRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Clock\DatePoint;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -24,6 +26,7 @@ final class GameController extends AbstractController
 {
     public function __construct(
         private readonly RoundStarter $starter,
+        private readonly EntityManagerInterface $entityManager,
         private readonly RoundRepository $rounds,
         private readonly ScoreGauge $gauge,
         private readonly LocaleSwitcher $localeSwitcher,
@@ -125,6 +128,18 @@ final class GameController extends AbstractController
         $this->speak($game);
 
         return $this->render('game/lobby.html.twig', ['game' => $game]);
+    }
+
+    /**
+     * The player leaves the game for the home page: the copilot is told to stop.
+     */
+    #[Route('/games/{id}/leave', name: 'game_leave', requirements: ['id' => Requirement::UUID_V7], methods: ['POST'])]
+    public function leave(Game $game): Response
+    {
+        $game->leave(new DatePoint());
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('home', ['_locale' => $game->getLanguage()->value]);
     }
 
     /**
