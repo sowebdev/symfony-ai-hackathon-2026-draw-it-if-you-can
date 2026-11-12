@@ -308,6 +308,41 @@
                 <target>Start the game</target>
                 <note>Leaves the lobby: the first round starts</note>
             </trans-unit>
+            <trans-unit id="role.drawer" resname="role.drawer">
+                <source>role.drawer</source>
+                <target>The drawer</target>
+                <note>Name of the role of the model that draws, on the home page</note>
+            </trans-unit>
+            <trans-unit id="role.guesser" resname="role.guesser">
+                <source>role.guesser</source>
+                <target>The guesser</target>
+                <note>Name of the role of the model that picks the word and guesses, on the home page</note>
+            </trans-unit>
+            <trans-unit id="status.checking_models" resname="status.checking_models">
+                <source>status.checking_models</source>
+                <target>Checking the models…</target>
+                <note>Home page, while the models are tried</note>
+            </trans-unit>
+            <trans-unit id="help.models" resname="help.models">
+                <source>help.models</source>
+                <target>A model does not answer as it should. Set AI_DRAWER_* and AI_GUESSER_* in .env.local (see the README), then try again. "make check" says the same in a terminal.</target>
+                <note>Home page, when a model fails its check</note>
+            </trans-unit>
+            <trans-unit id="action.check_again" resname="action.check_again">
+                <source>action.check_again</source>
+                <target>Check again</target>
+                <note>Home page: tries the models again</note>
+            </trans-unit>
+            <trans-unit id="status.picking_word" resname="status.picking_word">
+                <source>status.picking_word</source>
+                <target>The AI picks a word…</target>
+                <note>Loading screen, while the model picks the word of a round</note>
+            </trans-unit>
+            <trans-unit id="status.picking_word_note" resname="status.picking_word_note">
+                <source>status.picking_word_note</source>
+                <target>With a local model, it may take a few seconds.</target>
+                <note>Loading screen, under the title</note>
+            </trans-unit>
         </body>
     </file>
 </xliff>

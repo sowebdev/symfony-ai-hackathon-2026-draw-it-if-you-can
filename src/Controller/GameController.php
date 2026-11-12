@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Ai\ModelHealth;
 use App\Entity\Game;
 use App\Game\Language;
 use App\Game\RoundStarter;
@@ -51,6 +52,17 @@ final class GameController extends AbstractController
     public function home(): Response
     {
         return $this->renderHome();
+    }
+
+    /**
+     * Whether each role can play, for the home page: the checks of make check, kept a few minutes.
+     */
+    #[Route('/health', name: 'health', methods: ['GET'])]
+    public function health(Request $request, ModelHealth $health): JsonResponse
+    {
+        $report = $health->report($request->query->getBoolean('fresh'));
+
+        return $this->json(['ok' => [] === array_filter($report, static fn (array $role): bool => !$role['ok']), 'roles' => $report]);
     }
 
     /**

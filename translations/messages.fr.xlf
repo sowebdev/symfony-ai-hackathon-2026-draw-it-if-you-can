@@ -308,6 +308,41 @@
                 <target>Commencer la partie</target>
                 <note>Leaves the lobby: the first round starts</note>
             </trans-unit>
+            <trans-unit id="role.drawer" resname="role.drawer">
+                <source>role.drawer</source>
+                <target>Le dessinateur</target>
+                <note>Name of the role of the model that draws, on the home page</note>
+            </trans-unit>
+            <trans-unit id="role.guesser" resname="role.guesser">
+                <source>role.guesser</source>
+                <target>Le devineur</target>
+                <note>Name of the role of the model that picks the word and guesses, on the home page</note>
+            </trans-unit>
+            <trans-unit id="status.checking_models" resname="status.checking_models">
+                <source>status.checking_models</source>
+                <target>Vérification des modèles…</target>
+                <note>Home page, while the models are tried</note>
+            </trans-unit>
+            <trans-unit id="help.models" resname="help.models">
+                <source>help.models</source>
+                <target>Un modèle ne répond pas comme il faut. Règle AI_DRAWER_* et AI_GUESSER_* dans .env.local (voir le README), puis réessaie. « make check » dit la même chose dans un terminal.</target>
+                <note>Home page, when a model fails its check</note>
+            </trans-unit>
+            <trans-unit id="action.check_again" resname="action.check_again">
+                <source>action.check_again</source>
+                <target>Vérifier à nouveau</target>
+                <note>Home page: tries the models again</note>
+            </trans-unit>
+            <trans-unit id="status.picking_word" resname="status.picking_word">
+                <source>status.picking_word</source>
+                <target>L'IA choisit un mot…</target>
+                <note>Loading screen, while the model picks the word of a round</note>
+            </trans-unit>
+            <trans-unit id="status.picking_word_note" resname="status.picking_word_note">
+                <source>status.picking_word_note</source>
+                <target>Avec un modèle local, ça peut prendre quelques secondes.</target>
+                <note>Loading screen, under the title</note>
+            </trans-unit>
         </body>
     </file>
 </xliff>

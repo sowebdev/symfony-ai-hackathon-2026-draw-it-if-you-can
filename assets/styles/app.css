@@ -658,3 +658,107 @@ button.link {
 button.link:hover {
     transform: none;
 }
+
+/* The models, on the home page. */
+.health {
+    width: min(100%, 28rem);
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    border: 1.5px dashed #b9b0a0;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.health.failed {
+    border: 2px solid #b42318;
+    background: #fff5f5;
+}
+
+.health p {
+    margin: 0;
+}
+
+.health-checking {
+    color: #777;
+}
+
+.health ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.health li {
+    overflow-wrap: anywhere;
+}
+
+.health li span {
+    color: #777;
+}
+
+.health li.ok::before {
+    content: '✓ ';
+    color: var(--found);
+}
+
+.health li.failed::before {
+    content: '✗ ';
+    color: #b42318;
+}
+
+.health-help {
+    margin-top: 0.5rem;
+}
+
+/* The loading screen: a pencil scribbling while the AI picks a word. */
+.loading {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(251, 247, 236, 0.85);
+}
+
+.loading-card {
+    padding: 1.5rem 2.5rem;
+    text-align: center;
+    background: var(--sheet);
+    border: 2px solid var(--ink);
+    border-radius: 6px 10px 7px 12px;
+    box-shadow: 6px 8px 0 rgba(0, 0, 0, 0.12);
+    transform: rotate(-1deg);
+}
+
+.loading svg {
+    width: 12rem;
+    height: auto;
+}
+
+.loading path {
+    fill: none;
+    stroke: var(--pencil);
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-dasharray: 320;
+    stroke-dashoffset: 320;
+    animation: scribble 1.6s ease-in-out infinite;
+}
+
+@keyframes scribble {
+    70%,
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+.loading-title {
+    margin: 0.5rem 0 0;
+    font-size: 1.8rem;
+}
+
+.loading-note {
+    margin: 0.3rem 0 0;
+    color: #777;
+}

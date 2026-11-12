@@ -3,7 +3,7 @@
 {% block body %}
     <main class="home">
         <p class="error" role="alert">{{ error|trans }}</p>
-        <form method="post" action="{{ path('game_next_round', {id: game.id}) }}">
+        <form method="post" action="{{ path('game_next_round', {id: game.id}) }}" data-controller="loading" data-action="loading#show">
             <button type="submit">{{ 'action.retry'|trans }}</button>
         </form>
         <a href="{{ path('home', {_locale: app.locale}) }}">{{ 'action.new_game'|trans }}</a>

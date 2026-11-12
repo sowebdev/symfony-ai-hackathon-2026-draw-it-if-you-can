@@ -13,7 +13,7 @@
     {% if round.last %}
         <a class="button" href="{{ path('game_show', {id: round.game.id}) }}">{{ 'action.final_score'|trans }}</a>
     {% else %}
-        <form method="post" action="{{ path('game_next_round', {id: round.game.id}) }}">
+        <form method="post" action="{{ path('game_next_round', {id: round.game.id}) }}" data-controller="loading" data-action="loading#show">
             <button type="submit" autofocus>
                 {{ (round.game.drawnByInRound(round.number + 1).value == 'player' ? 'action.next_round_player' : 'action.next_round_ai')|trans }}
             </button>

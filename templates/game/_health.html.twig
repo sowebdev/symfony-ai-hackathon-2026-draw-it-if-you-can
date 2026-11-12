@@ -1,0 +1,15 @@
+{# Whether the models of the game answer, checked when the home page opens (GET /health). #}
+<section class="health" aria-live="polite"
+         data-controller="health"
+         data-health-url-value="{{ path('health') }}"
+         data-health-labels-value="{{ {
+             drawer: 'role.drawer'|trans,
+             guesser: 'role.guesser'|trans,
+         }|json_encode }}">
+    <p class="health-checking" data-health-target="checking">{{ 'status.checking_models'|trans }}</p>
+    <ul data-health-target="list"></ul>
+    <div class="health-help" data-health-target="help" hidden>
+        <p>{{ 'help.models'|trans }}</p>
+        <button type="button" class="link" data-action="health#retry">{{ 'action.check_again'|trans }}</button>
+    </div>
+</section>

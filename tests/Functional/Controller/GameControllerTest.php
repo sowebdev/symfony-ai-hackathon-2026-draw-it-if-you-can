@@ -52,6 +52,36 @@ final class GameControllerTest extends WebTestCase
         self::assertSelectorNotExists('.copilot-badge', 'No copilot unless asked');
     }
 
+    public function testTheHomePageSaysWhetherTheModelsCanPlay(): void
+    {
+        $client = self::createClient();
+        // The drawer answers "ready", the guesser names the circle.
+        self::scriptModel($client, ['ready', 'Circle']);
+
+        $client->request('GET', '/fr');
+        self::assertSelectorExists('.health[data-health-url-value="/health"]');
+        self::assertSelectorExists('form.new-game[data-action="loading#show"]');
+
+        $client->request('GET', '/health?fresh=1');
+        $report = json_decode((string) $client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
+        self::assertTrue($report['ok']);
+        self::assertSame(['drawer', 'guesser'], array_column($report['roles'], 'role'));
+    }
+
+    public function testAModelThatDoesNotSeeImagesIsReported(): void
+    {
+        $client = self::createClient();
+        self::scriptModel($client, ['ready', 'square']);
+
+        $client->request('GET', '/health?fresh=1');
+        $report = json_decode((string) $client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
+
+        self::assertFalse($report['ok']);
+        self::assertTrue($report['roles'][0]['ok']);
+        self::assertFalse($report['roles'][1]['ok']);
+        self::assertStringContainsString('does not recognize a circle', $report['roles'][1]['problem']);
+    }
+
     public function testAModelWithoutAUsableWordIsReported(): void
     {
         $client = self::createClient();

@@ -13,7 +13,7 @@
         {% if error %}
             <p class="error" role="alert">{{ error|trans }}</p>
         {% endif %}
-        <form method="post" action="{{ path('game_create') }}" class="new-game">
+        <form method="post" action="{{ path('game_create') }}" class="new-game" data-controller="loading" data-action="loading#show">
             <label>
                 {{ 'label.theme'|trans }}
                 <select name="theme">
@@ -32,5 +32,6 @@
                 <button type="submit" name="drawnBy" value="player">{{ 'action.player_draws'|trans }}</button>
             </div>
         </form>
+        {{ include('game/_health.html.twig') }}
     </main>
 {% endblock %}
