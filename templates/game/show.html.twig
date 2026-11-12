@@ -4,7 +4,7 @@
     <main class="game-over">
         <h1>{{ 'heading.game_over'|trans }}</h1>
         {% if game.duel %}
-            {% set rival = game.agentName ?? 'label.rival_unknown'|trans %}
+            {% set rival = game.agentDisplayName ?? 'label.rival_unknown'|trans %}
             <p class="final-score">
                 {% if total > rival_total %}{{ 'result.duel_won'|trans }}
                 {% elseif total < rival_total %}{{ 'result.duel_lost'|trans({'%name%': rival}) }}

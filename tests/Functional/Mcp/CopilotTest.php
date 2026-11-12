@@ -28,9 +28,9 @@ final class CopilotTest extends WebTestCase
         $this->connect();
     }
 
-    public function testTheAgentHasFourToolsAndTwoPrompts(): void
+    public function testTheAgentHasFiveToolsAndTwoPrompts(): void
     {
-        self::assertSame(['round_status', 'look_at_drawing', 'suggest_word', 'submit_answer'], array_column($this->rpc('tools/list')['tools'], 'name'));
+        self::assertSame(['round_status', 'look_at_drawing', 'suggest_word', 'choose_nickname', 'submit_answer'], array_column($this->rpc('tools/list')['tools'], 'name'));
         self::assertSame(['copilot', 'duel'], array_column($this->rpc('prompts/list')['prompts'], 'name'));
     }
 
@@ -114,15 +114,15 @@ final class CopilotTest extends WebTestCase
         self::assertSame('waiting for the player to start the game', $status['state']);
         self::assertStringContainsString('not started', $this->call('look_at_drawing')['content'][0]['text']);
         $this->client->request('GET', $game.'/agent');
-        self::assertSame(['connected' => true, 'name' => 'test'], json_decode((string) $this->client->getResponse()->getContent(), true));
+        self::assertSame(['connected' => true, 'name' => 'Test'], json_decode((string) $this->client->getResponse()->getContent(), true));
         $this->client->request('GET', $lobby);
-        self::assertSelectorTextContains('.agent-status.connected', 'Copilote connecté : test');
+        self::assertSelectorTextContains('.agent-status.connected', 'Copilote connecté : Test');
 
         // The clock starts when the player starts the game.
         $this->client->submitForm('Commencer la partie');
         $this->client->followRedirect();
         self::assertSelectorTextContains('.round-number', 'Manche 1 / 6');
-        self::assertSelectorTextContains('.copilot-badge.connected', 'test');
+        self::assertSelectorTextContains('.copilot-badge.connected', 'Test');
         self::assertSelectorTextContains('.clock strong', '60');
         $this->client->request('GET', $lobby);
         self::assertResponseRedirects(message: 'The lobby is behind once the game started');

@@ -1,6 +1,6 @@
 {# Shown once the round is over: what happened, the word, the points won, and what comes next.
    In a duel, the rival may have found the word: the points are its own. #}
-{% set rival = round.game.agentName ?? 'label.rival_unknown'|trans %}
+{% set rival = round.game.agentDisplayName ?? 'label.rival_unknown'|trans %}
 <section class="round-end" aria-live="assertive">
     <h2>
         {% if round.foundByRival %}{{ 'heading.round_found_by_rival'|trans({'%name%': rival}) }}

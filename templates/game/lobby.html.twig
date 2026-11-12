@@ -5,12 +5,14 @@
 {% set prompt = duel ? 'duel' : 'copilot' %}
 {% set waiting = duel ? 'status.rival_waiting' : 'status.copilot_waiting' %}
 {% set connected = duel ? 'status.rival_connected' : 'status.copilot_connected' %}
+{% set unnamed = (duel ? 'label.rival_unknown' : 'label.copilot_unknown')|trans %}
 {% block body %}
     <main class="lobby"
           data-controller="agent-status"
           data-agent-status-url-value="{{ path('game_agent', {id: game.id}) }}"
           data-agent-status-connected-value="{{ game.agentConnected ? 'true' : 'false' }}"
-          data-agent-status-connected-label-value="{{ connected|trans }}">
+          data-agent-status-connected-label-value="{{ connected|trans }}"
+          data-agent-status-unnamed-value="{{ unnamed }}">
         <h1>{{ (duel ? 'heading.lobby_duel' : 'heading.lobby')|trans }}</h1>
         <p>{{ (duel ? 'lobby.intro_duel' : 'lobby.intro')|trans }}</p>
 
@@ -27,7 +29,7 @@
         <p class="lobby-other">{{ 'lobby.other_clients'|trans({'%url%': url('_mcp_endpoint_default'), '%prompt%': prompt}) }}</p>
 
         <p class="agent-status {{ game.agentConnected ? 'connected' }}" role="status" data-agent-status-target="status">
-            {{ game.agentConnected ? connected|trans({'%name%': game.agentName}) : waiting|trans }}
+            {{ game.agentConnected ? connected|trans({'%name%': game.agentDisplayName ?? unnamed}) : waiting|trans }}
         </p>
 
         <form method="post" action="{{ path('game_next_round', {id: game.id}) }}" data-controller="loading" data-action="loading#show">

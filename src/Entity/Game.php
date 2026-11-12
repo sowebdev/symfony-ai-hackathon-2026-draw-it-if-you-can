@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Game\AgentName;
 use App\Game\DrawnBy;
 use App\Game\Language;
 use App\Game\Mode;
@@ -28,6 +29,10 @@ class Game
     /** The name the MCP client of the agent gave, e.g. "claude-code": said by the client, never checked. */
     #[ORM\Column(name: 'copilot_name', length: 100, nullable: true)]
     private ?string $agentName = null;
+
+    /** The nickname the agent chose for itself, e.g. "Picasso du dimanche": shown instead of its name. */
+    #[ORM\Column(length: 30, nullable: true)]
+    private ?string $agentNickname = null;
 
     #[ORM\Column(name: 'copilot_seen_at', nullable: true)]
     private ?\DateTimeImmutable $agentSeenAt = null;
@@ -119,7 +124,7 @@ class Game
      */
     public function agentSeen(string $name, \DateTimeImmutable $at): void
     {
-        $this->agentName = mb_substr('' === trim($name) ? 'MCP client' : $name, 0, 100);
+        $this->agentName = '' === trim($name) ? null : mb_substr($name, 0, 100);
         $this->agentSeenAt = $at;
     }
 
@@ -128,9 +133,34 @@ class Game
         return null !== $this->agentSeenAt;
     }
 
+    /**
+     * The name the MCP client gave itself, e.g. "claude-code", null without one.
+     */
     public function getAgentName(): ?string
     {
         return $this->agentName;
+    }
+
+    /**
+     * The name the player reads: the nickname of the agent, else its client made readable, e.g.
+     * "Claude"; null when there is neither.
+     */
+    public function getAgentDisplayName(): ?string
+    {
+        return $this->agentNickname ?? AgentName::forDisplay($this->agentName);
+    }
+
+    public function getAgentNickname(): ?string
+    {
+        return $this->agentNickname;
+    }
+
+    /**
+     * @throws \InvalidArgumentException When the nickname is empty or too long, with the reason for the agent
+     */
+    public function nameAgent(string $nickname): void
+    {
+        $this->agentNickname = AgentName::nickname($nickname);
     }
 
     public function getAgentSeenAt(): ?\DateTimeImmutable

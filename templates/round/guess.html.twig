@@ -43,7 +43,7 @@
                 {% endif %}
                 {% if round.game.duel %}
                     <div class="rival-answers">
-                        <h2>{{ 'heading.rival_answers'|trans({'%name%': round.game.agentName ?? 'label.rival_unknown'|trans}) }}</h2>
+                        <h2>{{ 'heading.rival_answers'|trans({'%name%': round.game.agentDisplayName ?? 'label.rival_unknown'|trans}) }}</h2>
                         <ol data-agent-target="answers">
                             {% for answer in rival_answers %}
                                 <li data-answer-id="{{ answer.id }}" class="{{ answer.accepted ? 'accepted' }}">{{ answer.word }}</li>

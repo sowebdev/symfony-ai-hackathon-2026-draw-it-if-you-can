@@ -161,7 +161,7 @@ final class GameController extends AbstractController
     #[Route('/games/{id}/agent', name: 'game_agent', requirements: ['id' => Requirement::UUID_V7], methods: ['GET'])]
     public function agent(Game $game): JsonResponse
     {
-        return $this->json(['connected' => $game->isAgentConnected(), 'name' => $game->getAgentName()]);
+        return $this->json(['connected' => $game->isAgentConnected(), 'name' => $game->getAgentDisplayName()]);
     }
 
     /**

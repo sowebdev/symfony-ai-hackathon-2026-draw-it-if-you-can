@@ -58,15 +58,16 @@ The game is an MCP server (Symfony MCP Bundle). An agent connected to it plays a
 - **With a copilot**: when the AI draws, the agent looks at the drawing and whispers words in the margin. A click on one answers it: you decide, the copilot never answers by itself.
 - **In a duel**: the agent guesses the same drawings as your side, those of the AI and yours, which your AI guesses for you. The first side to find the word wins its points. The agent answers once every 3 seconds at most, and only the exact word counts for it. Its answers show next to yours.
 
-Four tools and two prompts:
+Five tools and two prompts:
 
 - `round_status`: the round being played, the role of the agent, who draws, the theme, the time left, the wrong answers so far, the score of a duel, and what to do now. Never the word to find. It also tells the agent to stop, when the game is over or the player left.
 - `look_at_drawing`: the drawing as it is now, as a PNG image.
 - `suggest_word`: for a copilot, a word shown to you, at most 5 per round.
 - `submit_answer`: for a rival, an answer of its own.
+- `choose_nickname`: the name you see for the agent, a funny one chosen by the agent in the lobby. Without one, the game shows the name of its client, e.g. "Claude" for `claude-code`.
 - the `copilot` and `duel` prompts tell the agent how to play. A client without prompts can start from `round_status`, which explains the rules too.
 
-The name shown is the one the MCP client gives itself, e.g. `claude-code`, never checked. The game does not tell two agents apart: recent clients such as Claude Code speak the stateless protocol (2026-07-28), which has no session. Connect one agent at a time.
+The game does not tell two agents apart: recent clients such as Claude Code speak the stateless protocol (2026-07-28), which has no session. Connect one agent at a time.
 
 With Claude Code, over HTTP while the game runs:
 

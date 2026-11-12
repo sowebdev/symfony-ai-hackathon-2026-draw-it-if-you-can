@@ -68,6 +68,7 @@ final readonly class AgentTools
             return [
                 'game' => $game->getId()->toRfc4122(),
                 'you_are' => $this->role($game),
+                'your_nickname' => $game->getAgentNickname(),
                 'state' => $game->hasLeft() ? 'the player left' : 'waiting for the player to start the game',
                 'theme' => $game->getTheme()->description(),
                 'language' => $game->getLanguage()->nameInEnglish(),
@@ -152,6 +153,26 @@ final readonly class AgentTools
         }
 
         return \sprintf('"%s" is shown to the player, who decides. %d hints left in this round.', $hint->getWord(), Copilot::MAX_HINTS - \count($this->hints->findByRound($current)));
+    }
+
+    #[McpTool(name: 'choose_nickname', description: 'Choose the name the player sees for you, a funny nickname in the language of the game, e.g. "Picasso du dimanche" in French. 24 characters at most. Best done in the lobby, before the game starts.')]
+    public function chooseNickname(
+        #[Schema(description: 'Your nickname, 24 characters at most')]
+        string $nickname,
+        ?RequestContext $context = null,
+    ): string {
+        [$game] = $this->find(null, $context);
+        if (!$game->isWithAgent()) {
+            throw new ToolCallException('The player plays this game alone, without an agent: stop playing.');
+        }
+        try {
+            $game->nameAgent($nickname);
+        } catch (\InvalidArgumentException $invalid) {
+            throw new ToolCallException($invalid->getMessage(), previous: $invalid);
+        }
+        $this->entityManager->flush();
+
+        return \sprintf('The player now sees you as "%s".', $game->getAgentNickname());
     }
 
     #[McpTool(name: 'submit_answer', description: 'For a rival in a duel only. Answer the drawing of the round, whoever draws it: the first side to find the word wins its points. Only the exact word counts, in the language of the game. One answer every 3 seconds at most.')]
@@ -258,7 +279,9 @@ final readonly class AgentTools
         return match (true) {
             $game->hasLeft() => [true, 'The player left the game. Stop playing; the player will call you again for another game.'],
             !$game->isWithAgent() => [true, 'The player now plays alone, without an agent. Stop playing.'],
-            null === $round => [false, 'You are connected: the player sees it in the lobby. Call round_status again in a few seconds, until the game starts.'],
+            null === $round => [false, null === $game->getAgentNickname()
+                ? 'You are connected: the player sees it in the lobby. Choose a funny nickname with choose_nickname, then call round_status again in a few seconds, until the game starts.'
+                : 'You are connected: the player sees it in the lobby. Call round_status again in a few seconds, until the game starts.'],
             $round->isOver() && $round->isLast() => [true, 'The game is over. Stop playing.'],
             null !== $idle && $idle > self::IDLE_S * 1000 => [true, \sprintf('No new round for %d minutes: the player has probably stopped. Stop playing; the player will call you again.', intdiv(self::IDLE_S, 60))],
             $round->isOver() => [false, 'This round is over: wait for the player to start the next one, then call round_status again.'],

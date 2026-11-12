@@ -5,11 +5,11 @@
 <header class="scoreboard">
     <p class="round-number">{{ 'label.round'|trans({'%number%': round.number, '%count%': round.game.roundCount}) }} · {{ round.game.theme|trans }}</p>
     {% if round.game.withCopilot %}
-        <p class="copilot-badge {{ round.game.agentConnected ? 'connected' }}">{{ 'label.copilot'|trans }} {{ round.game.agentName ?? 'status.copilot_absent'|trans }}</p>
+        <p class="copilot-badge {{ round.game.agentConnected ? 'connected' }}">{{ 'label.copilot'|trans }} {{ round.game.agentConnected ? round.game.agentDisplayName ?? 'label.copilot_unknown'|trans : 'status.copilot_absent'|trans }}</p>
     {% endif %}
     {% if round.game.duel %}
         <p class="duel-score">{{ 'label.you'|trans }} <strong>{{ team_score }}</strong>
-            <span class="rival-score">{{ round.game.agentName ?? 'label.rival_unknown'|trans }} <strong>{{ rival_score }}</strong></span></p>
+            <span class="rival-score">{{ round.game.agentDisplayName ?? 'label.rival_unknown'|trans }} <strong>{{ rival_score }}</strong></span></p>
     {% else %}
         <p class="team-score">{{ 'label.team_score'|trans }} <strong>{{ team_score }}</strong></p>
     {% endif %}

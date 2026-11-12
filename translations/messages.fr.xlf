@@ -385,7 +385,7 @@
             </trans-unit>
             <trans-unit id="label.rival_unknown" resname="label.rival_unknown">
                 <source>label.rival_unknown</source>
-                <target>ton adversaire</target>
+                <target>Rival</target>
                 <note>Name of the rival of a duel before it called the game</note>
             </trans-unit>
             <trans-unit id="heading.rival_answers" resname="heading.rival_answers">
@@ -437,6 +437,11 @@
                 <source>found_by.ai</source>
                 <target>l'IA</target>
                 <note>Who found the word of a round: the AI of the player</note>
+            </trans-unit>
+            <trans-unit id="label.copilot_unknown" resname="label.copilot_unknown">
+                <source>label.copilot_unknown</source>
+                <target>ton copilote</target>
+                <note>Name of the copilot when its MCP client gives none</note>
             </trans-unit>
         </body>
     </file>

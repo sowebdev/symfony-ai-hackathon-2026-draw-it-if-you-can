@@ -39,7 +39,26 @@ final class DuelTest extends WebTestCase
         $status = $this->roundStatus();
         self::assertStringContainsString('rival', $status['you_are']);
         $this->client->request('GET', $lobby);
-        self::assertSelectorTextContains('.agent-status.connected', 'Adversaire connecté : test');
+        self::assertSelectorTextContains('.agent-status.connected', 'Adversaire connecté : Test');
+    }
+
+    public function testTheRivalChoosesAFunnyNickname(): void
+    {
+        $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'mode' => 'duel']);
+        $lobby = (string) $this->client->getResponse()->headers->get('Location');
+        self::assertStringContainsString('choose_nickname', $this->roundStatus()['what_you_can_do']);
+
+        self::assertTrue($this->call('choose_nickname', ['nickname' => str_repeat('x', 25)])['isError']);
+        self::assertTrue($this->call('choose_nickname', ['nickname' => " \n "])['isError']);
+        $named = $this->call('choose_nickname', ['nickname' => "Picasso\ndu dimanche"]);
+        self::assertStringContainsString('"Picasso du dimanche"', $named['content'][0]['text']);
+        self::assertSame('Picasso du dimanche', $this->roundStatus()['your_nickname']);
+
+        $this->client->request('GET', $lobby);
+        self::assertSelectorTextContains('.agent-status.connected', 'Adversaire connecté : Picasso du dimanche');
+        $this->client->submitForm('Commencer la partie');
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('.rival-score', 'Picasso du dimanche');
     }
 
     public function testTheRivalFindsTheDrawingOfTheAiFirstAndWinsItsPoints(): void
@@ -62,8 +81,8 @@ final class DuelTest extends WebTestCase
         self::assertResponseStatusCodeSame(409, 'Too late for the player');
 
         $this->client->request('GET', $round);
-        self::assertSelectorTextContains('.round-end h2', 'test a trouvé !');
-        self::assertSelectorTextContains('.round-end-points', 'points pour test');
+        self::assertSelectorTextContains('.round-end h2', 'Test a trouvé !');
+        self::assertSelectorTextContains('.round-end-points', 'points pour Test');
         self::assertSelectorTextContains('.duel-score', 'Toi 0');
         self::assertSelectorTextContains('.rival-score strong', '1000');
         self::assertSelectorTextContains('.rival-answers', 'zèbre');
@@ -101,7 +120,7 @@ final class DuelTest extends WebTestCase
 
         $this->call('submit_answer', ['word' => 'girafe']);
         $this->client->request('GET', $round);
-        self::assertSelectorTextContains('.round-end h2', 'test a trouvé !');
+        self::assertSelectorTextContains('.round-end h2', 'Test a trouvé !');
         self::assertSelectorExists('.rival-answers li.accepted');
         self::assertSelectorTextNotContains('.guesses ol', 'girafe', 'The answers of the rival are not those of the AI');
     }
@@ -128,7 +147,7 @@ final class DuelTest extends WebTestCase
         self::assertFalse($this->callStateless('submit_answer', 'claude-code', ['word' => 'zèbre'])['isError'] ?? false);
 
         $this->client->request('GET', $round);
-        self::assertSelectorTextContains('.rival-score', 'claude-code');
+        self::assertSelectorTextContains('.rival-score', 'Claude');
     }
 
     public function testTheFinalScoreOfADuelSaysWhoWon(): void
@@ -150,8 +169,8 @@ final class DuelTest extends WebTestCase
         }
 
         $this->client->followRedirect();
-        self::assertSelectorTextContains('.final-score', 'test gagne le duel.');
-        self::assertSelectorTextContains('.duel-final', 'Toi 0 points, test 3000 points');
+        self::assertSelectorTextContains('.final-score', 'Test gagne le duel.');
+        self::assertSelectorTextContains('.duel-final', 'Toi 0 points, Test 3000 points');
         self::assertSelectorTextContains('table', 'Trouvé par');
     }
 }

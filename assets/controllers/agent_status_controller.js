@@ -6,7 +6,7 @@ const POLL_MS = 1000;
 
 export default class extends Controller {
     static targets = ['status'];
-    static values = { url: String, connected: Boolean, connectedLabel: String };
+    static values = { url: String, connected: Boolean, connectedLabel: String, unnamed: String };
 
     connect() {
         this.timer = setInterval(() => this.poll(), POLL_MS);
@@ -24,7 +24,7 @@ export default class extends Controller {
         const { connected, name } = await response.json();
         if (connected) {
             this.connectedValue = true;
-            this.statusTarget.textContent = this.connectedLabelValue.replace('%name%', name);
+            this.statusTarget.textContent = this.connectedLabelValue.replace('%name%', name ?? this.unnamedValue);
             this.statusTarget.classList.add('connected');
         }
     }
