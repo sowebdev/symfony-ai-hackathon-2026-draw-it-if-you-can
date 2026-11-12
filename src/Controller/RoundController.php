@@ -9,9 +9,11 @@ use App\Entity\Round;
 use App\Entity\Stroke;
 use App\Game\DrawingLoop;
 use App\Game\GuessLoop;
+use App\Game\HintLoop;
 use App\Game\ScoreGauge;
 use App\Game\WordMatcher;
 use App\Repository\GuessRepository;
+use App\Repository\HintRepository;
 use App\Repository\RoundRepository;
 use App\Repository\StrokeRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -32,6 +34,7 @@ final class RoundController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly StrokeRepository $strokes,
         private readonly GuessRepository $guesses,
+        private readonly HintRepository $hints,
         private readonly RoundRepository $rounds,
         private readonly ScoreGauge $gauge,
         private readonly LocaleSwitcher $localeSwitcher,
@@ -47,6 +50,7 @@ final class RoundController extends AbstractController
         return $this->render($round->isDrawnByAi() ? 'round/guess.html.twig' : 'round/show.html.twig', [
             'round' => $round,
             'guesses' => $this->guesses->findByRound($round),
+            'hints' => $this->hints->findByRound($round),
             'gauge' => $this->gauge->steps($round->getDurationMs()),
             'points' => $this->gauge->pointsOf($round),
             'team_score' => $this->gauge->total($this->rounds->findByGame($round->getGame())),
@@ -131,6 +135,17 @@ final class RoundController extends AbstractController
      */
     #[Route('/drawing', name: 'round_drawing', methods: ['GET'])]
     public function drawing(Round $round, DrawingLoop $loop): EventStreamResponse
+    {
+        $this->denyUnlessAiDraws($round);
+
+        return new EventStreamResponse(static fn (): \Generator => $loop->run($round));
+    }
+
+    /**
+     * The hints of the copilot, pushed to the browser as server-sent events while the player guesses.
+     */
+    #[Route('/hints', name: 'round_hints', methods: ['GET'])]
+    public function hints(Round $round, HintLoop $loop): EventStreamResponse
     {
         $this->denyUnlessAiDraws($round);
 

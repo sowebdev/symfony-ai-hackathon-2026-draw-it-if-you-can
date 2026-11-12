@@ -71,4 +71,13 @@ class RoundRepository extends ServiceEntityRepository
     {
         return $this->findOneBy(['game' => $game], ['number' => 'DESC']);
     }
+
+    /**
+     * The round created last: the one the player is playing, or has just played. The id, a UUID v7,
+     * follows the order of creation, even for two rounds started in the same millisecond.
+     */
+    public function findLatest(): ?Round
+    {
+        return $this->findOneBy([], ['id' => 'DESC']);
+    }
 }

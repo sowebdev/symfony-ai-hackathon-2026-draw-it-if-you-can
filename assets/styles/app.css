@@ -380,7 +380,7 @@ button:focus-visible,
     list-style: none;
 }
 
-.guesses li {
+.guesses ol li {
     padding: 0.15rem 0.6rem;
     background: #fff;
     border: 1.5px solid #bbb;
@@ -389,11 +389,33 @@ button:focus-visible,
     text-decoration: line-through;
 }
 
-.guesses li.accepted {
+.guesses ol li.accepted {
     color: var(--found);
     border-color: var(--found);
     text-decoration: none;
     font-size: 1.3rem;
+}
+
+/* The hints of the copilot: notes in the margin, a click puts the word in the answer field. */
+.hints ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.4rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hints button {
+    padding: 0.15rem 0.7rem;
+    background: #e7f5ff;
+    border-style: dashed;
+    border-radius: 18px 18px 4px 18px;
+    box-shadow: none;
+}
+
+.hints button::after {
+    content: ' ?';
 }
 
 /* When the player draws, the AI calls its words out like a player around the table. */

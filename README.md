@@ -45,6 +45,23 @@ Then `make check` tries each model on a tiny task whose answer is known (the gue
 
 By default both roles use [Ollama](https://ollama.com) on your machine (`http://host.docker.internal:11434`) with `gemma3`, a model that reads images: `ollama pull gemma3`. Any other OpenAI-compatible server works, llama.cpp, LM Studio or a provider's API. If the game must join a Docker network of yours to reach it, put that in a `compose.override.yaml` (not committed).
 
+## The copilot, over MCP
+
+When the AI draws, an agent can help you guess. The game is an MCP server (Symfony MCP Bundle) with three tools and one prompt:
+
+- `round_status`: the round being played, who draws, the theme, the time left, your wrong answers and the hints given. Never the word to find.
+- `look_at_drawing`: the drawing as it is now, as a PNG image.
+- `suggest_word`: a word shown to you in the margin, at most 5 per round. A click puts it in your answer field: you decide.
+- the `copilot` prompt tells the agent how to play.
+
+With Claude Code, over HTTP while the game runs:
+
+```bash
+claude mcp add --transport http draw-it http://127.0.0.1:8040/mcp
+```
+
+Then start a game where the AI draws, and run the `copilot` prompt of the `draw-it` server (`/mcp__draw-it__copilot`). Clients that start their servers themselves can use STDIO instead: `docker compose exec -T php php bin/console mcp:server`. The HTTP endpoint only answers on localhost.
+
 ## Tests
 
 ```bash

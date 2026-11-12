@@ -248,6 +248,11 @@
                 <target>,</target>
                 <note>Between the units and the tenths of a number of seconds</note>
             </trans-unit>
+            <trans-unit id="heading.copilot_hints" resname="heading.copilot_hints">
+                <source>heading.copilot_hints</source>
+                <target>Ton copilote souffle…</target>
+                <note>Above the words an agent connected over MCP suggests to the player</note>
+            </trans-unit>
         </body>
     </file>
 </xliff>

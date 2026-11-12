@@ -36,6 +36,15 @@ export default class extends Controller {
         }
     }
 
+    // A hint of the copilot goes to the answer field: the player decides whether to send it.
+    fill({ detail: { word } }) {
+        if (this.overValue) {
+            return;
+        }
+        this.wordTarget.value = word;
+        this.wordTarget.focus();
+    }
+
     // The time is up: no more answers.
     stop() {
         this.overValue = true;
