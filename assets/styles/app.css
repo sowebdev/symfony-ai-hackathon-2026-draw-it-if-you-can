@@ -737,9 +737,15 @@ button:focus-visible,
     width: auto;
 }
 
+/* Both sides on one line, centred: the sketch of the agent is taller than the text. */
+.duel-score {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
 .side-score {
     color: var(--found);
-    margin-right: 0.8rem;
 }
 
 .hints h2,
