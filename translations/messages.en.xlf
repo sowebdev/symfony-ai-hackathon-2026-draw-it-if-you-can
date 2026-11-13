@@ -325,7 +325,7 @@
             </trans-unit>
             <trans-unit id="status.picking_word_note" resname="status.picking_word_note">
                 <source>status.picking_word_note</source>
-                <target>With a local model, it may take a few seconds.</target>
+                <target>It may take a few seconds.</target>
                 <note>Loading screen, under the title</note>
             </trans-unit>
             <trans-unit id="label.mode" resname="label.mode">
