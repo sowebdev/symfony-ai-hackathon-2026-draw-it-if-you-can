@@ -5,7 +5,7 @@ namespace App\Game;
 /**
  * Tells whether a guess is the word to find, without asking anyone: case, accents, a leading
  * article and a plural do not count ("Les Chats" finds "chat"). A near word ("kitten" for "cat")
- * is left to the player, who clicks "Yes!".
+ * does not count.
  */
 final class WordMatcher
 {

@@ -123,33 +123,6 @@ final class RoundControllerTest extends WebTestCase
         self::assertSame([], $this->streamGuesses($round));
     }
 
-    public function testThePlayerAcceptsANearWord(): void
-    {
-        $round = $this->startRound(['kitten']);
-        $this->addStroke($round, [[10, 10, 0]]);
-        [$guess] = $this->streamGuesses($round);
-
-        $this->client->request('POST', $round.'/guesses/'.$guess['data']['id'].'/accept');
-
-        self::assertResponseIsSuccessful();
-        self::assertIsInt($this->json()['foundAfterMs']);
-        $this->client->request('GET', $round);
-        self::assertSelectorTextContains('li.accepted', 'kitten');
-        self::assertSelectorNotExists('li button');
-    }
-
-    public function testAGuessOfAnotherRoundCannotBeAccepted(): void
-    {
-        $round = $this->startRound(['kitten']);
-        $this->addStroke($round, [[10, 10, 0]]);
-        [$guess] = $this->streamGuesses($round);
-        $other = $this->startRound(scripted: false);
-
-        $this->client->request('POST', $other.'/guesses/'.$guess['data']['id'].'/accept');
-
-        self::assertResponseStatusCodeSame(404);
-    }
-
     /**
      * Starts a game whose word is "cat", drawn by the player, and returns the URL of its round.
      *

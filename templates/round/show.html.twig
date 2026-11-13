@@ -10,8 +10,6 @@
           data-canvas-undo-url-value="{{ path('round_stroke_undo', {id: round.id}) }}"
           data-canvas-locked-value="{{ round.over ? 'true' : 'false' }}"
           data-guesses-stream-url-value="{{ path('round_guesses', {id: round.id}) }}"
-          data-guesses-accept-url-value="{{ path('round_guess_accept', {id: round.id, guessId: 0}) }}"
-          data-guesses-yes-label-value="{{ 'action.accept_guess'|trans }}"
           data-guesses-over-value="{{ round.over ? 'true' : 'false' }}"
           {% if round.game.withAgent %}{{ include('round/_agent.html.twig') }}{% endif %}
           data-action="guesses:found->canvas#lock guesses:found->round-timer#finish round-timer:up->canvas#lock round-timer:up->guesses#stop agent:found->canvas#lock agent:found->guesses#stop agent:found->round-timer#finish">
@@ -29,10 +27,7 @@
                 <h2>{{ (round.game.duel ? 'heading.your_ai_guesses' : 'heading.ai_guesses')|trans }}</h2>
                 <ol data-guesses-target="list">
                     {% for guess in guesses %}
-                        <li data-guess-id="{{ guess.id }}" class="{{ guess.accepted ? 'accepted' }}">
-                            <span>{{ guess.word }}</span>
-                            {% if not round.over %}<button type="button" data-action="guesses#accept">{{ 'action.accept_guess'|trans }}</button>{% endif %}
-                        </li>
+                        <li data-guess-id="{{ guess.id }}" class="{{ guess.accepted ? 'accepted' }}">{{ guess.word }}</li>
                     {% endfor %}
                 </ol>
                 <p class="result" data-guesses-target="result" hidden>

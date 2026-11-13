@@ -38,11 +38,6 @@
                 <target>↶ Erase the last stroke</target>
                 <note>Removes the last stroke</note>
             </trans-unit>
-            <trans-unit id="action.accept_guess" resname="action.accept_guess">
-                <source>action.accept_guess</source>
-                <target>Yes!</target>
-                <note>Next to a word of the AI: the player says it is right</note>
-            </trans-unit>
             <trans-unit id="instruction.draw" resname="instruction.draw">
                 <source>instruction.draw</source>
                 <target>Draw:</target>

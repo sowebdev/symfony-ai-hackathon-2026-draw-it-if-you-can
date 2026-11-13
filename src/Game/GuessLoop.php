@@ -26,7 +26,7 @@ final readonly class GuessLoop
     private const int GUESSES_PER_DRAWING = 2;
 
     /**
-     * Pause while waiting for a new stroke or for "Yes!".
+     * Pause while waiting for a new stroke.
      */
     private const int IDLE_PAUSE_MS = 500;
 
@@ -59,7 +59,7 @@ final readonly class GuessLoop
         $guessesOnDrawing = 0;
 
         while (microtime(true) < $deadline) {
-            // Strokes and "Yes!" come from other requests: read them fresh at each turn.
+            // Strokes come from other requests: read them fresh at each turn.
             $this->entityManager->clear();
             $round = $this->rounds->find($roundId) ?? throw new \LogicException('The round is gone.');
             if ($round->isOver()) {

@@ -2,11 +2,10 @@ import { Controller } from '@hotwired/stimulus';
 import { seconds } from '../seconds.js';
 
 // The words of the AI, received as server-sent events while the player draws.
-// "Yes!" accepts a near word; the exact word is recognised by the server. The stream ends with
-// the round: "found", or "over" when the time is up.
+// The exact word is recognised by the server. The stream ends with the round: "found", or "over" when the time is up.
 export default class extends Controller {
     static targets = ['list', 'result', 'time'];
-    static values = { streamUrl: String, acceptUrl: String, over: Boolean, yesLabel: String };
+    static values = { streamUrl: String, over: Boolean };
 
     connect() {
         if (this.overValue) {
@@ -25,30 +24,14 @@ export default class extends Controller {
     add({ id, word }) {
         const item = document.createElement('li');
         item.dataset.guessId = id;
-        const text = document.createElement('span');
-        text.textContent = word;
-        const yes = document.createElement('button');
-        yes.type = 'button';
-        yes.textContent = this.yesLabelValue;
-        yes.dataset.action = 'guesses#accept';
-        item.append(text, yes);
+        item.textContent = word;
         this.listTarget.append(item);
     }
 
-    async accept(event) {
-        const item = event.target.closest('li');
-        const url = this.acceptUrlValue.replace(/\/0\/accept$/, `/${item.dataset.guessId}/accept`);
-        const response = await fetch(url, { method: 'POST' });
-        if (response.ok) {
-            this.finish((await response.json()).foundAfterMs, item);
-        }
-    }
-
-    // The time is up: no more guesses, nor "Yes!".
+    // The time is up: no more guesses.
     stop() {
         this.source?.close();
         this.overValue = true;
-        this.listTarget.querySelectorAll('button').forEach((button) => button.remove());
     }
 
     finish(foundAfterMs, item = this.listTarget.lastElementChild) {

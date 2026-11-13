@@ -19,7 +19,6 @@ use App\Repository\RoundRepository;
 use App\Repository\StrokeRepository;
 use App\Repository\TipRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\EventStreamResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -117,26 +116,6 @@ final class RoundController extends AbstractController
     {
         $this->denyUnlessPlayerDraws($round);
         return new EventStreamResponse(static fn (): \Generator => $loop->run($round));
-    }
-
-    /**
-     * "Yes!": the player accepts a near word as the right one.
-     */
-    #[Route('/guesses/{guessId}/accept', name: 'round_guess_accept', requirements: ['guessId' => Requirement::DIGITS], methods: ['POST'])]
-    public function accept(Round $round, #[MapEntity(id: 'guessId')] Guess $guess): JsonResponse
-    {
-        $this->denyUnlessPlayerDraws($round);
-        if ($guess->getRound() !== $round || Author::Ai !== $guess->getAuthor()) {
-            throw $this->createNotFoundException('This guess is not one of the AI in this round.');
-        }
-        if ($round->isOver()) {
-            return $this->roundIsOver();
-        }
-        // The points count from the click: that is when the answer is validated.
-        $round->markFound($guess, $round->elapsedMs());
-        $this->entityManager->flush();
-
-        return $this->json(['foundAfterMs' => $round->getFoundAfterMs()]);
     }
 
     /**

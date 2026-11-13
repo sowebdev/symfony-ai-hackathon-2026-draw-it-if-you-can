@@ -430,19 +430,6 @@ button:focus-visible,
     text-decoration: line-through;
 }
 
-/* A wrong guess of the AI with its "Yes!" button: only the word is struck, the button still answers. */
-.guesses ol li:has(> span) {
-    text-decoration: none;
-}
-
-.guesses ol li > span {
-    text-decoration: line-through;
-}
-
-.guesses ol li.accepted > span {
-    text-decoration: none;
-}
-
 .guesses ol li.accepted {
     color: var(--found);
     border-color: var(--found);
@@ -546,11 +533,6 @@ button:focus-visible,
 [data-guesses-target='list'] li:last-child,
 [data-guesses-target='list'] li.accepted {
     opacity: 1;
-}
-
-[data-guesses-target='list'] li button {
-    padding: 0 0.5rem;
-    font-size: 1rem;
 }
 
 .result {

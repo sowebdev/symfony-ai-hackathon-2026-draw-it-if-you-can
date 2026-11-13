@@ -82,20 +82,6 @@ final class RoundTest extends TestCase
         self::assertSame(60_900, $round->getFoundAfterMs());
     }
 
-    public function testANearWordIsFoundWhenThePlayerValidatesIt(): void
-    {
-        self::mockTime();
-        $round = new Round(new Game(Language::English), 1, 'cat', 60_000, Theme::Animals);
-        $guess = new Guess($round, 'kitten', 5_000, Author::Ai);
-
-        $round->markFound($guess, 61_500);
-        self::assertFalse($round->isFound(), 'Validated too late');
-
-        $round->markFound($guess, 12_000);
-        self::assertSame(12_000, $round->getFoundAfterMs());
-        self::assertTrue($guess->isAccepted());
-    }
-
     public function testNoGivingUpOnceTheTimeIsUp(): void
     {
         $clock = self::mockTime();

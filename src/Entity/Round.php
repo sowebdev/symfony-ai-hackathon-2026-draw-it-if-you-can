@@ -217,20 +217,17 @@ class Round
     }
 
     /**
-     * The word is found when the answer is validated: at once when the code recognises it, when
-     * the player clicks "Yes!" for a near word. The points count from that moment. A validation
-     * after the time, grace included, finds nothing.
-     *
-     * @param int|null $validatedAfterMs Null when the code recognised the word as it was said
+     * The word is found when the code recognises it, at the moment it was said: the points count
+     * from then. A word said after the time, grace included, finds nothing.
      */
-    public function markFound(Guess $guess, ?int $validatedAfterMs = null): void
+    public function markFound(Guess $guess): void
     {
-        $validatedAfterMs ??= $guess->getSaidAfterMs();
-        if ($this->isFound() || $this->givenUp || $validatedAfterMs > $this->durationMs + self::GRACE_MS) {
+        $saidAfterMs = $guess->getSaidAfterMs();
+        if ($this->isFound() || $this->givenUp || $saidAfterMs > $this->durationMs + self::GRACE_MS) {
             return;
         }
         $guess->accept();
-        $this->foundAfterMs = $validatedAfterMs;
+        $this->foundAfterMs = $saidAfterMs;
         $this->foundBy = $guess->getAuthor();
     }
 

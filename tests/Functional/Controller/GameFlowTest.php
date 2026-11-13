@@ -116,22 +116,6 @@ final class GameFlowTest extends WebTestCase
         self::assertSelectorTextContains('.round-end-points', '+100 points');
     }
 
-    public function testANearWordCountsFromTheClickOnYes(): void
-    {
-        $round = self::startFirstRound($this->client, 'en', ['drawnBy' => 'player']);
-        $this->client->request('POST', $round.'/strokes', server: ['CONTENT_TYPE' => 'application/json'], content: '{"points":[[1,1,0]]}');
-        [$guess] = self::readEvents($this->client, $round.'/guesses');
-        self::assertSame('kitten', $guess['data']['word']);
-
-        // Said at once, validated 30 s later: 30 s count.
-        self::wait(30);
-        $this->client->request('POST', $round.'/guesses/'.$guess['data']['id'].'/accept');
-
-        self::assertSame(['foundAfterMs' => 30_000], json_decode((string) $this->client->getResponse()->getContent(), true));
-        $this->client->request('GET', $round);
-        self::assertSelectorTextContains('.round-end-points', '+640 points');
-    }
-
     public function testTheFrenchGameSpeaksFrench(): void
     {
         $round = self::startFirstRound($this->client, 'fr');
