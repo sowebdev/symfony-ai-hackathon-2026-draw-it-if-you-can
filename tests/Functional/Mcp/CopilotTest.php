@@ -220,7 +220,7 @@ final class CopilotTest extends WebTestCase
     {
         $round = $this->startRound('ai');
         $this->client->request('GET', $round);
-        $this->client->submitForm('Nouvelle partie');
+        $this->client->submitForm('Quitter la partie');
 
         self::assertTrue($this->roundStatus()['stop']);
         self::assertStringContainsString('left the game', $this->call('suggest_word', ['word' => 'girafe'])['content'][0]['text']);

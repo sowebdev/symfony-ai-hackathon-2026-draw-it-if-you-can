@@ -47,6 +47,6 @@
         <form method="post" action="{{ path('game_next_round', {id: game.id}) }}" {{ include('game/_deal.html.twig', {number: 1}) }}>
             <button type="submit">{{ 'action.start_game'|trans }}</button>
         </form>
-        <form method="post" action="{{ path('game_leave', {id: game.id}) }}" class="leave"><button type="submit" class="link">{{ 'action.new_game'|trans }}</button></form>
+        <form method="post" action="{{ path('game_leave', {id: game.id}) }}" class="leave"><button type="submit" class="link">{{ 'action.leave_game'|trans }}</button></form>
     </main>
 {% endblock %}

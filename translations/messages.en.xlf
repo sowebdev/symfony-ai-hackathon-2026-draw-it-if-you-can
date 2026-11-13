@@ -28,9 +28,14 @@
                 <target>New game</target>
                 <note>Button and link that start a new game</note>
             </trans-unit>
+            <trans-unit id="action.leave_game" resname="action.leave_game">
+                <source>action.leave_game</source>
+                <target>Leave the game</target>
+                <note>In the bar of a round and in the lobby: leaves the game for the home page</note>
+            </trans-unit>
             <trans-unit id="action.undo" resname="action.undo">
                 <source>action.undo</source>
-                <target>Undo</target>
+                <target>↶ Erase the last stroke</target>
                 <note>Removes the last stroke</note>
             </trans-unit>
             <trans-unit id="action.accept_guess" resname="action.accept_guess">
@@ -145,7 +150,7 @@
             </trans-unit>
             <trans-unit id="label.team_score" resname="label.team_score">
                 <source>label.team_score</source>
-                <target>Team score</target>
+                <target>Score</target>
                 <note>Points of the player and the AI together</note>
             </trans-unit>
             <trans-unit id="label.time_left" resname="label.time_left">

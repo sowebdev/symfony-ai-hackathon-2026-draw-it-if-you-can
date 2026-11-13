@@ -66,9 +66,10 @@
 
                 <div class="toolbar">
                     <button type="button" data-action="ai-drawing#giveUp" data-ai-drawing-target="giveUp">{{ 'action.give_up'|trans }}</button>
-                    <form method="post" action="{{ path('game_leave', {id: round.game.id}) }}" class="leave"><button type="submit" class="link">{{ 'action.new_game'|trans }}</button></form>
                 </div>
             </section>
         </div>
+
+        {{ include('round/_leave.html.twig') }}
     </main>
 {% endblock %}

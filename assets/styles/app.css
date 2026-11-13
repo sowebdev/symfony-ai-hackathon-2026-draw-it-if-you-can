@@ -257,6 +257,11 @@ button:focus-visible,
     transform: rotate(-3deg);
 }
 
+.round-footer {
+    margin-top: 1.2rem;
+    font-size: 1rem;
+}
+
 .clock strong {
     font-size: 2rem;
     font-weight: normal;
@@ -897,7 +902,7 @@ button:focus-visible,
     }
 }
 
-/* "New game" inside a game: a form, so that the game knows the player left, drawn as a link. */
+/* "Leave the game": a form, so that the game knows the player left, drawn as a link. */
 form.leave {
     display: inline;
 }
