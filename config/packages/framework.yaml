@@ -8,6 +8,12 @@ framework:
     #esi: true
     #fragments: true
 
+    # The game only calls models. A local model loads on its first call: 14 GB read from the disk
+    # took more than the 60 s of PHP's default_socket_timeout (13/11/2026).
+    http_client:
+        default_options:
+            timeout: 300
+
 when@test:
     framework:
         test: true

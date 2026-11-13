@@ -18,7 +18,7 @@ Work in progress for the Symfony AI hackathon (November 2026).
 
 ## Getting started
 
-1. Have a model ready. The simplest: [Ollama](https://ollama.com) on your machine, then `ollama pull lfm3-vl:2b` (1.5 GB, runs on the CPU, without a GPU). That is what the game expects by default. On Linux, start Ollama with `OLLAMA_HOST=0.0.0.0`, or the game, in its container, cannot reach it. Another server or an API key: see [The models](#the-models).
+1. Have a model ready. By default the game expects [Ollama](https://ollama.com) on your machine with Qwen3.8 27B, the smallest local model that draws recognisably: `ollama pull hf.co/unsloth/Qwen3.8-27B-GGUF:UD-Q3_K_XL` (14 GB, for a GPU with 16 GB or a Mac with enough memory). On Linux, start Ollama with `OLLAMA_HOST=0.0.0.0`, or the game, in its container, cannot reach it. A smaller machine or an API key: see [Which model?](#which-model).
 2. Install and start the game:
 
    ```bash
@@ -53,12 +53,12 @@ The game does not need the best model: a poor drawer makes you laugh, a good one
 
 | Setup | Guesser | Drawer | Notes |
 |---|---|---|---|
-| Default: Ollama, `lfm3-vl:2b` for both roles | finds a swan at the first word, 3 to 5 s per word on a CPU, 0.1 s on a GPU | strokes, but nothing you can guess | runs on the CPU, without a GPU |
-| Anthropic API (`https://api.anthropic.com`) | `claude-haiku-5-5`, about 1 s | `claude-sonnet-5-5`, a whale you recognise in 10 s | the best we tried |
+| **Default**: Ollama, `hf.co/unsloth/Qwen3.8-27B-GGUF:UD-Q3_K_XL` for both roles | 0.7 s per word, finds a swan | a cat with whiskers, a snail with its shell, first stroke after 4 s | 14 GB, fully on a 16 GB GPU; the official `qwen3.8:27b` (18 GB) also works, but spills onto the CPU and draws its first stroke after 10 s. Not tried on a Mac |
+| Anthropic API (`https://api.anthropic.com`) | `claude-haiku-5-5`, about 1 s | `claude-sonnet-5-5`, a whale you recognise in 10 s | the best we tried, on any machine |
 | Mistral API (`https://api.mistral.ai`) | `mistral-small-latest`, 0.5 s, but misses easy drawings | `mistral-medium-3.5`, funny, rarely guessable | models that always reason, such as `mistral-large-4`, answer in a format the game cannot read yet |
-| A GPU (16 GB) with a 27B model, e.g. Qwen through llama.cpp | fast | recognisable sketches | |
+| A small model on the CPU, without a GPU: Ollama, `lfm3-vl:2b` for both roles | finds the swan, 3 to 5 s per word | strokes, but nothing you can guess | 1.5 GB; play "I draw, the AI guesses" (LFM Open License) |
 
-Small local models from 2B to 12B (Qwen 3.5, Gemma 4, Ministral 3, Granite 4) all guess fairly well, but none drew anything recognisable, on a CPU or a GPU. Without a GPU, play "I draw, the AI guesses", or plug a cloud model in as the drawer only: each role has its own endpoint.
+Smaller local models, from 2B to 12B (Qwen 3.5, Gemma 4, Ministral 3, Granite 4, LFM), all guess fairly well, but none drew anything recognisable, on a CPU or a GPU. Each role has its own endpoint: a small local guesser can play with a cloud drawer.
 
 - **Local models must not reason**: keep `DISABLE_THINKING=true`, or a small model takes tens of seconds per word. Cloud models may reason: the answer stays short.
 - **One model for both roles, or two that fit in memory together**: the roles take turns all the time, and loading a model takes 10 to 45 s.
