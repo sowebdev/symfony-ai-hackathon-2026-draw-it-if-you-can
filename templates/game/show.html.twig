@@ -19,6 +19,7 @@
                 <tr>
                     <th scope="col">{{ 'column.round'|trans }}</th>
                     <th scope="col">{{ 'column.drawer'|trans }}</th>
+                    <th scope="col">{{ 'label.theme'|trans }}</th>
                     <th scope="col">{{ 'column.word'|trans }}</th>
                     <th scope="col">{{ 'column.found_in'|trans }}</th>
                     {% if game.duel %}<th scope="col">{{ 'column.found_by'|trans }}</th>{% endif %}
@@ -30,6 +31,7 @@
                     <tr>
                         <td>{{ row.round.number }}</td>
                         <td>{{ ('drawer.' ~ row.round.drawnBy.value)|trans }}</td>
+                        <td>{{ row.round.theme|trans }}</td>
                         <td>{{ row.round.targetWord }}</td>
                         <td>{{ row.round.found ? (row.round.foundAfterMs / 1000)|number_format(1, 'label.decimal_separator'|trans) ~ ' s' : 'result.not_found'|trans }}</td>
                         {% if game.duel %}

@@ -97,7 +97,7 @@ final class CopilotTest extends WebTestCase
 
     public function testAGameWithACopilotWaitsInTheLobbyUntilThePlayerStartsIt(): void
     {
-        $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'mode' => 'copilot']);
+        $this->client->request('POST', '/fr/games', ['mode' => 'copilot']);
         self::assertResponseRedirects();
         $lobby = (string) $this->client->getResponse()->headers->get('Location');
         self::assertMatchesRegularExpression('#^/games/[0-9a-f-]{36}/lobby$#', $lobby);
@@ -168,7 +168,7 @@ final class CopilotTest extends WebTestCase
     public function testTheCopilotIsToldToStopWhenThePlayerPlaysAlone(): void
     {
         $this->startRound('ai');
-        $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'drawnBy' => 'player']);
+        $this->client->request('POST', '/fr/games', ['drawnBy' => 'player']);
 
         $status = $this->roundStatus();
         self::assertTrue($status['stop']);
@@ -177,8 +177,7 @@ final class CopilotTest extends WebTestCase
 
     public function testAGameWithoutACopilotIsNotSeenNorHelped(): void
     {
-        $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'drawnBy' => 'ai']);
-        $round = (string) $this->client->getResponse()->headers->get('Location');
+        $round = self::startFirstRound($this->client, 'fr', ['drawnBy' => 'ai']);
         self::readEvents($this->client, $round.'/drawing');
 
         foreach ([['look_at_drawing', []], ['suggest_word', ['word' => 'girafe']]] as [$tool, $arguments]) {
@@ -194,7 +193,7 @@ final class CopilotTest extends WebTestCase
      */
     private function openLobby(): string
     {
-        $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'mode' => 'copilot']);
+        $this->client->request('POST', '/fr/games', ['mode' => 'copilot']);
         self::assertResponseRedirects();
 
         return (string) $this->client->getResponse()->headers->get('Location');

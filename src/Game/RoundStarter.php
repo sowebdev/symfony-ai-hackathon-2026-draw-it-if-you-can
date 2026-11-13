@@ -22,31 +22,19 @@ final readonly class RoundStarter
         private ManagerRegistry $registry,
         private RoundRepository $rounds,
         private WordPicker $wordPicker,
+        private Dealer $dealer,
         #[Autowire('%game.round_seconds%')]
         private int $roundSeconds,
     ) {
     }
 
     /**
-     * The first round of a new game, stored with it.
-     *
-     * @throws \Throwable When the model gives no word: nothing is stored
+     * A new game, stored without a round: the theme of its first round is dealt, so that its card
+     * is shown while the AI picks the word. A game with an agent waits in the lobby meanwhile.
      */
-    public function startGame(Game $game): Round
+    public function open(Game $game): void
     {
-        $round = $this->newRound($game, 1);
-        $this->entityManager->persist($game);
-        $this->entityManager->persist($round);
-        $this->entityManager->flush();
-
-        return $round;
-    }
-
-    /**
-     * A game with a copilot: stored without a round, it waits in the lobby for the copilot.
-     */
-    public function openLobby(Game $game): void
-    {
+        $game->dealNextTheme($this->dealer->theme());
         $this->entityManager->persist($game);
         $this->entityManager->flush();
     }
@@ -68,7 +56,7 @@ final readonly class RoundStarter
             return null;
         }
 
-        $round = $this->newRound($game, null === $last ? 1 : $last->getNumber() + 1);
+        $round = $this->newRound($game, null === $last ? 1 : $last->getNumber() + 1, $last);
         try {
             $this->entityManager->persist($round);
             $this->entityManager->flush();
@@ -82,12 +70,14 @@ final readonly class RoundStarter
         return $round;
     }
 
-    private function newRound(Game $game, int $number): Round
+    private function newRound(Game $game, int $number, ?Round $previous): Round
     {
+        $theme = $game->getNextTheme() ?? $this->dealer->theme($previous?->getTheme());
         // The AI that does not guess picks the word: the guesser when the player draws, the drawer otherwise.
         $role = DrawnBy::Ai === $game->drawnByInRound($number) ? Role::Drawer : Role::Guesser;
-        $word = $this->wordPicker->pick($game->getTheme(), $game->getLanguage(), $role);
+        $word = $this->wordPicker->pick($theme, $game->getLanguage(), $role);
+        $game->dealNextTheme($this->dealer->theme($theme));
 
-        return new Round($game, $number, $word, $this->roundSeconds * 1000);
+        return new Round($game, $number, $word, $this->roundSeconds * 1000, $theme);
     }
 }

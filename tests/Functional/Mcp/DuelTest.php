@@ -29,7 +29,7 @@ final class DuelTest extends WebTestCase
 
     public function testTheLobbyOfADuelAsksForARival(): void
     {
-        $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'mode' => 'duel']);
+        $this->client->request('POST', '/fr/games', ['mode' => 'duel']);
         $lobby = (string) $this->client->getResponse()->headers->get('Location');
         $this->client->request('GET', $lobby);
         self::assertSelectorTextContains('h1', 'Branche ton adversaire');
@@ -44,7 +44,7 @@ final class DuelTest extends WebTestCase
 
     public function testTheRivalChoosesAFunnyNickname(): void
     {
-        $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'mode' => 'duel']);
+        $this->client->request('POST', '/fr/games', ['mode' => 'duel']);
         $lobby = (string) $this->client->getResponse()->headers->get('Location');
         self::assertStringContainsString('choose_nickname', $this->roundStatus()['what_you_can_do']);
 
@@ -165,7 +165,7 @@ final class DuelTest extends WebTestCase
 
     public function testInTheLobbyTheGameTellsTheRivalToWaitForIt(): void
     {
-        $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'mode' => 'duel']);
+        $this->client->request('POST', '/fr/games', ['mode' => 'duel']);
 
         $status = $this->waitForYourTurn();
         self::assertSame('nothing new yet', $status['news']);

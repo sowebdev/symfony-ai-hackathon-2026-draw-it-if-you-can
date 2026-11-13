@@ -3,7 +3,8 @@
    The round-timer controller is on the main element (round/_timer.html.twig), so that the other
    controllers of the round can act on it. #}
 <header class="scoreboard">
-    <p class="round-number">{{ 'label.round'|trans({'%number%': round.number, '%count%': round.game.roundCount}) }} · {{ round.game.theme|trans }}</p>
+    <p class="round-number">{{ 'label.round'|trans({'%number%': round.number, '%count%': round.game.roundCount}) }}</p>
+    <p class="theme-tag">{{ round.theme.icon }} {{ round.theme|trans }}</p>
     {% if round.game.withCopilot %}
         <p class="copilot-badge {{ round.game.agentConnected ? 'connected' }}">
             {{ include('game/_mode_sketch.html.twig', {mode: 'agent'}) }}

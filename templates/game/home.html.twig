@@ -13,15 +13,7 @@
         {% if error %}
             <p class="error" role="alert">{{ error|trans }}</p>
         {% endif %}
-        <form method="post" action="{{ path('game_create') }}" class="new-game" data-controller="loading" data-action="loading#show">
-            <label>
-                {{ 'label.theme'|trans }}
-                <select name="theme">
-                    {% for theme in themes %}
-                        <option value="{{ theme.value }}">{{ theme|trans }}</option>
-                    {% endfor %}
-                </select>
-            </label>
+        <form method="post" action="{{ path('game_create') }}" class="new-game">
             <fieldset class="game-mode">
                 <legend>{{ 'label.mode'|trans }}</legend>
                 <div class="mode-cards">
@@ -36,10 +28,9 @@
                     {% endfor %}
                 </div>
             </fieldset>
-            <p class="who-starts">{{ 'label.who_starts'|trans }}</p>
+            <p class="who-starts">{{ 'label.dealt'|trans }}</p>
             <div class="modes">
-                <button type="submit" name="drawnBy" value="ai">{{ 'action.ai_draws'|trans }}</button>
-                <button type="submit" name="drawnBy" value="player">{{ 'action.player_draws'|trans }}</button>
+                <button type="submit">{{ 'action.start_game'|trans }}</button>
             </div>
         </form>
         {{ include('game/_health.html.twig') }}

@@ -113,7 +113,7 @@ final readonly class AgentTools
                 'you_are' => $this->role($game),
                 'your_nickname' => $game->getAgentNickname(),
                 'state' => $game->hasLeft() ? 'the player left' : 'waiting for the player to start the game',
-                'theme' => $game->getTheme()->description(),
+                'theme' => 'dealt at random for each round',
                 'language' => $game->getLanguage()->nameInEnglish(),
                 'stop' => $stop,
                 'what_you_can_do' => $advice,
@@ -132,7 +132,7 @@ final readonly class AgentTools
             'number' => $current->getNumber(),
             'of' => $game->getRoundCount(),
             'drawn_by' => $current->getDrawnBy()->value,
-            'theme' => $game->getTheme()->description(),
+            'theme' => $current->getTheme()->description(),
             'language' => $game->getLanguage()->nameInEnglish(),
             'time_left_s' => intdiv($current->timeLeftMs(), 1000),
             'state' => match (true) {

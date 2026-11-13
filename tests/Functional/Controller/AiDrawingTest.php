@@ -27,7 +27,10 @@ final class AiDrawingTest extends WebTestCase
     public function testTheWordIsNotShownToThePlayer(): void
     {
         $this->client->request('GET', '/fr');
-        $this->client->submitForm("L'IA dessine", ['theme' => 'animals']);
+        $this->client->submitForm('Commencer la partie');
+        $this->client->followRedirect();
+        // The page of the card of the first theme: without JavaScript, a button starts the round.
+        $this->client->submitForm('Commencer la partie');
         $this->client->followRedirect();
 
         self::assertResponseIsSuccessful();
@@ -124,7 +127,7 @@ final class AiDrawingTest extends WebTestCase
 
     public function testTheAiDoesNotDrawInARoundOfThePlayer(): void
     {
-        $this->client->request('POST', '/en/games', ['theme' => 'animals', 'drawnBy' => 'player']);
+        $this->client->request('POST', '/en/games', ['drawnBy' => 'player']);
         $round = (string) $this->client->getResponse()->headers->get('Location');
 
         $this->client->request('GET', $round.'/drawing');
@@ -160,10 +163,7 @@ final class AiDrawingTest extends WebTestCase
 
     private function startRound(): string
     {
-        $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'drawnBy' => 'ai']);
-        self::assertResponseRedirects();
-
-        return (string) $this->client->getResponse()->headers->get('Location');
+        return self::startFirstRound($this->client, 'fr', ['drawnBy' => 'ai']);
     }
 
     private function answer(string $round, string $word): void

@@ -4,10 +4,10 @@ namespace App\Controller;
 
 use App\Ai\ModelHealth;
 use App\Entity\Game;
+use App\Game\Dealer;
 use App\Game\Language;
 use App\Game\RoundStarter;
 use App\Game\ScoreGauge;
-use App\Game\Theme;
 use App\Repository\RoundRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Clock\DatePoint;
@@ -69,21 +69,12 @@ final class GameController extends AbstractController
      * The game is played in the language of the page: the interface, the words and the guesses.
      */
     #[Route('/{_locale}/games', name: 'game_create', requirements: ['_locale' => new EnumRequirement(Language::class)], methods: ['POST'])]
-    public function create(Request $request, #[MapRequestPayload] NewGame $payload): Response
+    public function create(Request $request, Dealer $dealer, #[MapRequestPayload] NewGame $payload = new NewGame()): Response
     {
-        $game = new Game($payload->theme, Language::from($request->getLocale()), $this->roundCount, $payload->drawnBy, $payload->mode);
-        if ($game->isWithAgent()) {
-            $this->starter->openLobby($game);
+        $game = new Game(Language::from($request->getLocale()), $this->roundCount, $payload->drawnBy ?? $dealer->firstDrawer(), $payload->mode);
+        $this->starter->open($game);
 
-            return $this->redirectToRoute('game_lobby', ['id' => $game->getId()]);
-        }
-        try {
-            $round = $this->starter->startGame($game);
-        } catch (\Throwable $exception) {
-            return $this->noWord($exception, fn (string $error, int $status): Response => $this->renderHome($error, $status));
-        }
-
-        return $this->redirectToRoute('round_show', ['id' => $round->getId()]);
+        return $this->redirectToRoute($game->isWithAgent() ? 'game_lobby' : 'game_show', ['id' => $game->getId()]);
     }
 
     /**
@@ -96,7 +87,7 @@ final class GameController extends AbstractController
         try {
             $round = $this->starter->startNext($game);
         } catch (\Throwable $exception) {
-            return $this->noWord($exception, fn (string $error, int $status): Response => $this->render('game/no_word.html.twig', ['game' => $game, 'error' => $error], new Response(status: $status)));
+            return $this->noWord($exception, fn (string $error, int $status): Response => $this->render('game/no_word.html.twig', ['game' => $game, 'number' => ($this->rounds->findLastOfGame($game)?->getNumber() ?? 0) + 1, 'error' => $error], new Response(status: $status)));
         }
 
         return null === $round
@@ -111,8 +102,14 @@ final class GameController extends AbstractController
     public function show(Game $game): Response
     {
         $rounds = $this->rounds->findByGame($game);
-        if ([] === $rounds) {
+        if ([] === $rounds && $game->isWithAgent()) {
             return $this->redirectToRoute('game_lobby', ['id' => $game->getId()]);
+        }
+        if ([] === $rounds) {
+            // The card of the first theme turns over while the AI picks the word.
+            $this->speak($game);
+
+            return $this->render('game/deal.html.twig', ['game' => $game, 'dealing' => null !== $game->getNextTheme()]);
         }
         $last = $rounds[array_key_last($rounds)];
         if (!$last->isLast() || !$last->isOver()) {
@@ -185,7 +182,6 @@ final class GameController extends AbstractController
     private function renderHome(?string $error = null, int $status = Response::HTTP_OK): Response
     {
         return $this->render('game/home.html.twig', [
-            'themes' => Theme::cases(),
             'languages' => Language::cases(),
             'error' => $error,
         ], new Response(status: $status));

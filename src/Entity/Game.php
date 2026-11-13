@@ -41,9 +41,11 @@ class Game
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $leftAt = null;
 
+    /** Dealt ahead of the next round, so that its card is shown while the AI picks the word. */
+    #[ORM\Column(enumType: Theme::class, nullable: true)]
+    private ?Theme $nextTheme = null;
+
     public function __construct(
-        #[ORM\Column(enumType: Theme::class)]
-        private Theme $theme,
         #[ORM\Column(enumType: Language::class)]
         private Language $language,
         #[ORM\Column(options: ['default' => 1])]
@@ -71,9 +73,14 @@ class Game
         return $this->createdAt;
     }
 
-    public function getTheme(): Theme
+    public function getNextTheme(): ?Theme
     {
-        return $this->theme;
+        return $this->nextTheme;
+    }
+
+    public function dealNextTheme(Theme $theme): void
+    {
+        $this->nextTheme = $theme;
     }
 
     public function getLanguage(): Language

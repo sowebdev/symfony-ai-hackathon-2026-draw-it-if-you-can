@@ -36,10 +36,17 @@ final class GameControllerTest extends WebTestCase
         $client->request('GET', '/fr');
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('html[lang="fr"] h1 + p', "Dessine pour l'IA, ou devine ses dessins.");
-        self::assertSelectorTextContains('option[value="animals"]', 'Animaux');
+        self::assertSelectorTextContains('.who-starts', 'tirés au hasard');
 
-        $client->submitForm('Je dessine', ['theme' => 'animals']);
+        $client->request('POST', '/fr/games', ['drawnBy' => 'player']);
         self::assertResponseRedirects();
+        $game = (string) $client->getResponse()->headers->get('Location');
+
+        // The card of the first theme turns over, then the form starts the round by itself.
+        $client->request('GET', $game, server: ['HTTP_ACCEPT_LANGUAGE' => 'en']);
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('form[data-loading-auto-value="true"][data-loading-theme-value="🐾 Animaux"][data-loading-round-value="Manche 1 / 6"]');
+        $client->request('POST', $game.'/rounds');
 
         // The round page speaks the language of its game, whatever the browser says.
         $client->request('GET', (string) $client->getResponse()->headers->get('Location'), server: ['HTTP_ACCEPT_LANGUAGE' => 'en']);
@@ -47,7 +54,8 @@ final class GameControllerTest extends WebTestCase
         self::assertSelectorExists('html[lang="fr"]');
         self::assertSelectorTextContains('.target', 'À dessiner');
         self::assertSelectorTextContains('.target strong', 'girafe');
-        self::assertSelectorTextContains('.round-number', 'Animaux');
+        self::assertSelectorTextContains('.theme-tag', 'Animaux');
+        self::assertSelectorTextContains('.target-theme', 'Animaux');
         self::assertSelectorExists('canvas[data-canvas-target="canvas"]');
         self::assertSelectorNotExists('.copilot-badge', 'No copilot unless asked');
     }
@@ -60,7 +68,6 @@ final class GameControllerTest extends WebTestCase
 
         $client->request('GET', '/fr');
         self::assertSelectorExists('.health[data-health-url-value="/health"]');
-        self::assertSelectorExists('form.new-game[data-action="loading#show"]');
 
         $client->request('GET', '/health?fresh=1');
         $report = json_decode((string) $client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
@@ -87,18 +94,19 @@ final class GameControllerTest extends WebTestCase
         $client = self::createClient();
         self::scriptModel($client, word: 'I would say a giraffe');
 
-        $client->request('POST', '/en/games', ['theme' => 'animals']);
+        $client->request('POST', '/en/games', []);
+        $client->request('POST', $client->getResponse()->headers->get('Location').'/rounds');
 
         self::assertResponseStatusCodeSame(503);
         self::assertSelectorTextContains('.error', 'could not pick a word');
     }
 
-    public function testAnUnknownThemeIsRejected(): void
+    public function testAnUnknownModeIsRejected(): void
     {
         $client = self::createClient();
         self::scriptModel($client);
 
-        $client->request('POST', '/en/games', ['theme' => 'cars']);
+        $client->request('POST', '/en/games', ['mode' => 'cars']);
 
         self::assertResponseStatusCodeSame(422);
     }

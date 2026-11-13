@@ -3,12 +3,16 @@
 namespace App\Tests\Functional;
 
 use App\Ai\Drawer;
+use App\Game\Dealer;
+use Random\Engine;
+use Random\Randomizer;
 use Symfony\AI\Platform\Test\MockPlatformFactory;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 /**
  * Replaces the models with a script: the word to draw is "cat", the guesses are taken in order,
- * and the AI draws the given strokes.
+ * and the AI draws the given strokes. The dealer always takes its first choice: the AI draws first
+ * unless the test says otherwise, and the first round is about animals.
  */
 trait ScriptedModel
 {
@@ -35,7 +39,29 @@ trait ScriptedModel
         $client->getContainer()->set('ai.platform.generic.guesser', $platform);
         $client->getContainer()->set('ai.platform.generic.drawer', $platform);
         $client->getContainer()->set(Drawer::class, $drawer = new ScriptedDrawer($strokes, $drawingFailure, $details));
+        $client->getContainer()->set(Dealer::class, new Dealer(new Randomizer(new class implements Engine {
+            public function generate(): string
+            {
+                return "\0\0\0\0\0\0\0\0";
+            }
+        })));
 
         return $drawer;
+    }
+
+    /**
+     * Starts a game as the home form does, through the page where the card of its first theme
+     * turns over, and returns the URL of its first round.
+     *
+     * @param array<string, string> $form
+     */
+    private static function startFirstRound(KernelBrowser $client, string $locale = 'en', array $form = []): string
+    {
+        $client->request('POST', "/{$locale}/games", $form);
+        self::assertResponseRedirects();
+        $client->request('POST', $client->getResponse()->headers->get('Location').'/rounds');
+        self::assertResponseRedirects();
+
+        return (string) $client->getResponse()->headers->get('Location');
     }
 }

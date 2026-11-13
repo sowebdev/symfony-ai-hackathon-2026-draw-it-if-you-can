@@ -1,5 +1,16 @@
 {# Shown while a form waits for the AI, typically picking the word of a round (assets/controllers/loading_controller.js). #}
-<div class="loading" id="loading" hidden role="status" aria-live="assertive">
+{# On the page that deals the first theme of a game, the screen and the card are there from the start. #}
+{% set dealing = dealing ?? false %}
+<div class="loading" id="loading" {{ dealing ? '' : 'hidden' }} role="status" aria-live="assertive">
+    <div class="theme-card" {{ dealing ? '' : 'hidden' }}>
+        <div class="theme-card-inner">
+            <div class="theme-card-back" aria-hidden="true">?</div>
+            <div class="theme-card-face">
+                <small class="theme-card-round">{{ dealing ? 'label.round'|trans({'%number%': 1, '%count%': game.roundCount}) }}</small>
+                <strong class="theme-card-theme">{{ dealing ? game.nextTheme.icon ~ ' ' ~ game.nextTheme|trans }}</strong>
+            </div>
+        </div>
+    </div>
     <div class="loading-card">
         <svg viewBox="0 0 200 120" aria-hidden="true">
             <path d="M20 90 C40 30 70 20 90 60 S140 100 160 40 S185 30 190 50"/>

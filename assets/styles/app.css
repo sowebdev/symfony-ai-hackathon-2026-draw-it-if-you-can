@@ -214,7 +214,36 @@ button:focus-visible,
 }
 
 .round-number {
-    flex: 1;
+    flex: none;
+}
+
+/* The theme of the round: a label taped in the bar, as on the card drawn before the round. */
+.theme-tag {
+    position: relative;
+    margin-right: auto !important;
+    padding: 0.15rem 0.8rem;
+    font-size: 1.4rem;
+    background: var(--sheet);
+    border: 2px solid var(--ink);
+    border-radius: 4px 7px 5px 8px;
+    box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.1);
+    transform: rotate(-2deg);
+}
+
+.theme-tag::before {
+    content: '';
+    position: absolute;
+    top: -0.6rem;
+    left: 50%;
+    width: 3rem;
+    height: 1rem;
+    background: var(--tape);
+    transform: translateX(-50%) rotate(3deg);
+}
+
+.target-theme {
+    color: #777;
+    white-space: nowrap;
 }
 
 .clock {
@@ -884,6 +913,8 @@ button.link:hover {
     z-index: 10;
     display: flex;
     align-items: center;
+    flex-direction: column;
+    gap: 1.5rem;
     justify-content: center;
     background: rgba(251, 247, 236, 0.85);
 }
@@ -928,6 +959,75 @@ button.link:hover {
 .loading-note {
     margin: 0.3rem 0 0;
     color: #777;
+}
+
+/* The page that deals the first theme: its button only starts the round, by itself, under the card. */
+.deal form {
+    visibility: hidden;
+}
+
+/* The card of the theme, drawn before a round: face down, then turned over (loading_controller.js). */
+.theme-card {
+    width: 13rem;
+    height: 17rem;
+    perspective: 900px;
+}
+
+.theme-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(0.3, 1.4, 0.5, 1) 0.25s;
+}
+
+.theme-card.dealt .theme-card-inner {
+    transform: rotateY(180deg) rotate(-3deg);
+}
+
+.theme-card-back,
+.theme-card-face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    border: 2px solid var(--ink);
+    border-radius: 10px 14px 9px 16px;
+    box-shadow: 6px 8px 0 rgba(0, 0, 0, 0.12);
+    backface-visibility: hidden;
+}
+
+.theme-card-back {
+    font-size: 5rem;
+    color: var(--sheet);
+    background: repeating-linear-gradient(45deg, var(--pencil) 0 12px, var(--rust) 12px 24px);
+}
+
+.theme-card-face {
+    padding: 1rem;
+    text-align: center;
+    background: var(--sheet);
+    transform: rotateY(180deg);
+}
+
+.theme-card-round {
+    font-size: 1.2rem;
+    color: #777;
+}
+
+.theme-card-theme {
+    font-size: 2.2rem;
+    font-weight: normal;
+    line-height: 1.2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .theme-card-inner {
+        transition: none;
+    }
 }
 
 /* A duel: the score of each side in the bar, and the answers of the rival in its own column. */

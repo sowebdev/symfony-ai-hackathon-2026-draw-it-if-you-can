@@ -161,10 +161,7 @@ final class RoundControllerTest extends WebTestCase
         if ($scripted) {
             self::scriptModel($this->client, $guesses);
         }
-        $this->client->request('POST', '/en/games', ['theme' => 'animals', 'drawnBy' => 'player']);
-        self::assertResponseRedirects();
-
-        return (string) $this->client->getResponse()->headers->get('Location');
+        return self::startFirstRound($this->client, 'en', ['drawnBy' => 'player']);
     }
 
     /**

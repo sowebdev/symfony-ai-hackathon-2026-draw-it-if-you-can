@@ -16,7 +16,7 @@
           {% if round.game.duel %}{{ include('round/_agent.html.twig') }}{% endif %}
           data-action="guesses:found->canvas#lock guesses:found->round-timer#finish round-timer:up->canvas#lock round-timer:up->guesses#stop agent:found->canvas#lock agent:found->guesses#stop agent:found->round-timer#finish">
         {{ include('round/_scoreboard.html.twig') }}
-        <p class="target">{{ 'instruction.draw'|trans }} <strong>{{ round.targetWord }}</strong></p>
+        <p class="target">{{ 'instruction.draw'|trans }} <strong>{{ round.targetWord }}</strong> <span class="target-theme">· {{ round.theme.icon }} {{ round.theme|trans }}</span></p>
 
         <div class="board">
             <div class="stage">

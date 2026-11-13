@@ -91,8 +91,7 @@ final class GameFlowTest extends WebTestCase
     public function testNothingCountsOnceTheTimeIsUp(): void
     {
         $round = $this->startGame();
-        $this->client->request('POST', '/en/games', ['theme' => 'animals', 'drawnBy' => 'player']);
-        $drawn = (string) $this->client->getResponse()->headers->get('Location');
+        $drawn = self::startFirstRound($this->client, 'en', ['drawnBy' => 'player']);
 
         self::wait(62);
 
@@ -119,8 +118,7 @@ final class GameFlowTest extends WebTestCase
 
     public function testANearWordCountsFromTheClickOnYes(): void
     {
-        $this->client->request('POST', '/en/games', ['theme' => 'animals', 'drawnBy' => 'player']);
-        $round = (string) $this->client->getResponse()->headers->get('Location');
+        $round = self::startFirstRound($this->client, 'en', ['drawnBy' => 'player']);
         $this->client->request('POST', $round.'/strokes', server: ['CONTENT_TYPE' => 'application/json'], content: '{"points":[[1,1,0]]}');
         [$guess] = self::readEvents($this->client, $round.'/guesses');
         self::assertSame('kitten', $guess['data']['word']);
@@ -136,8 +134,7 @@ final class GameFlowTest extends WebTestCase
 
     public function testTheFrenchGameSpeaksFrench(): void
     {
-        $this->client->request('POST', '/fr/games', ['theme' => 'animals']);
-        $round = (string) $this->client->getResponse()->headers->get('Location');
+        $round = self::startFirstRound($this->client, 'fr');
         $this->client->request('POST', $round.'/give-up');
 
         $this->client->request('GET', $round);
@@ -148,10 +145,7 @@ final class GameFlowTest extends WebTestCase
 
     private function startGame(): string
     {
-        $this->client->request('POST', '/en/games', ['theme' => 'animals']);
-        self::assertResponseRedirects();
-
-        return (string) $this->client->getResponse()->headers->get('Location');
+        return self::startFirstRound($this->client);
     }
 
     private function gameOf(string $round): string

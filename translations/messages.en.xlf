@@ -8,6 +8,11 @@
                 <target>Draw for the AI, or guess its drawings.</target>
                 <note>Under the title of the home page</note>
             </trans-unit>
+            <trans-unit id="label.dealt" resname="label.dealt">
+                <source>label.dealt</source>
+                <target>Who draws first and the theme of each round are dealt at random.</target>
+                <note>Above the button that starts a game</note>
+            </trans-unit>
             <trans-unit id="label.language" resname="label.language">
                 <source>label.language</source>
                 <target>Language</target>
@@ -16,7 +21,7 @@
             <trans-unit id="label.theme" resname="label.theme">
                 <source>label.theme</source>
                 <target>Theme</target>
-                <note>Field of the new game form</note>
+                <note>Column of the final score: the theme of each round</note>
             </trans-unit>
             <trans-unit id="action.new_game" resname="action.new_game">
                 <source>action.new_game</source>
@@ -72,16 +77,6 @@
                 <source>theme.developer</source>
                 <target>Developer life</target>
                 <note>Name of a theme</note>
-            </trans-unit>
-            <trans-unit id="action.player_draws" resname="action.player_draws">
-                <source>action.player_draws</source>
-                <target>I draw</target>
-                <note>Starts a game where the player draws and the AI guesses</note>
-            </trans-unit>
-            <trans-unit id="action.ai_draws" resname="action.ai_draws">
-                <source>action.ai_draws</source>
-                <target>The AI draws</target>
-                <note>Starts a game where the AI draws and the player guesses</note>
             </trans-unit>
             <trans-unit id="instruction.guess" resname="instruction.guess">
                 <source>instruction.guess</source>
@@ -147,11 +142,6 @@
                 <source>label.points_at_stake</source>
                 <target>This word is worth</target>
                 <note>Before the points the word is worth now, above the gauge</note>
-            </trans-unit>
-            <trans-unit id="label.who_starts" resname="label.who_starts">
-                <source>label.who_starts</source>
-                <target>Who draws first?</target>
-                <note>Above the buttons that start a game</note>
             </trans-unit>
             <trans-unit id="heading.round_found" resname="heading.round_found">
                 <source>heading.round_found</source>

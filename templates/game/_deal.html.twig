@@ -1,0 +1,7 @@
+{# On a form that starts a round: the loading screen, and on it the card of the theme dealt for
+   the round, turned over before the AI picks the word (assets/controllers/loading_controller.js). #}
+data-controller="loading" data-action="loading#show"
+{% if game.nextTheme %}
+    data-loading-theme-value="{{ game.nextTheme.icon }} {{ game.nextTheme|trans }}"
+    data-loading-round-value="{{ 'label.round'|trans({'%number%': number, '%count%': game.roundCount}) }}"
+{% endif %}

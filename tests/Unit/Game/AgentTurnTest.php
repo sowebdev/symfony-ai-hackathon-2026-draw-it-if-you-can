@@ -18,18 +18,18 @@ final class AgentTurnTest extends TestCase
 
     public function testInTheLobbyNothingComesUntilTheFirstRound(): void
     {
-        $game = new Game(Theme::Animals, Language::English, 6, DrawnBy::Ai, Mode::Copilot);
+        $game = new Game(Language::English, 6, DrawnBy::Ai, Mode::Copilot);
         $turn = AgentTurn::from(null);
 
         self::assertNull($turn->news($game, null, 0));
-        self::assertSame(AgentTurn::NEW_ROUND, $turn->news($game, new Round($game, 1, 'cat', 60_000), 0), 'The player started the game');
+        self::assertSame(AgentTurn::NEW_ROUND, $turn->news($game, new Round($game, 1, 'cat', 60_000, Theme::Animals), 0), 'The player started the game');
     }
 
     public function testACopilotWaitsForStrokesItHasNotSeen(): void
     {
         self::mockTime();
-        $game = new Game(Theme::Animals, Language::English, 6, DrawnBy::Ai, Mode::Copilot);
-        $round = new Round($game, 1, 'cat', 60_000);
+        $game = new Game(Language::English, 6, DrawnBy::Ai, Mode::Copilot);
+        $round = new Round($game, 1, 'cat', 60_000, Theme::Animals);
         $turn = AgentTurn::from($round);
 
         self::assertNull($turn->news($game, $round, 0), 'The canvas is empty');
@@ -43,8 +43,8 @@ final class AgentTurnTest extends TestCase
     public function testAStrokeTheAgentWasToldOfIsNoNews(): void
     {
         self::mockTime();
-        $game = new Game(Theme::Animals, Language::English, 6, DrawnBy::Ai, Mode::Duel);
-        $round = new Round($game, 1, 'cat', 60_000);
+        $game = new Game(Language::English, 6, DrawnBy::Ai, Mode::Duel);
+        $round = new Round($game, 1, 'cat', 60_000, Theme::Animals);
         $round->agentTold(2);
 
         self::assertNull(AgentTurn::from($round)->news($game, $round, 2), 'A status gave these strokes');
@@ -54,8 +54,8 @@ final class AgentTurnTest extends TestCase
     public function testACopilotHasNothingToDoWhileThePlayerDraws(): void
     {
         self::mockTime();
-        $game = new Game(Theme::Animals, Language::English, 6, DrawnBy::Player, Mode::Copilot);
-        $round = new Round($game, 1, 'cat', 60_000);
+        $game = new Game(Language::English, 6, DrawnBy::Player, Mode::Copilot);
+        $round = new Round($game, 1, 'cat', 60_000, Theme::Animals);
 
         self::assertNull(AgentTurn::from($round)->news($game, $round, 5));
     }
@@ -63,8 +63,8 @@ final class AgentTurnTest extends TestCase
     public function testARivalPlaysOnEveryDrawing(): void
     {
         self::mockTime();
-        $game = new Game(Theme::Animals, Language::English, 6, DrawnBy::Player, Mode::Duel);
-        $round = new Round($game, 1, 'cat', 60_000);
+        $game = new Game(Language::English, 6, DrawnBy::Player, Mode::Duel);
+        $round = new Round($game, 1, 'cat', 60_000, Theme::Animals);
 
         self::assertSame(AgentTurn::NEW_STROKES, AgentTurn::from($round)->news($game, $round, 5));
     }
@@ -72,8 +72,8 @@ final class AgentTurnTest extends TestCase
     public function testTheEndOfARoundComesOnceThenTheNextRound(): void
     {
         $clock = self::mockTime();
-        $game = new Game(Theme::Animals, Language::English, 6, DrawnBy::Player, Mode::Copilot);
-        $round = new Round($game, 1, 'cat', 60_000);
+        $game = new Game(Language::English, 6, DrawnBy::Player, Mode::Copilot);
+        $round = new Round($game, 1, 'cat', 60_000, Theme::Animals);
         $turn = AgentTurn::from($round);
 
         $clock->sleep(62);
@@ -81,6 +81,6 @@ final class AgentTurnTest extends TestCase
 
         $over = AgentTurn::from($round);
         self::assertNull($over->news($game, $round, 0), 'The agent knows the round is over');
-        self::assertSame(AgentTurn::NEW_ROUND, $over->news($game, new Round($game, 2, 'dog', 60_000), 0));
+        self::assertSame(AgentTurn::NEW_ROUND, $over->news($game, new Round($game, 2, 'dog', 60_000, Theme::Animals), 0));
     }
 }

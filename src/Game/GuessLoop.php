@@ -104,7 +104,7 @@ final readonly class GuessLoop
         $said = array_map(static fn (Guess $guess): string => $guess->getWord(), $this->guesses->findByRound($round));
         $png = $this->renderer->toPng(array_map(static fn (Stroke $stroke): array => $stroke->getPoints(), $strokes));
 
-        $word = $this->guesser->guess($png, $game->getTheme(), $game->getLanguage(), $said);
+        $word = $this->guesser->guess($png, $round->getTheme(), $game->getLanguage(), $said);
         // A slow model may answer after the end of the round: too late.
         if (null === $word || $round->isTimeUp() || \in_array(WordMatcher::normalize($word), array_map(WordMatcher::normalize(...), $said), true)) {
             return null;

@@ -18,14 +18,14 @@ final class ScoreGaugeTest extends TestCase
 {
     public function testInADuelEachSideHasTheWordsItFound(): void
     {
-        $game = new Game(Theme::Animals, Language::English, 6, DrawnBy::Ai, Mode::Duel);
-        $byPlayer = new Round($game, 1, 'cat', 60_000);
+        $game = new Game(Language::English, 6, DrawnBy::Ai, Mode::Duel);
+        $byPlayer = new Round($game, 1, 'cat', 60_000, Theme::Animals);
         $byPlayer->markFound(new Guess($byPlayer, 'cat', 0, Author::Player));
-        $byAi = new Round($game, 2, 'dog', 60_000);
+        $byAi = new Round($game, 2, 'dog', 60_000, Theme::Animals);
         $byAi->markFound(new Guess($byAi, 'dog', 35_000, Author::Ai));
-        $byRival = new Round($game, 3, 'cow', 60_000);
+        $byRival = new Round($game, 3, 'cow', 60_000, Theme::Animals);
         $byRival->markFound(new Guess($byRival, 'cow', 60_000, Author::Agent));
-        $nobody = new Round($game, 4, 'owl', 60_000);
+        $nobody = new Round($game, 4, 'owl', 60_000, Theme::Animals);
         $gauge = new ScoreGauge(1000, 10, 100);
 
         self::assertSame(1550, $gauge->total([$byPlayer, $byAi, $byRival, $nobody]), 'The player and the AI play together');

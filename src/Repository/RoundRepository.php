@@ -29,7 +29,7 @@ class RoundRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('r')
             ->select('r.targetWord')
             ->join('r.game', 'g')
-            ->where('g.theme = :theme')
+            ->where('r.theme = :theme')
             ->andWhere('g.language = :language')
             ->setParameter('theme', $theme)
             ->setParameter('language', $language)

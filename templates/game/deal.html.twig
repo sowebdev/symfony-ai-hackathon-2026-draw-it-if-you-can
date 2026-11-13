@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{# A new game without an agent: the card of the first theme turns over, then the first round starts. #}
+{% block body %}
+    <main class="home deal">
+        <form method="post" action="{{ path('game_next_round', {id: game.id}) }}" {{ include('game/_deal.html.twig', {number: 1}) }} data-loading-auto-value="true">
+            <button type="submit">{{ 'action.start_game'|trans }}</button>
+        </form>
+    </main>
+{% endblock %}

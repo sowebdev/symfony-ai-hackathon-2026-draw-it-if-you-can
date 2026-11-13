@@ -106,7 +106,7 @@ final readonly class DrawingLoop
 
             $before = $position;
             try {
-                foreach ($this->drawer->draw($round->getTargetWord(), $round->getGame()->getTheme(), ...$this->sketchSoFar($round)) as $written) {
+                foreach ($this->drawer->draw($round->getTargetWord(), $round->getTheme(), ...$this->sketchSoFar($round)) as $written) {
                     // The player may have found the word, or given up, in another request; or the time is up.
                     $round = $this->fresh($roundId);
                     if ($round->isOver() || $position >= self::MAX_STROKES) {

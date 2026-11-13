@@ -13,7 +13,7 @@
           {{ include('round/_agent.html.twig') }}
           data-action="ai-drawing:over->round-timer#finish round-timer:up->ai-drawing#stop agent:pick->ai-drawing#answerHint agent:found->ai-drawing#stop agent:found->round-timer#finish">
         {{ include('round/_scoreboard.html.twig') }}
-        <p class="target">{{ 'instruction.guess'|trans }}</p>
+        <p class="target">{{ 'instruction.guess'|trans }} <span class="target-theme">· {{ round.theme.icon }} {{ round.theme|trans }}</span></p>
 
         <div class="board">
             <div class="stage">

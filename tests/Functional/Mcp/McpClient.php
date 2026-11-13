@@ -113,7 +113,7 @@ trait McpClient
      */
     private function startRound(string $drawnBy, string $mode = 'copilot'): string
     {
-        $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'drawnBy' => $drawnBy, 'mode' => $mode]);
+        $this->client->request('POST', '/fr/games', ['drawnBy' => $drawnBy, 'mode' => $mode]);
         $lobby = (string) $this->client->getResponse()->headers->get('Location');
         $this->client->request('POST', substr($lobby, 0, -\strlen('/lobby')).'/rounds');
         self::assertResponseRedirects();

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Game\Author;
 use App\Game\DrawnBy;
+use App\Game\Theme;
 use App\Repository\RoundRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -91,6 +92,9 @@ class Round
         private string $targetWord,
         #[ORM\Column(options: ['default' => 60000])]
         private int $durationMs,
+        /** Dealt for each round: it frames the word, and the guesser knows it. */
+        #[ORM\Column(enumType: Theme::class)]
+        private Theme $theme,
     ) {
         if ($number < 1 || $number > $game->getRoundCount()) {
             throw new \InvalidArgumentException(\sprintf('Round %d is not in a game of %d rounds.', $number, $game->getRoundCount()));
@@ -98,6 +102,11 @@ class Round
         $this->id = Uuid::v7();
         $this->drawnBy = $game->drawnByInRound($number);
         $this->startedAtMs = self::toMs(new DatePoint());
+    }
+
+    public function getTheme(): Theme
+    {
+        return $this->theme;
     }
 
     public function getNumber(): int

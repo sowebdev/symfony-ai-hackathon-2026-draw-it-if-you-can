@@ -24,6 +24,19 @@ enum Theme: string implements TranslatableInterface
     }
 
     /**
+     * The picture on the theme card and on the label of a round.
+     */
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Animals => '🐾',
+            self::Food => '🍳',
+            self::EverydayObjects => '🔑',
+            self::Developer => '💻',
+        };
+    }
+
+    /**
      * How the theme is described to the model.
      */
     public function description(): string

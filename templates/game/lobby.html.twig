@@ -44,7 +44,7 @@
             {% if not game.agentConnected %}{{ waiting|trans }}{% elseif game.agentDisplayName %}{{ connected|trans({'%name%': game.agentDisplayName}) }}{% else %}{{ unnamed|trans }}{% endif %}
         </p>
 
-        <form method="post" action="{{ path('game_next_round', {id: game.id}) }}" data-controller="loading" data-action="loading#show">
+        <form method="post" action="{{ path('game_next_round', {id: game.id}) }}" {{ include('game/_deal.html.twig', {number: 1}) }}>
             <button type="submit">{{ 'action.start_game'|trans }}</button>
         </form>
         <form method="post" action="{{ path('game_leave', {id: game.id}) }}" class="leave"><button type="submit" class="link">{{ 'action.new_game'|trans }}</button></form>
