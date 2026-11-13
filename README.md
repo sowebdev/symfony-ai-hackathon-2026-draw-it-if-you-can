@@ -14,11 +14,11 @@ Work in progress for the Symfony AI hackathon (November 2026).
 ## Requirements
 
 - Docker and make: PHP, Composer and the tests all run in the container
-- A model: a local OpenAI-compatible server (llama.cpp) or an API key. The game needs an AI to play, there is no offline mode.
+- A model: a local OpenAI-compatible server (Ollama, llama.cpp, LM Studio) or an API key. The game needs an AI to play, there is no offline mode.
 
 ## Getting started
 
-1. Have a model ready, one that reads images. The simplest: [Ollama](https://ollama.com) on your machine, then `ollama pull gemma3`. That is what the game expects by default. Another server or an API key: see [The models](#the-models).
+1. Have a model ready. The simplest: [Ollama](https://ollama.com) on your machine, then `ollama pull lfm3-vl:2b` (1.5 GB, runs on the CPU, without a GPU). That is what the game expects by default. On Linux, start Ollama with `OLLAMA_HOST=0.0.0.0`, or the game, in its container, cannot reach it. Another server or an API key: see [The models](#the-models).
 2. Install and start the game:
 
    ```bash
@@ -39,17 +39,34 @@ The AI has two roles, each with its own OpenAI-compatible endpoint, model and op
 Set them in `.env.local` (defaults in `.env`):
 
 ```bash
-AI_GUESSER_BASE_URL=https://api.mistral.ai
-AI_GUESSER_MODEL=mistral-small-latest
-AI_GUESSER_API_KEY=...
-AI_GUESSER_DISABLE_THINKING=false   # true sends llama.cpp's chat_template_kwargs, which an API may refuse
+AI_DRAWER_BASE_URL=https://api.anthropic.com
+AI_DRAWER_MODEL=claude-sonnet-5-5
+AI_DRAWER_API_KEY=...
+AI_DRAWER_DISABLE_THINKING=false   # true turns reasoning off: for local models, an API may refuse it
 ```
-
-The strokes of the AI look drawn by a hand; `HUMANIZED_DRAWING=false` in `.env.local` draws straight segments instead.
 
 Then `make check` tries each model on a tiny task whose answer is known (the guesser must name a circle drawn in an image) and tells what is wrong.
 
-By default both roles use [Ollama](https://ollama.com) on your machine (`http://host.docker.internal:11434`) with `gemma3`, a model that reads images: `ollama pull gemma3`. Any other OpenAI-compatible server works, llama.cpp, LM Studio or a provider's API. If the game must join a Docker network of yours to reach it, put that in a `compose.override.yaml` (not committed).
+### Which model?
+
+The game does not need the best model: a poor drawer makes you laugh, a good one makes you play. Drawing is the hard part; guessing works even with a tiny model. What we tried (November 2026):
+
+| Setup | Guesser | Drawer | Notes |
+|---|---|---|---|
+| Default: Ollama, `lfm3-vl:2b` for both roles | finds a swan at the first word, 3 to 5 s per word on a CPU, 0.1 s on a GPU | strokes, but nothing you can guess | runs on the CPU, without a GPU |
+| Anthropic API (`https://api.anthropic.com`) | `claude-haiku-5-5`, about 1 s | `claude-sonnet-5-5`, a whale you recognise in 10 s | the best we tried |
+| Mistral API (`https://api.mistral.ai`) | `mistral-small-latest`, 0.5 s, but misses easy drawings | `mistral-medium-3.5`, funny, rarely guessable | models that always reason, such as `mistral-large-4`, answer in a format the game cannot read yet |
+| A GPU (16 GB) with a 27B model, e.g. Qwen through llama.cpp | fast | recognisable sketches | |
+
+Small local models from 2B to 12B (Qwen 3.5, Gemma 4, Ministral 3, Granite 4) all guess fairly well, but none drew anything recognisable, on a CPU or a GPU. Without a GPU, play "I draw, the AI guesses", or plug a cloud model in as the drawer only: each role has its own endpoint.
+
+- **Local models must not reason**: keep `DISABLE_THINKING=true`, or a small model takes tens of seconds per word. Cloud models may reason: the answer stays short.
+- **One model for both roles, or two that fit in memory together**: the roles take turns all the time, and loading a model takes 10 to 45 s.
+- **Ollama on Linux** listens on 127.0.0.1 only: start it with `OLLAMA_HOST=0.0.0.0`, so that the game's container reaches it at `host.docker.internal`. Docker Desktop on macOS and Windows does it for you.
+
+Any other OpenAI-compatible server works, llama.cpp or LM Studio. If the game must join a Docker network of yours to reach it, put that in a `compose.override.yaml` (not committed).
+
+The strokes of the AI look drawn by a hand; `HUMANIZED_DRAWING=false` in `.env.local` draws straight segments instead.
 
 ## An agent over MCP: copilot or duel
 

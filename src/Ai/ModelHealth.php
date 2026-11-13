@@ -66,6 +66,9 @@ final readonly class ModelHealth
         if (preg_match('/\b40[13]\b/', $message) || stripos($message, 'unauthorized') !== false) {
             return 'The server refused the API key: check AI_<ROLE>_API_KEY. '.$message;
         }
+        if (preg_match('/model ["\']?([^"\'\s]+)["\']? not found/i', $message, $missing)) {
+            return \sprintf('The server does not have this model: download it first (with Ollama: ollama pull %s), or set another one.', $missing[1]);
+        }
         // The generic bridge of Symfony AI reads a text answer only; a reasoning model of Mistral
         // answers with blocks, its reasoning then its text.
         if ($exception instanceof \TypeError && str_contains($message, 'array given')) {

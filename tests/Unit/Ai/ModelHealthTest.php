@@ -22,7 +22,13 @@ final class ModelHealthTest extends TestCase
 
     public function testAnotherFailureIsGivenAsIs(): void
     {
-        self::assertSame('The call failed: model "gemma3" not found', ModelHealth::explain(new \RuntimeException('model "gemma3" not found')));
+        self::assertSame('The call failed: the server is overloaded', ModelHealth::explain(new \RuntimeException('the server is overloaded')));
+    }
+
+    public function testAMissingModelSaysHowToDownloadIt(): void
+    {
+        self::assertStringEndsWith('(with Ollama: ollama pull lfm3-vl:2b), or set another one.', ModelHealth::explain(new \RuntimeException('model "lfm3-vl:2b" not found')));
+        self::assertStringContainsString('ollama pull lfm3-vl:2b)', ModelHealth::explain(new \RuntimeException("model 'lfm3-vl:2b' not found")));
     }
 
     public function testAReasoningModelThatTheBridgeCannotReadIsExplained(): void
