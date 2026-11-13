@@ -53,6 +53,23 @@ final class RoundTest extends TestCase
         self::assertTrue($round->isOver());
     }
 
+    public function testTheTimeLeftStopsWhenTheRoundEnds(): void
+    {
+        $clock = self::mockTime();
+        $round = new Round(new Game(Theme::Animals, Language::English), 1, 'cat', 60_000);
+        $clock->sleep(43);
+        self::assertSame(17_000, $round->timeLeftMs());
+
+        $round->markFound(new Guess($round, 'cat', 43_000, Author::Player));
+        $clock->sleep(16);
+        self::assertSame(17_000, $round->timeLeftMs(), 'Found with 17 s left');
+        self::assertSame(1_000, $round->remainingMs(), 'The clock of the round itself goes on');
+
+        $lost = new Round(new Game(Theme::Animals, Language::English), 1, 'cat', 60_000);
+        $clock->sleep(62);
+        self::assertSame(0, $lost->timeLeftMs());
+    }
+
     public function testAGuessSaidTooLateFindsNothing(): void
     {
         self::mockTime();

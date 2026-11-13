@@ -72,6 +72,12 @@ class Round
     private int $strokesSeenByAgent = 0;
 
     /**
+     * How many strokes the last status told the agent of: a wait answers only for more.
+     */
+    #[ORM\Column(options: ['default' => 0])]
+    private int $strokesToldToAgent = 0;
+
+    /**
      * @param int $number     Order of the round in the game, from 1: it tells who draws
      * @param int $durationMs Kept on the round, so that a change of configuration does not change it
      */
@@ -115,6 +121,19 @@ class Round
     public function remainingMs(?\DateTimeImmutable $now = null): int
     {
         return max(0, $this->durationMs - $this->elapsedMs($now));
+    }
+
+    /**
+     * Milliseconds left on the clock when the round ended, or now while it is played: the clock
+     * stops when the word is found. A round given up or out of time has none left.
+     */
+    public function timeLeftMs(?\DateTimeImmutable $now = null): int
+    {
+        return match (true) {
+            $this->isFound() => max(0, $this->durationMs - (int) $this->foundAfterMs),
+            $this->isOver($now) => 0,
+            default => $this->remainingMs($now),
+        };
     }
 
     /**
@@ -268,5 +287,21 @@ class Round
     public function agentLooked(int $strokes): void
     {
         $this->strokesSeenByAgent = max($this->strokesSeenByAgent, $strokes);
+    }
+
+    /**
+     * A status told the agent the round had this many strokes.
+     */
+    public function agentTold(int $strokes): void
+    {
+        $this->strokesToldToAgent = max($this->strokesToldToAgent, $strokes);
+    }
+
+    /**
+     * Strokes the agent knows of, by looking at the drawing or by a status.
+     */
+    public function getStrokesKnownByAgent(): int
+    {
+        return max($this->strokesSeenByAgent, $this->strokesToldToAgent);
     }
 }

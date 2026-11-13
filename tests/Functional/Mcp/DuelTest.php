@@ -90,6 +90,10 @@ final class DuelTest extends WebTestCase
         $status = $this->roundStatus();
         self::assertSame('agent', $status['found_by']);
         self::assertSame(['you' => 1000, 'the_player' => 0], $status['score']);
+        self::assertSame(57, $status['time_left_s'], 'Found after 3 s');
+
+        Clock::get()->sleep(30);
+        self::assertSame(57, $this->roundStatus()['time_left_s'], 'The clock stops when the word is found');
     }
 
     public function testTheRivalAnswersOnceEveryThreeSecondsAndNeverTwiceTheSame(): void
@@ -135,6 +139,7 @@ final class DuelTest extends WebTestCase
         $status = $this->waitForYourTurn();
         self::assertSame('new strokes on the drawing', $status['news']);
         self::assertSame(['strokes' => 1, 'strokes_you_saw' => 0], array_intersect_key($status, ['strokes' => 0, 'strokes_you_saw' => 0]));
+        self::assertSame('nothing new yet', $this->waitForYourTurn()['news'], 'The agent was told of this stroke, even without looking');
 
         $this->call('look_at_drawing');
         $status = $this->waitForYourTurn();

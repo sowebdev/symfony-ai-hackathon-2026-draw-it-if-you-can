@@ -18,7 +18,7 @@ final readonly class AgentTurn
     /** The round ended since. */
     public const string ROUND_OVER = 'the round is over';
 
-    /** The drawing the agent plays on has strokes it has not seen. */
+    /** The drawing the agent plays on has strokes it neither saw nor was told of. */
     public const string NEW_STROKES = 'new strokes on the drawing';
 
     private function __construct(
@@ -45,7 +45,7 @@ final readonly class AgentTurn
             null === $round => null,
             $round->getId()->toRfc4122() !== $this->round => self::NEW_ROUND,
             $round->isOver() => $this->over ? null : self::ROUND_OVER,
-            self::playsOn($game, $round) && $strokes > $round->getStrokesSeenByAgent() => self::NEW_STROKES,
+            self::playsOn($game, $round) && $strokes > $round->getStrokesKnownByAgent() => self::NEW_STROKES,
             default => null,
         };
     }

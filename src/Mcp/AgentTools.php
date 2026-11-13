@@ -120,6 +120,11 @@ final readonly class AgentTools
             ];
         }
 
+        // The agent now knows of these strokes: a wait answers only for more.
+        $strokes = \count($this->strokes->findByRound($current));
+        $current->agentTold($strokes);
+        $this->entityManager->flush();
+
         $status = [
             'you_are' => $this->role($game),
             'your_nickname' => $game->getAgentNickname(),
@@ -129,7 +134,7 @@ final readonly class AgentTools
             'drawn_by' => $current->getDrawnBy()->value,
             'theme' => $game->getTheme()->description(),
             'language' => $game->getLanguage()->nameInEnglish(),
-            'time_left_s' => intdiv($current->remainingMs(), 1000),
+            'time_left_s' => intdiv($current->timeLeftMs(), 1000),
             'state' => match (true) {
                 $game->hasLeft() => 'the player left',
                 $current->isFound() => 'found',
@@ -137,7 +142,7 @@ final readonly class AgentTools
                 $current->isOver() => 'time is up',
                 default => 'playing',
             },
-            'strokes' => \count($this->strokes->findByRound($current)),
+            'strokes' => $strokes,
             'strokes_you_saw' => $current->getStrokesSeenByAgent(),
         ];
         // Once the round is over, nothing counts any more: the agent may know what it missed.
@@ -183,7 +188,7 @@ final readonly class AgentTools
         $png = $this->renderer->toPng(array_map(static fn (Stroke $stroke): array => $stroke->getPoints(), $strokes));
 
         return [
-            new TextContent(\sprintf('Round %d, %d strokes, %d s left.', $current->getNumber(), \count($strokes), intdiv($current->remainingMs(), 1000))),
+            new TextContent(\sprintf('Round %d, %d strokes, %d s left.', $current->getNumber(), \count($strokes), intdiv($current->timeLeftMs(), 1000))),
             new ImageContent(base64_encode($png), 'image/png'),
         ];
     }

@@ -22,7 +22,7 @@ In the first version, `round_status` answered at once. Claude Code called it two
 
 Option 4, with a tool of its own, `wait_for_your_turn`.
 
-- It answers when a round starts, when the round ends, or when the drawing the agent plays on has strokes the agent has not seen. `look_at_drawing` keeps on the round how many strokes the agent saw.
+- It answers when a round starts, when the round ends, or when the drawing the agent plays on has strokes the agent does not know of. The agent knows of a stroke once it looked at the drawing, or once a status gave the number of strokes: an agent that waits again without looking is not woken up by the same stroke twice.
 - It answers after 25 s with nothing new. The bound stays under the 30 s `max_execution_time` of PHP. Claude Code and Mistral Vibe both played through waits of 25 s without a timeout (2026-11-12).
 - It answers with the same status as `round_status`, plus a `news` field: `a new round started`, `the round is over`, `new strokes on the drawing`, `stop` or `nothing new yet`.
 - `round_status` always answers at once.

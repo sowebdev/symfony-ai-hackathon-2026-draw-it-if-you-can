@@ -40,6 +40,17 @@ final class AgentTurnTest extends TestCase
         self::assertSame(AgentTurn::NEW_STROKES, $turn->news($game, $round, 4));
     }
 
+    public function testAStrokeTheAgentWasToldOfIsNoNews(): void
+    {
+        self::mockTime();
+        $game = new Game(Theme::Animals, Language::English, 6, DrawnBy::Ai, Mode::Duel);
+        $round = new Round($game, 1, 'cat', 60_000);
+        $round->agentTold(2);
+
+        self::assertNull(AgentTurn::from($round)->news($game, $round, 2), 'A status gave these strokes');
+        self::assertSame(AgentTurn::NEW_STROKES, AgentTurn::from($round)->news($game, $round, 3));
+    }
+
     public function testACopilotHasNothingToDoWhileThePlayerDraws(): void
     {
         self::mockTime();
