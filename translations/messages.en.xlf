@@ -63,11 +63,6 @@
                 <target>Animals</target>
                 <note>Name of a theme</note>
             </trans-unit>
-            <trans-unit id="theme.food" resname="theme.food">
-                <source>theme.food</source>
-                <target>Food and cooking</target>
-                <note>Name of a theme</note>
-            </trans-unit>
             <trans-unit id="theme.everyday-objects" resname="theme.everyday-objects">
                 <source>theme.everyday-objects</source>
                 <target>Everyday objects</target>
@@ -76,6 +71,26 @@
             <trans-unit id="theme.developer" resname="theme.developer">
                 <source>theme.developer</source>
                 <target>Developer life</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+            <trans-unit id="theme.places" resname="theme.places">
+                <source>theme.places</source>
+                <target>Places</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+            <trans-unit id="theme.characters" resname="theme.characters">
+                <source>theme.characters</source>
+                <target>Characters</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+            <trans-unit id="theme.nature" resname="theme.nature">
+                <source>theme.nature</source>
+                <target>Nature</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+            <trans-unit id="theme.transport" resname="theme.transport">
+                <source>theme.transport</source>
+                <target>Transport</target>
                 <note>Name of a theme</note>
             </trans-unit>
             <trans-unit id="instruction.guess" resname="instruction.guess">

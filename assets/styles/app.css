@@ -220,9 +220,12 @@ button:focus-visible,
 /* The theme of the round: a label taped in the bar, as on the card drawn before the round. */
 /* One colour per theme, on its card and its label: a landmark that cannot be taken for a word. */
 .theme-animals { --theme: #2b8a3e; }
-.theme-food { --theme: #c2255c; }
 .theme-everyday-objects { --theme: #5f3dc4; }
 .theme-developer { --theme: #1971c2; }
+.theme-places { --theme: #495057; }
+.theme-characters { --theme: #c2255c; }
+.theme-nature { --theme: #0c8599; }
+.theme-transport { --theme: #a67c00; }
 
 .theme-tag {
     position: relative;

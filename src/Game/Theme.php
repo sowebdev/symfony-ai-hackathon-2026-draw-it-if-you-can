@@ -11,9 +11,12 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 enum Theme: string implements TranslatableInterface
 {
     case Animals = 'animals';
-    case Food = 'food';
     case EverydayObjects = 'everyday-objects';
     case Developer = 'developer';
+    case Places = 'places';
+    case Characters = 'characters';
+    case Nature = 'nature';
+    case Transport = 'transport';
 
     /**
      * The name shown to the player, in translations/messages.*.yaml.
@@ -30,9 +33,12 @@ enum Theme: string implements TranslatableInterface
     {
         return match ($this) {
             self::Animals => 'animals',
-            self::Food => 'food, dishes and kitchen utensils',
             self::EverydayObjects => 'everyday objects found at home or in the street',
             self::Developer => 'the daily life of a software developer: objects, tools and things around a computer',
+            self::Places => 'places and buildings with a shape of their own, in town or in the wild',
+            self::Characters => 'characters known by their job, their costume or their story, real or imaginary',
+            self::Nature => 'nature: plants, landscapes and what the sky and the weather show',
+            self::Transport => 'vehicles and means of transport, on land, on water, in the air or in space',
         };
     }
 }
