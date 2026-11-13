@@ -1,5 +1,6 @@
 {# A small sketch of who plays in a mode: the player (round head), the AI of the game (square head,
-   antenna), an agent connected over MCP (a screen for a head, a cable, in orange). "agent" draws
+   antenna), an agent connected over MCP (a screen for a head, a cable, in orange). Alone with the
+   AI, the player holds its hand. "agent" draws
    the agent alone, for the bar of a round. #}
 {% set ink = 'fill="none" stroke="#2b2b2b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"' %}
 {% set pen = 'fill="none" stroke="#e8590c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"' %}
@@ -12,7 +13,8 @@
 <svg class="mode-sketch" width="150" height="90" viewBox="-75 -60 150 90" aria-hidden="true">
     {% if mode == 'solo' %}
         {{ _self.player(-28, ink) }}{{ _self.ai(28, ink) }}
-        <path {{ pen|raw }} d="M-8 -8 C-4 -16 4 -16 8 -8 C4 -2 0 2 0 2 C0 2 -4 -2 -8 -8 Z"/>
+        {# Hand in hand, in ink like them: orange is for the agent only. #}
+        <path {{ ink|raw }} d="M-15 -2 C-6 5 6 5 15 -2"/>
     {% elseif mode == 'copilot' %}
         {{ _self.player(-22, ink) }}{{ _self.agent(30, pen) }}
         <path {{ pen|raw }} d="M-6 -50 C-6 -58 10 -58 10 -50 C10 -44 4 -42 2 -42 L-2 -36 L-1 -42 C-4 -43 -6 -46 -6 -50 Z"/>
