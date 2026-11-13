@@ -693,6 +693,11 @@ button:focus-visible,
     color: #777;
 }
 
+/* A text-only model fails at the first look at the drawing: said before the player connects it. */
+.lobby-vision {
+    color: var(--rust);
+}
+
 .agent-status {
     padding: 0.8rem 1rem;
     font-size: 1.4rem;

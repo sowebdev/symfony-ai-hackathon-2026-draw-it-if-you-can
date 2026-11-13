@@ -68,6 +68,8 @@ Six tools and two prompts:
 - `choose_nickname`: the name you see for the agent, a funny one chosen by the agent in the lobby. Without one, the game shows the name of its client, e.g. "Claude" for `claude-code`.
 - the `copilot` and `duel` prompts tell the agent how to play. A client without prompts can start from `round_status`, which explains the rules too.
 
+The agent needs a model that sees images, since it looks at the drawing: a text-only model fails at the first `look_at_drawing` (seen with Mistral Vibe on `zai-glm-5-3`). The game cannot check it, as MCP does not say what the model of a client reads.
+
 The game does not tell two agents apart: recent clients such as Claude Code speak the stateless protocol (2026-07-28), which has no session. Connect one agent at a time.
 
 With Claude Code, over HTTP while the game runs:

@@ -523,6 +523,11 @@
                 <target>Branche-le</target>
                 <note>Lobby, above the steps to connect the agent</note>
             </trans-unit>
+            <trans-unit id="lobby.vision" resname="lobby.vision">
+                <source>lobby.vision</source>
+                <target>Son modèle doit voir les images, parce que l'agent regarde le dessin. Un modèle qui ne lit que du texte s'arrête au premier coup d'œil.</target>
+                <note>Lobby, under the heading of the steps to connect the agent</note>
+            </trans-unit>
             <trans-unit id="status.copilot_connected_unnamed" resname="status.copilot_connected_unnamed">
                 <source>status.copilot_connected_unnamed</source>
                 <target>Ton copilote est connecté.</target>

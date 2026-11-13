@@ -171,7 +171,7 @@ final readonly class AgentTools
     /**
      * @return list<TextContent|ImageContent>
      */
-    #[McpTool(name: 'look_at_drawing', description: 'The drawing of the round as it is now, as a PNG image, black strokes on white. Strokes may still be coming: wait_for_your_turn tells you when there are new ones.')]
+    #[McpTool(name: 'look_at_drawing', description: 'The drawing of the round as it is now, as a PNG image, black strokes on white: you need a model that sees images. Strokes may still be coming: wait_for_your_turn tells you when there are new ones.')]
     public function lookAtDrawing(
         #[Schema(description: 'Id of a round; leave empty for the round being played')]
         ?string $round = null,

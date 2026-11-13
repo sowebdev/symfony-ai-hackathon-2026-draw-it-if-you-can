@@ -106,6 +106,7 @@ final class CopilotTest extends WebTestCase
         $this->client->request('GET', $lobby);
         self::assertSelectorTextContains('.agent-status', 'En attente de ton copilote');
         self::assertSelectorTextContains('.lobby-steps', 'claude mcp add --transport http draw-it http://localhost/mcp');
+        self::assertSelectorTextContains('.lobby-vision', 'doit voir les images');
         $this->client->request('GET', $game.'/agent');
         self::assertSame(['connected' => false, 'name' => null], json_decode((string) $this->client->getResponse()->getContent(), true));
 

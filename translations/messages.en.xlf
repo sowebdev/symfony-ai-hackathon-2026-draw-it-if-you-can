@@ -523,6 +523,11 @@
                 <target>Connect it</target>
                 <note>Lobby, above the steps to connect the agent</note>
             </trans-unit>
+            <trans-unit id="lobby.vision" resname="lobby.vision">
+                <source>lobby.vision</source>
+                <target>Its model must see images: the agent looks at the drawing. A text-only model stops at the first look.</target>
+                <note>Lobby, under the heading of the steps to connect the agent</note>
+            </trans-unit>
             <trans-unit id="status.copilot_connected_unnamed" resname="status.copilot_connected_unnamed">
                 <source>status.copilot_connected_unnamed</source>
                 <target>Your copilot is connected.</target>
