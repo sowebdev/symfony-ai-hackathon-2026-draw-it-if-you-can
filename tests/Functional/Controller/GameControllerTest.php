@@ -62,8 +62,8 @@ final class GameControllerTest extends WebTestCase
     public function testTheHomePageSaysWhetherTheModelsCanPlay(): void
     {
         $client = self::createClient();
-        // The drawer answers "ready", the guesser names the circle.
-        self::scriptModel($client, ['ready', 'Circle']);
+        // Both models name the circle: both read images.
+        self::scriptModel($client, ['Circle', 'Circle']);
 
         $client->request('GET', '/fr');
         self::assertSelectorExists('.health[data-health-url-value="/health"]');
@@ -77,7 +77,7 @@ final class GameControllerTest extends WebTestCase
     public function testAModelThatDoesNotSeeImagesIsReported(): void
     {
         $client = self::createClient();
-        self::scriptModel($client, ['ready', 'square']);
+        self::scriptModel($client, ['circle', 'square']);
 
         $client->request('GET', '/health?fresh=1');
         $report = json_decode((string) $client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
@@ -86,6 +86,21 @@ final class GameControllerTest extends WebTestCase
         self::assertTrue($report['roles'][0]['ok']);
         self::assertFalse($report['roles'][1]['ok']);
         self::assertStringContainsString('does not recognize a circle', $report['roles'][1]['problem']);
+    }
+
+    public function testADrawerThatDoesNotSeeImagesIsReported(): void
+    {
+        $client = self::createClient();
+        // A text-only drawer: it looks at its drawing to add details, so it must read images too.
+        self::scriptModel($client, ['ready', 'circle']);
+
+        $client->request('GET', '/health?fresh=1');
+        $report = json_decode((string) $client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
+
+        self::assertFalse($report['ok']);
+        self::assertSame('drawer', $report['roles'][0]['role']);
+        self::assertStringContainsString('must be a model that reads images', $report['roles'][0]['problem']);
+        self::assertTrue($report['roles'][1]['ok']);
     }
 
     public function testAModelWithoutAUsableWordIsReported(): void

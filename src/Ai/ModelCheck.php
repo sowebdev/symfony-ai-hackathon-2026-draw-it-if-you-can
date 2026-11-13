@@ -28,10 +28,9 @@ final readonly class ModelCheck
      */
     public function check(Role $role): ?string
     {
-        return match ($role) {
-            Role::Drawer => $this->checkAnswers(),
-            Role::Guesser => $this->checkSeesImages(),
-        };
+        // Both roles read images: the guesser names the drawing, the drawer looks at its own to add
+        // details. Tool calling is checked once the AI draws.
+        return $this->checkSeesImages($role);
     }
 
     /**
@@ -61,21 +60,13 @@ final readonly class ModelCheck
     /** Said when a model gives nothing usable: the most likely cause after a missing skill. */
     private const string REASONING_HINT = 'A model that reasons before answering may spend all its tokens on it: choose one that does not reason.';
 
-    private function checkAnswers(): ?string
-    {
-        // Tool calling is checked once the AI draws; for now, the model must answer at all.
-        $answer = $this->model->ask(Role::Drawer, new MessageBag(Message::ofUser('Answer with the single word: ready')));
-
-        return null === $answer ? 'The model gave no usable answer to a one-word question. '.self::REASONING_HINT : null;
-    }
-
-    private function checkSeesImages(): ?string
+    private function checkSeesImages(Role $role): ?string
     {
         $messages = new MessageBag(Message::ofUser(
             new Image($this->renderer->toPng([self::circle()]), 'image/png'),
             'What shape is drawn in this image? Answer with one word in English.',
         ));
-        $answer = $this->model->ask(Role::Guesser, $messages);
+        $answer = $this->model->ask($role, $messages);
 
         if (null === $answer) {
             return 'The model gave no usable answer about an image: it must be a model that reads images. '.self::REASONING_HINT;

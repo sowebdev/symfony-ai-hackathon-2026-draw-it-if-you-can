@@ -33,8 +33,10 @@ The home page checks both models at once and tells you what is wrong if one does
 
 The AI has two roles, each with its own OpenAI-compatible endpoint, model and optional API key:
 
-- **the drawer** draws while you guess;
-- **the guesser** picks the word you draw, then guesses your drawing: its model must read images.
+- **the drawer** draws while you guess, and looks at its drawing to add the details that are missing;
+- **the guesser** picks the word you draw, then guesses your drawing.
+
+Both models must read images, and the drawer must also call tools.
 
 Set them in `.env.local` (defaults in `.env`):
 
@@ -45,7 +47,7 @@ AI_DRAWER_API_KEY=...
 AI_DRAWER_DISABLE_THINKING=false   # true turns reasoning off: for local models, an API may refuse it
 ```
 
-Then `make check` tries each model on a tiny task whose answer is known (the guesser must name a circle drawn in an image) and tells what is wrong.
+Then `make check` tries each model on a tiny task whose answer is known (each must name a circle drawn in an image) and tells what is wrong.
 
 ### Which model?
 

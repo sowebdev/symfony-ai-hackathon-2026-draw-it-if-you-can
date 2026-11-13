@@ -3,10 +3,14 @@
 namespace App\Ai;
 
 use App\Drawing\GridStroke;
+use App\Drawing\StrokeRenderer;
+use App\Drawing\StrokeTracer;
 use App\Game\Theme;
 use Symfony\AI\Agent\Execution\Update\Progress;
+use Symfony\AI\Platform\Message\Content\Image;
 use Symfony\AI\Platform\Message\Message;
 use Symfony\AI\Platform\Message\MessageBag;
+use Symfony\AI\Platform\Message\UserMessage;
 
 /**
  * The model draws with the draw_stroke tool, on the 50 x 50 grid of SketchAgent, with our own
@@ -24,14 +28,17 @@ final readonly class Drawer implements DrawsStrokes
      */
     private const int MAX_TOKENS_PER_ANSWER = 4000;
 
-    public function __construct(private Models $models)
-    {
+    public function __construct(
+        private Models $models,
+        private StrokeTracer $tracer,
+        private StrokeRenderer $renderer,
+    ) {
     }
 
     /**
      * Strokes for one call: the first sketch, then a few details at a time.
      */
-    public const int MAX_DETAIL_STROKES = 6;
+    public const int MAX_DETAIL_STROKES = 3;
 
     public function draw(string $word, Theme $theme, array $drawn = [], array $wrongAnswers = []): \Generator
     {
@@ -44,7 +51,7 @@ final readonly class Drawer implements DrawsStrokes
                 No letters, digits or words.
                 {$this->task($drawn, $wrongAnswers, $max)}
                 PROMPT),
-            Message::ofUser("Theme: {$theme->description()}. Draw: {$word}"),
+            $this->request($word, $theme, $drawn),
         );
 
         $agent = $this->models->agent(Role::Drawer, new Pen($max), maxToolCalls: $max + 5);
@@ -72,6 +79,26 @@ final readonly class Drawer implements DrawsStrokes
     }
 
     /**
+     * What to draw, and for details, the drawing so far as an image: without it, a model adds its
+     * details blind and draws over its own strokes (Qwen 3.8, 13/11/2026).
+     *
+     * @param list<GridStroke> $drawn
+     */
+    private function request(string $word, Theme $theme, array $drawn): UserMessage
+    {
+        $text = "Theme: {$theme->description()}. Draw: {$word}";
+        if ([] === $drawn) {
+            return Message::ofUser($text);
+        }
+        $strokes = [];
+        foreach ($drawn as $i => $stroke) {
+            $strokes[] = $this->tracer->draw($stroke, 0, $i + 1)->points;
+        }
+
+        return Message::ofUser($text.'. Your drawing so far, with the lines of the grid:', new Image($this->renderer->toPng($strokes, grid: true), 'image/png'));
+    }
+
+    /**
      * @param list<GridStroke> $drawn
      * @param list<string>     $wrongAnswers
      */
@@ -88,16 +115,18 @@ final readonly class Drawer implements DrawsStrokes
             static fn (GridStroke $stroke): string => \sprintf('- %s: %s', '' === $stroke->part ? 'stroke' : $stroke->part, $stroke->written),
             $drawn,
         ));
-        $answers = [] === $wrongAnswers
-            ? 'The player has not answered yet.'
-            : 'The player answered, wrongly: '.implode(', ', $wrongAnswers).'. Make the difference clear.';
+        $aim = [] === $wrongAnswers
+            ? 'The player has not answered yet. Add the most telling part that is still missing, or one thing it is usually seen with.'
+            : 'The player answered, wrongly: '.implode(', ', $wrongAnswers).'. Think of what the thing you draw has and these have not, and draw that.';
 
         return <<<TASK
-            You already drew these strokes, they stay on the canvas:
+            You already drew these strokes, they stay on the canvas, and you see them in the image:
             {$strokes}
-            Nobody has guessed it yet. {$answers}
-            Add 1 to {$max} strokes that make the drawing easier to recognize: a telling detail, something the thing is usually seen with, or a clearer outline of a part. Do not redraw what is there.
-            When you have added them, answer "done" without calling the tool.
+            Look at the image first: place what you add where it belongs, in the free space or on the right part, never on top of what is there.
+            Nobody has guessed it yet. {$aim}
+            Add 1 to {$max} strokes. Each one is a new part, with a name that is not in the list above.
+            No texture, shading, shine, crumbs, drops or other repeated marks: they make a drawing busier, not clearer. Do not redraw what is there.
+            When you have added them, or if nothing would help, answer "done" without calling the tool.
             TASK;
     }
 
