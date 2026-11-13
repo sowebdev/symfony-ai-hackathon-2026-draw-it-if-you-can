@@ -64,9 +64,11 @@ final readonly class Models
     public function options(Role $role, array $options = []): array
     {
         if ($this->of($role)[3]) {
-            // No reasoning: the game needs an answer every few seconds (tests of 10/11/2026).
-            // A llama.cpp option: a provider's API may refuse it, hence the switch.
+            // No reasoning: a local model may reason for tens of seconds (tests of 10/11/2026).
+            // llama.cpp reads chat_template_kwargs, Ollama reads reasoning_effort and ignores the
+            // other (13/11/2026); a cloud API may refuse either, hence the switch.
             $options['chat_template_kwargs'] = ['enable_thinking' => false];
+            $options['reasoning_effort'] = 'none';
         }
 
         return $options;
