@@ -258,6 +258,11 @@
                 <target>%name% whispers…</target>
                 <note>Above the words an agent connected over MCP suggests to the player</note>
             </trans-unit>
+            <trans-unit id="heading.copilot_tips" resname="heading.copilot_tips">
+                <source>heading.copilot_tips</source>
+                <target>Tips from %name%</target>
+                <note>Above the tips an agent connected over MCP gives to the player who draws</note>
+            </trans-unit>
             <trans-unit id="heading.lobby" resname="heading.lobby">
                 <source>heading.lobby</source>
                 <target>Connect your copilot</target>
@@ -465,7 +470,7 @@
             </trans-unit>
             <trans-unit id="mode.copilot_hint" resname="mode.copilot_hint">
                 <source>mode.copilot_hint</source>
-                <target>An agent such as Claude Code or Vibe helps you guess.</target>
+                <target>An agent such as Claude Code or Vibe helps you guess and draw.</target>
                 <note>Home page, under a mode of the game</note>
             </trans-unit>
             <trans-unit id="mode.duel_hint" resname="mode.duel_hint">
@@ -500,7 +505,7 @@
             </trans-unit>
             <trans-unit id="lobby.copilot_does_4" resname="lobby.copilot_does_4">
                 <source>lobby.copilot_does_4</source>
-                <target>When you draw, it waits for the next round.</target>
+                <target>When you draw, it gives you tips so that the AI finds the word.</target>
                 <note>Lobby, what the copilot does</note>
             </trans-unit>
             <trans-unit id="lobby.duel_does" resname="lobby.duel_does">

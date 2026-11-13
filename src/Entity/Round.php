@@ -79,6 +79,13 @@ class Round
     private int $strokesToldToAgent = 0;
 
     /**
+     * How many guesses of the AI the last status told the copilot of, while the player draws: a
+     * wait answers only for more.
+     */
+    #[ORM\Column(options: ['default' => 0])]
+    private int $aiGuessesToldToAgent = 0;
+
+    /**
      * @param int $number     Order of the round in the game, from 1: it tells who draws
      * @param int $durationMs Kept on the round, so that a change of configuration does not change it
      */
@@ -312,5 +319,18 @@ class Round
     public function getStrokesKnownByAgent(): int
     {
         return max($this->strokesSeenByAgent, $this->strokesToldToAgent);
+    }
+
+    /**
+     * A status told the copilot the AI had made this many guesses.
+     */
+    public function agentToldAiGuesses(int $guesses): void
+    {
+        $this->aiGuessesToldToAgent = max($this->aiGuessesToldToAgent, $guesses);
+    }
+
+    public function getAiGuessesToldToAgent(): int
+    {
+        return $this->aiGuessesToldToAgent;
     }
 }

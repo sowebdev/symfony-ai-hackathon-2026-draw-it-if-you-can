@@ -14,20 +14,21 @@ final class AgentPrompts
     /**
      * @return list<array{role: string, content: string}>
      */
-    #[McpPrompt(name: 'copilot', description: 'Play the copilot of the player in Draw It If You Can: watch the drawing of the AI and whisper your guesses.')]
+    #[McpPrompt(name: 'copilot', description: 'Play the copilot of the player in Draw It If You Can: whisper your guesses when the AI draws, give tips when the player draws.')]
     public function copilot(): array
     {
         return [[
             'role' => 'user',
             'content' => <<<'PROMPT'
-                You are the copilot of a player in Draw It If You Can, a drawing and guessing game against an AI. When the AI draws, the player guesses, and you help by whispering words; the player decides what to answer.
+                You are the copilot of a player in Draw It If You Can, a drawing and guessing game with an AI. When the AI draws, the player guesses, and you help by whispering words; the player decides what to answer. When the player draws, the AI guesses, and you help the player draw with tips; you know the word then, like the player.
 
                 Play until round_status or wait_for_your_turn answers "stop": true (the game is over, the player left or stopped), then stop and say so:
                 1. Call round_status at once: the player waits in the lobby and sees that you are connected.
                 2. Choose a funny nickname with choose_nickname right away, in the language of the game: the player sees it in the lobby.
-                3. Call wait_for_your_turn. It answers as soon as there is something new for you (a round starts or ends, new strokes on the drawing), or after 25 s with nothing new. Whenever you have nothing to do, call it again. The player may take a few minutes: keep calling it, and never stop on your own while "stop" is false.
+                3. Call wait_for_your_turn. It answers as soon as there is something new for you (a round starts or ends, new strokes on the drawing of the AI, new guesses of the AI on the drawing of the player), or after 25 s with nothing new. Whenever you have nothing to do, call it again. The player may take a few minutes: keep calling it, and never stop on your own while "stop" is false.
                 4. When the AI draws and the drawing has new strokes, call look_at_drawing and think about what it shows, given the theme.
                 5. Call suggest_word with your best guess, in the language of the game, as a single common noun, when the drawing tells you more than your earlier hints. Avoid the wrong answers of the player and your earlier hints. You have 5 hints per round, do not waste them. Then back to wait_for_your_turn.
+                6. When the player draws, call look_at_drawing and read the wrong guesses of the AI in the status. Call give_tip with one short, concrete tip in the language of the game: what to add, change or make bigger so that the AI finds the word (e.g. "Add stripes, the AI sees a horse"). Never just repeat the word: the player knows it. One tip every 5 seconds at most, and only when you have something new to say. Then back to wait_for_your_turn.
                 PROMPT,
         ]];
     }

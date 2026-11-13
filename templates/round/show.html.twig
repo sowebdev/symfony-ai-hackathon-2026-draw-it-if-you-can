@@ -2,7 +2,7 @@
 
 {% block body %}
     <main class="round"
-          data-controller="canvas guesses round-timer{{ round.game.duel ? ' agent' }}"
+          data-controller="canvas guesses round-timer{{ round.game.withAgent ? ' agent' }}"
           {{ include('round/_timer.html.twig') }}
           data-canvas-elapsed-ms-value="{{ round.elapsedMs }}"
           data-canvas-strokes-url-value="{{ path('round_strokes', {id: round.id}) }}"
@@ -13,7 +13,7 @@
           data-guesses-accept-url-value="{{ path('round_guess_accept', {id: round.id, guessId: 0}) }}"
           data-guesses-yes-label-value="{{ 'action.accept_guess'|trans }}"
           data-guesses-over-value="{{ round.over ? 'true' : 'false' }}"
-          {% if round.game.duel %}{{ include('round/_agent.html.twig') }}{% endif %}
+          {% if round.game.withAgent %}{{ include('round/_agent.html.twig') }}{% endif %}
           data-action="guesses:found->canvas#lock guesses:found->round-timer#finish round-timer:up->canvas#lock round-timer:up->guesses#stop agent:found->canvas#lock agent:found->guesses#stop agent:found->round-timer#finish">
         {{ include('round/_scoreboard.html.twig') }}
         <p class="target">{{ 'instruction.draw'|trans }} <strong>{{ round.targetWord }}</strong></p>
@@ -38,6 +38,17 @@
                 <p class="result" data-guesses-target="result" hidden>
                     {{ 'result.found_in'|trans({'%seconds%': '<strong data-guesses-target="time"></strong>'})|raw }}
                 </p>
+
+                {% if round.game.withCopilot %}
+                    <div class="tips" {{ tips is empty ? 'hidden' }} data-agent-target="tips">
+                        <h2>{{ 'heading.copilot_tips'|trans({'%name%': round.game.agentDisplayName ?? 'label.copilot_unknown'|trans}) }}</h2>
+                        <ol data-agent-target="tipList">
+                            {% for tip in tips|reverse %}
+                                <li data-tip-id="{{ tip.id }}">{{ tip.text }}</li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                {% endif %}
 
                 {% if round.game.duel %}
                     <div class="rival-answers">

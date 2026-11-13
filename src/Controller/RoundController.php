@@ -17,6 +17,7 @@ use App\Repository\GuessRepository;
 use App\Repository\HintRepository;
 use App\Repository\RoundRepository;
 use App\Repository\StrokeRepository;
+use App\Repository\TipRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -36,6 +37,7 @@ final class RoundController extends AbstractController
         private readonly StrokeRepository $strokes,
         private readonly GuessRepository $guesses,
         private readonly HintRepository $hints,
+        private readonly TipRepository $tips,
         private readonly RoundRepository $rounds,
         private readonly ScoreGauge $gauge,
         private readonly LocaleSwitcher $localeSwitcher,
@@ -56,6 +58,7 @@ final class RoundController extends AbstractController
             'guesses' => array_values(array_filter($guesses, static fn (Guess $guess): bool => !$guess->getAuthor()->isRival())),
             'rival_answers' => array_values(array_filter($guesses, static fn (Guess $guess): bool => $guess->getAuthor()->isRival())),
             'hints' => $this->hints->findByRound($round),
+            'tips' => $this->tips->findByRound($round),
             'gauge' => $this->gauge->steps($round->getDurationMs()),
             'points' => $this->gauge->pointsOf($round),
             'team_score' => $this->gauge->total($rounds),
@@ -148,7 +151,7 @@ final class RoundController extends AbstractController
     }
 
     /**
-     * The hints of the copilot, or the answers of the rival in a duel, pushed to the browser as
+     * The hints and tips of the copilot, or the answers of the rival in a duel, pushed to the browser as
      * server-sent events.
      */
     #[Route('/agent', name: 'round_agent', methods: ['GET'])]

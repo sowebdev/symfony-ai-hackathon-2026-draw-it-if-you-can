@@ -23,14 +23,14 @@ final class CopilotTest extends WebTestCase
     protected function setUp(): void
     {
         $this->client = self::createClient();
-        self::scriptModel($this->client, word: 'girafe', strokes: [['neck', 'x25y45,x25y10'], ['head', 'x25y10,x30y8']]);
+        self::scriptModel($this->client, guesses: ['cheval', 'zèbre'], word: 'girafe', strokes: [['neck', 'x25y45,x25y10'], ['head', 'x25y10,x30y8']]);
         self::mockTime();
         $this->connect();
     }
 
-    public function testTheAgentHasSixToolsAndTwoPrompts(): void
+    public function testTheAgentHasSevenToolsAndTwoPrompts(): void
     {
-        self::assertSame(['round_status', 'wait_for_your_turn', 'look_at_drawing', 'suggest_word', 'choose_nickname', 'submit_answer'], array_column($this->rpc('tools/list')['tools'], 'name'));
+        self::assertSame(['round_status', 'wait_for_your_turn', 'look_at_drawing', 'suggest_word', 'give_tip', 'choose_nickname', 'submit_answer'], array_column($this->rpc('tools/list')['tools'], 'name'));
         self::assertSame(['copilot', 'duel'], array_column($this->rpc('prompts/list')['prompts'], 'name'));
     }
 
@@ -93,6 +93,80 @@ final class CopilotTest extends WebTestCase
         $this->startRound('ai');
         Clock::get()->sleep(62);
         self::assertStringContainsString('over', $this->call('suggest_word', ['word' => 'girafe'])['content'][0]['text']);
+    }
+
+    public function testWhenThePlayerDrawsTheCopilotKnowsTheWordAndWhatTheAiSees(): void
+    {
+        $round = $this->startRound('player');
+        $this->drawStroke($round);
+        self::readEvents($this->client, $round.'/guesses');
+
+        $status = $this->roundStatus();
+        self::assertSame('player', $status['drawn_by']);
+        self::assertSame('girafe', $status['the_word_the_player_draws'], 'The player knows the word: their copilot may too');
+        self::assertContains('cheval', $status['wrong_guesses_of_the_ai']);
+        self::assertSame([], $status['your_tips']);
+        self::assertStringContainsString('give_tip', $status['what_you_can_do']);
+        self::assertSame('image', $this->call('look_at_drawing')['content'][1]['type'], 'The copilot sees the drawing of the player');
+    }
+
+    public function testTheCopilotOfAPlayerWhoDrawsIsWokenByTheGuessesOfTheAi(): void
+    {
+        $round = $this->startRound('player');
+        $this->roundStatus();
+
+        $this->drawStroke($round);
+        self::readEvents($this->client, $round.'/guesses');
+
+        self::assertSame('the AI made new guesses', $this->waitForYourTurn()['news']);
+    }
+
+    public function testATipIsShownToThePlayerWhoDraws(): void
+    {
+        $round = $this->startRound('player');
+        $this->call('choose_nickname', ['nickname' => 'Crayon Fou']);
+
+        $result = $this->call('give_tip', ['tip' => "  Allonge le cou, l'IA voit un canard  "]);
+        self::assertFalse($result['isError'] ?? false);
+        self::assertStringContainsString('shown to the player', $result['content'][0]['text']);
+        self::assertSame(["Allonge le cou, l'IA voit un canard"], $this->roundStatus()['your_tips']);
+
+        self::assertSame([['tip', "Allonge le cou, l'IA voit un canard"]], array_map(static fn (array $event): array => [$event['type'], $event['data']['text']], self::readEvents($this->client, $round.'/agent')));
+        $this->client->request('GET', $round);
+        self::assertSelectorTextContains('.tips h2', 'Les conseils de Crayon Fou');
+        self::assertSelectorTextContains('.tips li', "Allonge le cou, l'IA voit un canard");
+    }
+
+    public function testTipsComeAFewSecondsApartWithoutALimitPerRound(): void
+    {
+        $round = $this->startRound('player');
+        self::assertFalse($this->call('give_tip', ['tip' => 'Dessine le cou'])['isError'] ?? false);
+
+        $tooFast = $this->call('give_tip', ['tip' => 'Ajoute des taches']);
+        self::assertTrue($tooFast['isError']);
+        self::assertStringContainsString('Too fast', $tooFast['content'][0]['text']);
+
+        foreach (range(1, Copilot::MAX_HINTS + 1) as $tip) {
+            Clock::get()->sleep(Copilot::TIP_GAP_MS / 1000);
+            self::assertFalse($this->call('give_tip', ['tip' => "Conseil $tip"])['isError'] ?? false, "Tip $tip");
+        }
+
+        self::assertTrue($this->call('give_tip', ['tip' => ''])['isError'], 'An empty tip');
+        Clock::get()->sleep(Copilot::TIP_GAP_MS / 1000);
+        self::assertTrue($this->call('give_tip', ['tip' => str_repeat('a', Copilot::TIP_MAX_LENGTH + 1)])['isError'], 'A tip too long');
+
+        $this->client->request('GET', $round);
+        self::assertSelectorTextContains('.tips li:first-child', 'Conseil '.(Copilot::MAX_HINTS + 1), 'The newest tip on top');
+    }
+
+    public function testNoTipWhenTheAiDrawsNorInADuel(): void
+    {
+        $this->startRound('ai');
+        self::assertStringContainsString('suggest_word', $this->call('give_tip', ['tip' => 'Dessine le cou'])['content'][0]['text']);
+
+        $this->startRound('player', 'duel');
+        self::assertStringContainsString('duel', $this->call('give_tip', ['tip' => 'Dessine le cou'])['content'][0]['text']);
+        self::assertArrayNotHasKey('the_word_the_player_draws', $this->roundStatus(), 'A rival never gets the word');
     }
 
     public function testAGameWithACopilotWaitsInTheLobbyUntilThePlayerStartsIt(): void
@@ -180,7 +254,7 @@ final class CopilotTest extends WebTestCase
         $round = self::startFirstRound($this->client, 'fr', ['drawnBy' => 'ai']);
         self::readEvents($this->client, $round.'/drawing');
 
-        foreach ([['look_at_drawing', []], ['suggest_word', ['word' => 'girafe']]] as [$tool, $arguments]) {
+        foreach ([['look_at_drawing', []], ['suggest_word', ['word' => 'girafe']], ['give_tip', ['tip' => 'Dessine le cou']]] as [$tool, $arguments]) {
             $result = $this->call($tool, $arguments);
             self::assertTrue($result['isError'], $tool);
             self::assertStringContainsString('alone', $result['content'][0]['text']);
@@ -197,6 +271,12 @@ final class CopilotTest extends WebTestCase
         self::assertResponseRedirects();
 
         return (string) $this->client->getResponse()->headers->get('Location');
+    }
+
+    private function drawStroke(string $round): void
+    {
+        $this->client->request('POST', $round.'/strokes', server: ['CONTENT_TYPE' => 'application/json'], content: '{"points": [[100, 100, 0], [500, 500, 300]]}');
+        self::assertResponseStatusCodeSame(201);
     }
 
     private function answer(string $round, string $word): void

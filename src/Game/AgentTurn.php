@@ -21,6 +21,9 @@ final readonly class AgentTurn
     /** The drawing the agent plays on has strokes it neither saw nor was told of. */
     public const string NEW_STROKES = 'new strokes on the drawing';
 
+    /** While the player draws, the AI made guesses the copilot was not told of. */
+    public const string NEW_AI_GUESSES = 'the AI made new guesses';
+
     private function __construct(
         private ?string $round,
         private bool $over,
@@ -35,17 +38,20 @@ final readonly class AgentTurn
     /**
      * What is new for the agent, for it to act on; null while nothing is.
      *
-     * @param int $strokes Strokes of the round now
+     * @param int $strokes   Strokes of the round now
+     * @param int $aiGuesses Guesses of the AI in the round now
      *
-     * @return self::NEW_ROUND|self::ROUND_OVER|self::NEW_STROKES|null
+     * @return self::NEW_ROUND|self::ROUND_OVER|self::NEW_STROKES|self::NEW_AI_GUESSES|null
      */
-    public function news(Game $game, ?Round $round, int $strokes): ?string
+    public function news(Game $game, ?Round $round, int $strokes, int $aiGuesses = 0): ?string
     {
         return match (true) {
             null === $round => null,
             $round->getId()->toRfc4122() !== $this->round => self::NEW_ROUND,
             $round->isOver() => $this->over ? null : self::ROUND_OVER,
             self::playsOn($game, $round) && $strokes > $round->getStrokesKnownByAgent() => self::NEW_STROKES,
+            // The copilot of a player who draws acts on what the AI sees, not on every stroke.
+            self::tipsOn($game, $round) && $aiGuesses > $round->getAiGuessesToldToAgent() => self::NEW_AI_GUESSES,
             default => null,
         };
     }
@@ -57,5 +63,13 @@ final readonly class AgentTurn
     public static function playsOn(Game $game, Round $round): bool
     {
         return $game->isDuel() || $round->isDrawnByAi();
+    }
+
+    /**
+     * Whether the agent gives tips in this round: a copilot while the player draws.
+     */
+    public static function tipsOn(Game $game, Round $round): bool
+    {
+        return !$game->isDuel() && !$round->isDrawnByAi();
     }
 }

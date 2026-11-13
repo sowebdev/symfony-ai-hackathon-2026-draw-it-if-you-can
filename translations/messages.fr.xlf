@@ -258,6 +258,11 @@
                 <target>%name% te souffle…</target>
                 <note>Above the words an agent connected over MCP suggests to the player</note>
             </trans-unit>
+            <trans-unit id="heading.copilot_tips" resname="heading.copilot_tips">
+                <source>heading.copilot_tips</source>
+                <target>Les conseils de %name%</target>
+                <note>Above the tips an agent connected over MCP gives to the player who draws</note>
+            </trans-unit>
             <trans-unit id="heading.lobby" resname="heading.lobby">
                 <source>heading.lobby</source>
                 <target>Branche ton copilote</target>
@@ -465,7 +470,7 @@
             </trans-unit>
             <trans-unit id="mode.copilot_hint" resname="mode.copilot_hint">
                 <source>mode.copilot_hint</source>
-                <target>Un agent comme Claude Code ou Vibe t'aide à deviner.</target>
+                <target>Un agent comme Claude Code ou Vibe t'aide à deviner et à dessiner.</target>
                 <note>Home page, under a mode of the game</note>
             </trans-unit>
             <trans-unit id="mode.duel_hint" resname="mode.duel_hint">
@@ -500,7 +505,7 @@
             </trans-unit>
             <trans-unit id="lobby.copilot_does_4" resname="lobby.copilot_does_4">
                 <source>lobby.copilot_does_4</source>
-                <target>Quand tu dessines, il attend la manche suivante.</target>
+                <target>Quand tu dessines, il te donne des conseils pour que l'IA trouve le mot.</target>
                 <note>Lobby, what the copilot does</note>
             </trans-unit>
             <trans-unit id="lobby.duel_does" resname="lobby.duel_does">

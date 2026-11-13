@@ -1,10 +1,11 @@
 import { Controller } from '@hotwired/stimulus';
 
 // What the agent connected over MCP does, received as server-sent events: the hints of a copilot,
-// a click on one answers it (the player decides); the answers of the rival in a duel, and
+// a click on one answers it (the player decides); its tips to the player who draws, the newest on
+// top; the answers of the rival in a duel, and
 // "rival_found" when it finds the word, which ends the round.
 export default class extends Controller {
-    static targets = ['hints', 'hintList', 'answers'];
+    static targets = ['hints', 'hintList', 'tips', 'tipList', 'answers'];
     static values = { streamUrl: String, over: Boolean };
 
     connect() {
@@ -13,6 +14,7 @@ export default class extends Controller {
         }
         this.source = new EventSource(this.streamUrlValue);
         this.source.addEventListener('hint', (event) => this.addHint(JSON.parse(event.data)));
+        this.source.addEventListener('tip', (event) => this.addTip(JSON.parse(event.data)));
         this.source.addEventListener('answer', (event) => this.addAnswer(JSON.parse(event.data)));
         this.source.addEventListener('rival_found', () => {
             this.source.close();
@@ -38,6 +40,18 @@ export default class extends Controller {
         item.append(button);
         this.hintListTarget.append(item);
         this.hintsTarget.hidden = false;
+    }
+
+    // Like the hints, a tip comes again at each reconnection: it stays once.
+    addTip({ id, text }) {
+        if (!this.hasTipListTarget || this.tipListTarget.querySelector(`[data-tip-id="${id}"]`)) {
+            return;
+        }
+        const item = document.createElement('li');
+        item.dataset.tipId = id;
+        item.textContent = text;
+        this.tipListTarget.prepend(item);
+        this.tipsTarget.hidden = false;
     }
 
     addAnswer({ id, word, right }) {

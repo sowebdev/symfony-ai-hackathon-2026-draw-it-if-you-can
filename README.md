@@ -4,7 +4,7 @@ A solo drawing and guessing game against an AI, built with Symfony AI and MCP.
 
 - **You draw, the AI guesses**: it calls out single words as your drawing takes shape, like a player around the table.
 - **The AI draws, you guess**: the model draws stroke by stroke, rendered to look hand-drawn.
-- **A copilot over MCP**: an external agent connects to the game to see the drawing in progress and give you hints.
+- **A copilot over MCP**: an external agent connects to the game to see the drawing in progress, give you hints when you guess and tips when you draw.
 - **A duel over MCP**: the agent guesses against you instead, and the first side to find the word wins its points.
 
 The game speaks English and French: the whole game follows the language of the page, the interface, the word to draw and the words of the AI.
@@ -74,15 +74,16 @@ The strokes of the AI look drawn by a hand; `HUMANIZED_DRAWING=false` in `.env.l
 
 The game is an MCP server (Symfony MCP Bundle). An agent connected to it plays along, in one of two modes chosen on the home page:
 
-- **With a copilot**: when the AI draws, the agent looks at the drawing and whispers words in the margin. A click on one answers it: you decide, the copilot never answers by itself.
+- **With a copilot**: when the AI draws, the agent looks at the drawing and whispers words in the margin. A click on one answers it: you decide, the copilot never answers by itself. When you draw, it knows the word like you, watches your drawing and the wrong guesses of your AI, and gives you tips on post-its, e.g. "make the neck longer, the AI sees a duck".
 - **In a duel**: the agent guesses the same drawings as your side, those of the AI and yours, which your AI guesses for you. The first side to find the word wins its points. The agent answers once every 3 seconds at most, and only the exact word counts for it. Its answers show next to yours.
 
-Six tools and two prompts:
+Seven tools and two prompts:
 
-- `round_status`: the round being played, the role of the agent, who draws, the theme, the time left, the wrong answers so far, the score of a duel, and what to do now. Never the word to find while the round is played; once it is over, the word it was. It also tells the agent to stop, when the game is over or the player left. It always answers at once.
-- `wait_for_your_turn`: waits for something new for the agent, a round that starts or ends, new strokes on the drawing, and answers with the same status as `round_status`, or after 25 s with nothing new. An agent cannot wait by itself between two calls, so the game waits for it, and the agent only has to call again. Why: [ADR 0002](docs/adr/0002-agents-wait-on-the-server.md).
+- `round_status`: the round being played, the role of the agent, who draws, the theme, the time left, the wrong answers so far, the score of a duel, and what to do now. Never the word to find while the round is played, except to the copilot of a player who draws, who knows it anyway; once it is over, the word it was. It also tells the agent to stop, when the game is over or the player left. It always answers at once.
+- `wait_for_your_turn`: waits for something new for the agent, a round that starts or ends, new strokes on the drawing of the AI, new guesses of your AI while you draw, and answers with the same status as `round_status`, or after 25 s with nothing new. An agent cannot wait by itself between two calls, so the game waits for it, and the agent only has to call again. Why: [ADR 0002](docs/adr/0002-agents-wait-on-the-server.md).
 - `look_at_drawing`: the drawing as it is now, as a PNG image.
 - `suggest_word`: for a copilot, a word shown to you, at most 5 per round.
+- `give_tip`: for a copilot, a tip shown to you while you draw, one every 5 seconds at most.
 - `submit_answer`: for a rival, an answer of its own.
 - `choose_nickname`: the name you see for the agent, a funny one chosen by the agent in the lobby. Without one, the game shows the name of its client, e.g. "Claude" for `claude-code`.
 - the `copilot` and `duel` prompts tell the agent how to play. A client without prompts can start from `round_status`, which explains the rules too.

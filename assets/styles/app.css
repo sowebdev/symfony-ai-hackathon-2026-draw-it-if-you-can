@@ -468,6 +468,59 @@ button:focus-visible,
     content: ' ?';
 }
 
+/* The tips of the copilot to the player who draws: post-its taped in the margin, the newest on top,
+   the older ones fading below. Not struck like the wrong guesses of the same column. */
+.tips ol {
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.guesses .tips li {
+    position: relative;
+    margin: 0 0 0.6rem;
+    padding: 0.9rem 0.9rem 0.6rem;
+    font-size: 1.15rem;
+    line-height: 1.25;
+    color: var(--ink);
+    text-decoration: none;
+    background: #fff9c4;
+    border: 2px solid var(--ink);
+    border-radius: 4px 8px 6px 10px;
+    box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.1);
+    transform: rotate(-1.2deg);
+}
+
+.guesses .tips li:first-child {
+    animation: tip-stick 0.35s ease-out;
+}
+
+.guesses .tips li:first-child::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    width: 60px;
+    height: 20px;
+    margin-left: -30px;
+    background: var(--tape);
+    transform: rotate(3deg);
+}
+
+.guesses .tips li + li {
+    font-size: 0.95rem;
+    opacity: 0.5;
+    box-shadow: none;
+    transform: rotate(0.8deg);
+}
+
+@keyframes tip-stick {
+    from {
+        transform: translateY(-8px) rotate(6deg) scale(1.08);
+        opacity: 0;
+    }
+}
+
 /* When the player draws, the AI calls its words out like a player around the table. */
 [data-guesses-target='list'] li {
     display: flex;
@@ -804,6 +857,7 @@ button:focus-visible,
 }
 
 .hints h2,
+.tips h2,
 .rival-answers h2 {
     color: var(--pencil);
 }

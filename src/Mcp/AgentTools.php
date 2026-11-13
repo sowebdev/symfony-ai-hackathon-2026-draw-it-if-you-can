@@ -8,6 +8,7 @@ use App\Entity\Guess;
 use App\Entity\Hint;
 use App\Entity\Round;
 use App\Entity\Stroke;
+use App\Entity\Tip;
 use App\Game\AgentRefusal;
 use App\Game\AgentTurn;
 use App\Game\Author;
@@ -19,6 +20,7 @@ use App\Repository\GuessRepository;
 use App\Repository\HintRepository;
 use App\Repository\RoundRepository;
 use App\Repository\StrokeRepository;
+use App\Repository\TipRepository;
 use Mcp\Capability\Attribute\McpTool;
 use Mcp\Capability\Attribute\Schema;
 use Mcp\Exception\ToolCallException;
@@ -33,8 +35,9 @@ use Symfony\Component\Uid\Uuid;
 
 /**
  * The game as seen by an agent connected over MCP: the state of the round and the drawing in
- * progress. The copilot acts by a hint to the player, the rival of a duel by its own answers.
- * The word to find is never given.
+ * progress. The copilot acts by a hint to the player who guesses and a tip to the player who
+ * draws, the rival of a duel by its own answers. The word is given only to the copilot of a
+ * player who draws, who knows it anyway; never to an agent that has to find it.
  */
 final readonly class AgentTools
 {
@@ -51,6 +54,7 @@ final readonly class AgentTools
         private StrokeRepository $strokes,
         private GuessRepository $guesses,
         private HintRepository $hints,
+        private TipRepository $tips,
         private StrokeRenderer $renderer,
         private ScoreGauge $gauge,
         private Copilot $copilot,
@@ -63,7 +67,7 @@ final readonly class AgentTools
     /**
      * @return array<string, mixed>
      */
-    #[McpTool(name: 'round_status', description: 'Start here. The round being played in Draw It If You Can: whether you are the copilot of the player or their rival in a duel, who draws, the theme, the time left, the wrong answers so far, and what you can do now. Never the word to find while the round is played; the word once it is over. Answers at once; to wait for the game, call wait_for_your_turn.')]
+    #[McpTool(name: 'round_status', description: 'Start here. The round being played in Draw It If You Can: whether you are the copilot of the player or their rival in a duel, who draws, the theme, the time left, the wrong answers so far, and what you can do now. The word to find is never given while the round is played, except to the copilot of a player who draws; it is given once the round is over. Answers at once; to wait for the game, call wait_for_your_turn.')]
     public function roundStatus(
         #[Schema(description: 'Id of a round; leave empty for the round being played')]
         ?string $round = null,
@@ -88,7 +92,7 @@ final readonly class AgentTools
         while (true) {
             [$stop] = $this->advice($game, $current);
             $strokes = null === $current ? 0 : \count($this->strokes->findByRound($current));
-            $news = $stop ? 'stop' : $turn->news($game, $current, $strokes);
+            $news = $stop ? 'stop' : $turn->news($game, $current, $strokes, null === $current ? 0 : \count($this->aiGuesses($current)));
             if (null !== $news || microtime(true) >= $deadline) {
                 break;
             }
@@ -120,9 +124,10 @@ final readonly class AgentTools
             ];
         }
 
-        // The agent now knows of these strokes: a wait answers only for more.
+        // The agent now knows of these strokes and guesses: a wait answers only for more.
         $strokes = \count($this->strokes->findByRound($current));
         $current->agentTold($strokes);
+        $current->agentToldAiGuesses(\count($this->aiGuesses($current)));
         $this->entityManager->flush();
 
         $status = [
@@ -157,11 +162,18 @@ final readonly class AgentTools
                 'your_answers' => $this->wrongAnswers($current, [Author::Agent]),
                 'score' => ['you' => $this->gauge->rivalTotal($rounds), 'the_player' => $this->gauge->total($rounds)],
             ];
-        } else {
+        } elseif ($current->isDrawnByAi()) {
             $status += [
-                'wrong_answers' => $current->isDrawnByAi() ? $this->wrongAnswers($current, [Author::Player]) : [],
+                'wrong_answers' => $this->wrongAnswers($current, [Author::Player]),
                 'your_hints' => array_map(static fn (Hint $hint): string => $hint->getWord(), $this->hints->findByRound($current)),
                 'hints_left' => max(0, Copilot::MAX_HINTS - \count($this->hints->findByRound($current))),
+            ];
+        } else {
+            // The player draws and knows the word: their copilot may know it too, to advise them.
+            $status += [
+                'the_word_the_player_draws' => $current->getTargetWord(),
+                'wrong_guesses_of_the_ai' => $this->wrongAnswers($current, [Author::Ai]),
+                'your_tips' => array_map(static fn (Tip $tip): string => $tip->getText(), $this->tips->findByRound($current)),
             ];
         }
 
@@ -171,7 +183,7 @@ final readonly class AgentTools
     /**
      * @return list<TextContent|ImageContent>
      */
-    #[McpTool(name: 'look_at_drawing', description: 'The drawing of the round as it is now, as a PNG image, black strokes on white: you need a model that sees images. Strokes may still be coming: wait_for_your_turn tells you when there are new ones.')]
+    #[McpTool(name: 'look_at_drawing', description: 'The drawing of the round as it is now, by the AI or by the player, as a PNG image, black strokes on white: you need a model that sees images. Strokes may still be coming: wait_for_your_turn tells you when there are new ones.')]
     public function lookAtDrawing(
         #[Schema(description: 'Id of a round; leave empty for the round being played')]
         ?string $round = null,
@@ -209,6 +221,24 @@ final readonly class AgentTools
         }
 
         return \sprintf('"%s" is shown to the player, who decides. %d hints left in this round.', $hint->getWord(), Copilot::MAX_HINTS - \count($this->hints->findByRound($current)));
+    }
+
+    #[McpTool(name: 'give_tip', description: 'For a copilot only, when the player draws. Give the player one short, concrete tip so that the AI finds the word: what to add, change or make bigger, given the drawing and the wrong guesses of the AI. It appears on screen next to the drawing. One tip every 5 seconds at most, in the language of the game, 120 characters at most.')]
+    public function giveTip(
+        #[Schema(description: 'Your tip, one short sentence in the language of the game, e.g. "Allonge le cou, l\'IA voit un canard" in French')]
+        string $tip,
+        #[Schema(description: 'Id of a round; leave empty for the round being played')]
+        ?string $round = null,
+        ?RequestContext $context = null,
+    ): string {
+        $current = $this->findRound($round, $context);
+        try {
+            $this->copilot->tip($current, $tip);
+        } catch (AgentRefusal $refusal) {
+            throw new ToolCallException($refusal->getMessage(), previous: $refusal);
+        }
+
+        return \sprintf('Your tip is shown to the player. Call wait_for_your_turn: it answers when the AI guesses again. Next tip in %d s at the earliest.', intdiv(Copilot::TIP_GAP_MS, 1000));
     }
 
     #[McpTool(name: 'choose_nickname', description: 'Choose the name the player sees for you: invent a funny nickname of your own, in the language of the game, 24 characters at most. Best done in the lobby, before the game starts.')]
@@ -304,6 +334,14 @@ final readonly class AgentTools
     }
 
     /**
+     * @return list<Guess>
+     */
+    private function aiGuesses(Round $round): array
+    {
+        return array_values(array_filter($this->guesses->findByRound($round), static fn (Guess $guess): bool => Author::Ai === $guess->getAuthor()));
+    }
+
+    /**
      * @param list<Author> $authors
      *
      * @return list<string>
@@ -320,7 +358,7 @@ final readonly class AgentTools
     {
         return $game->isDuel()
             ? 'the rival of the player in a duel: you guess the same drawings, and the first side to find the word wins its points'
-            : 'the copilot of the player: you whisper words, and the player decides';
+            : 'the copilot of the player: you whisper words when they guess, and give tips when they draw; the player decides';
     }
 
     /**
@@ -356,7 +394,7 @@ final readonly class AgentTools
             null !== $idle && $idle > self::IDLE_S * 1000 => [true, \sprintf('No new round for %d minutes: the player has probably stopped. Stop playing; the player will call you again.', intdiv(self::IDLE_S, 60))],
             $round->isOver() => [false, 'This round is over: call wait_for_your_turn, it answers when the player starts the next one. Keep calling it.'],
             $game->isDuel() => [false, \sprintf('%s: call look_at_drawing, then submit_answer with your best guess, one word in the language of the game. Wrong? Call wait_for_your_turn: it answers when the drawing grows. Then look again and answer again, every %d seconds at most. Play fair: see the game through these tools only.', $round->isDrawnByAi() ? 'The AI draws, the player and you guess' : 'The player draws, the AI of the player and you guess', intdiv(Duel::ANSWER_GAP_MS, 1000))],
-            !$round->isDrawnByAi() => [false, 'The player draws and the AI guesses: nothing for you to do in this round. Call wait_for_your_turn: it answers when the next round starts. Keep calling it.'],
+            !$round->isDrawnByAi() => [false, \sprintf('The player draws "%s" and the AI guesses: help the player draw. Call look_at_drawing, read the wrong guesses of the AI, then give_tip with one short, concrete tip: what to add or change so that the AI finds the word. Never just repeat the word: the player knows it. Then call wait_for_your_turn: it answers when the AI guesses again.', $round->getTargetWord())],
             default => [false, 'The AI draws and the player guesses: call look_at_drawing, then suggest_word with your best guess. Then call wait_for_your_turn: it answers when the drawing grows, and you look again.'],
         };
     }

@@ -51,13 +51,28 @@ final class AgentTurnTest extends TestCase
         self::assertSame(AgentTurn::NEW_STROKES, AgentTurn::from($round)->news($game, $round, 3));
     }
 
-    public function testACopilotHasNothingToDoWhileThePlayerDraws(): void
+    public function testTheCopilotOfAPlayerWhoDrawsWaitsForTheGuessesOfTheAiNotForStrokes(): void
     {
         self::mockTime();
         $game = new Game(Language::English, 6, DrawnBy::Player, Mode::Copilot);
         $round = new Round($game, 1, 'cat', 60_000, Theme::Animals);
 
-        self::assertNull(AgentTurn::from($round)->news($game, $round, 5));
+        self::assertNull(AgentTurn::from($round)->news($game, $round, 5), 'The player draws on');
+        self::assertSame(AgentTurn::NEW_AI_GUESSES, AgentTurn::from($round)->news($game, $round, 5, 1));
+
+        $round->agentToldAiGuesses(1);
+        self::assertNull(AgentTurn::from($round)->news($game, $round, 6, 1), 'A status gave this guess');
+        self::assertSame(AgentTurn::NEW_AI_GUESSES, AgentTurn::from($round)->news($game, $round, 6, 2));
+    }
+
+    public function testARivalIsNotWokenByTheGuessesOfTheAi(): void
+    {
+        self::mockTime();
+        $game = new Game(Language::English, 6, DrawnBy::Player, Mode::Duel);
+        $round = new Round($game, 1, 'cat', 60_000, Theme::Animals);
+        $round->agentTold(5);
+
+        self::assertNull(AgentTurn::from($round)->news($game, $round, 5, 2));
     }
 
     public function testARivalPlaysOnEveryDrawing(): void
