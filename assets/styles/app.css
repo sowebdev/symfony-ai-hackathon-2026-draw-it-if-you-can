@@ -390,6 +390,19 @@ button:focus-visible,
     text-decoration: line-through;
 }
 
+/* A wrong guess of the AI with its "Yes!" button: only the word is struck, the button still answers. */
+.guesses ol li:has(> span) {
+    text-decoration: none;
+}
+
+.guesses ol li > span {
+    text-decoration: line-through;
+}
+
+.guesses ol li.accepted > span {
+    text-decoration: none;
+}
+
 .guesses ol li.accepted {
     color: var(--found);
     border-color: var(--found);
@@ -484,6 +497,8 @@ button:focus-visible,
     box-shadow: 6px 8px 0 rgba(0, 0, 0, 0.12);
     transform: translate(-50%, -50%) rotate(1.5deg);
     animation: stick 0.35s ease-out;
+    /* Stuck on the canvas: a stroke still going on when the word is found must not select its text. */
+    user-select: none;
 }
 
 @keyframes stick {
