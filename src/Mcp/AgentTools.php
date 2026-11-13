@@ -81,7 +81,7 @@ final readonly class AgentTools
     public function waitForYourTurn(?RequestContext $context = null): array
     {
         // An agent cannot wait by itself between two calls: the game waits for it. See
-        // docs/adr/0001-agents-wait-on-the-server.md.
+        // docs/adr/0002-agents-wait-on-the-server.md.
         [$game, $current] = $this->find(null, $context);
         $turn = AgentTurn::from($current);
         $deadline = microtime(true) + $this->waitS;

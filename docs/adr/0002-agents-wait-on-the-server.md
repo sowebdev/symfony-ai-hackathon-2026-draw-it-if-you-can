@@ -1,4 +1,4 @@
-# 1. Agents wait on the server
+# 2. Agents wait on the server
 
 - Status: accepted
 - Date: 2026-11-13

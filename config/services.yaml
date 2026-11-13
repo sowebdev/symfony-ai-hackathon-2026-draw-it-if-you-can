@@ -21,7 +21,7 @@ parameters:
     # A stream of the hints of the copilot ends after this; the browser reconnects by itself.
     game.agent_stream_max_s: 120
     # wait_for_your_turn waits this long for something new, so that an agent which cannot wait
-    # by itself only has to call it again (docs/adr/0001-agents-wait-on-the-server.md).
+    # by itself only has to call it again (docs/adr/0002-agents-wait-on-the-server.md).
     game.agent_wait_s: 25
     # Longest drawing of the AI: Qwen takes 30 to 50 s (test B, 10/11/2026).
     game.drawing_stream_max_s: 180
