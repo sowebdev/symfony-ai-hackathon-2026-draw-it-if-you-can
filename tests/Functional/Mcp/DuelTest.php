@@ -125,6 +125,49 @@ final class DuelTest extends WebTestCase
         self::assertSelectorTextNotContains('.guesses ol', 'girafe', 'The answers of the rival are not those of the AI');
     }
 
+    public function testTheRivalWaitsForStrokesItHasNotSeen(): void
+    {
+        $round = $this->startRound('player', 'duel');
+        $this->call('choose_nickname', ['nickname' => 'Crayon Fou']);
+        self::assertSame('nothing new yet', $this->waitForYourTurn()['news'], 'The canvas is empty');
+
+        $this->client->request('POST', $round.'/strokes', server: ['CONTENT_TYPE' => 'application/json'], content: '{"points": [[100, 100, 0], [500, 500, 300]]}');
+        $status = $this->waitForYourTurn();
+        self::assertSame('new strokes on the drawing', $status['news']);
+        self::assertSame(['strokes' => 1, 'strokes_you_saw' => 0], array_intersect_key($status, ['strokes' => 0, 'strokes_you_saw' => 0]));
+
+        $this->call('look_at_drawing');
+        $status = $this->waitForYourTurn();
+        self::assertSame('nothing new yet', $status['news'], 'The agent saw the only stroke');
+        self::assertSame(1, $status['strokes_you_saw']);
+        self::assertFalse($status['stop']);
+
+        // The round ends between two calls: the status says so.
+        Clock::get()->sleep(62);
+        $status = $this->waitForYourTurn();
+        self::assertSame(['state' => 'time is up', 'the_word_was' => 'girafe'], array_intersect_key($status, ['state' => 0, 'the_word_was' => 0]));
+        self::assertStringContainsString('wait_for_your_turn', $status['what_you_can_do']);
+    }
+
+    public function testWithoutANicknameTheRivalIsAskedForOneDuringTheRound(): void
+    {
+        $this->startRound('ai', 'duel');
+
+        self::assertStringStartsWith('First choose a funny nickname', $this->roundStatus()['what_you_can_do']);
+        $this->call('choose_nickname', ['nickname' => 'Crayon Fou']);
+        self::assertStringStartsWith('The AI draws', $this->roundStatus()['what_you_can_do']);
+    }
+
+    public function testInTheLobbyTheGameTellsTheRivalToWaitForIt(): void
+    {
+        $this->client->request('POST', '/fr/games', ['theme' => 'animals', 'mode' => 'duel']);
+
+        $status = $this->waitForYourTurn();
+        self::assertSame('nothing new yet', $status['news']);
+        self::assertSame('waiting for the player to start the game', $status['state']);
+        self::assertStringContainsString('wait_for_your_turn', $status['what_you_can_do']);
+    }
+
     public function testTheEndOfARoundSaysWhichSideFound(): void
     {
         $round = $this->startRound('player', 'duel');

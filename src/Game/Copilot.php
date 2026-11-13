@@ -43,7 +43,7 @@ final readonly class Copilot
             throw new AgentRefusal('The player draws this round and knows the word: there is nothing to guess. Wait for the next round, drawn by the AI.');
         }
         if ($round->isOver()) {
-            throw new AgentRefusal('This round is over. Look for the next one with round_status.');
+            throw new AgentRefusal('This round is over. Wait for the next one with wait_for_your_turn.');
         }
 
         $given = $this->hints->findByRound($round);

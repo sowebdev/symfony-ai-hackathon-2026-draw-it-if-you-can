@@ -66,6 +66,14 @@ trait McpClient
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    private function waitForYourTurn(): array
+    {
+        return json_decode($this->call('wait_for_your_turn')['content'][0]['text'], true, flags: \JSON_THROW_ON_ERROR);
+    }
+
+    /**
      * @param array<string, mixed> $arguments
      *
      * @return array<string, mixed>

@@ -41,7 +41,7 @@ final readonly class Duel
             throw new AgentRefusal('The player left the game: stop playing.');
         }
         if ($round->isOver()) {
-            throw new AgentRefusal('This round is over. Look for the next one with round_status.');
+            throw new AgentRefusal('This round is over. Wait for the next one with wait_for_your_turn.');
         }
 
         $mine = $this->answersOf($round);

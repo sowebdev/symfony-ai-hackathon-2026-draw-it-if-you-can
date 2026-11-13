@@ -28,9 +28,9 @@ final class CopilotTest extends WebTestCase
         $this->connect();
     }
 
-    public function testTheAgentHasFiveToolsAndTwoPrompts(): void
+    public function testTheAgentHasSixToolsAndTwoPrompts(): void
     {
-        self::assertSame(['round_status', 'look_at_drawing', 'suggest_word', 'choose_nickname', 'submit_answer'], array_column($this->rpc('tools/list')['tools'], 'name'));
+        self::assertSame(['round_status', 'wait_for_your_turn', 'look_at_drawing', 'suggest_word', 'choose_nickname', 'submit_answer'], array_column($this->rpc('tools/list')['tools'], 'name'));
         self::assertSame(['copilot', 'duel'], array_column($this->rpc('prompts/list')['prompts'], 'name'));
     }
 

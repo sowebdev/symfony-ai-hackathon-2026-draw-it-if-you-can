@@ -66,6 +66,12 @@ class Round
     private DrawnBy $drawnBy;
 
     /**
+     * How many strokes the agent saw when it last looked at the drawing: it waits for more.
+     */
+    #[ORM\Column(options: ['default' => 0])]
+    private int $strokesSeenByAgent = 0;
+
+    /**
      * @param int $number     Order of the round in the game, from 1: it tells who draws
      * @param int $durationMs Kept on the round, so that a change of configuration does not change it
      */
@@ -249,5 +255,18 @@ class Round
     public function finishAiDrawing(): void
     {
         $this->aiDrawingFinished = true;
+    }
+
+    public function getStrokesSeenByAgent(): int
+    {
+        return $this->strokesSeenByAgent;
+    }
+
+    /**
+     * The agent looked at the drawing, which had this many strokes.
+     */
+    public function agentLooked(int $strokes): void
+    {
+        $this->strokesSeenByAgent = max($this->strokesSeenByAgent, $strokes);
     }
 }

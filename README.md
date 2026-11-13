@@ -58,9 +58,10 @@ The game is an MCP server (Symfony MCP Bundle). An agent connected to it plays a
 - **With a copilot**: when the AI draws, the agent looks at the drawing and whispers words in the margin. A click on one answers it: you decide, the copilot never answers by itself.
 - **In a duel**: the agent guesses the same drawings as your side, those of the AI and yours, which your AI guesses for you. The first side to find the word wins its points. The agent answers once every 3 seconds at most, and only the exact word counts for it. Its answers show next to yours.
 
-Five tools and two prompts:
+Six tools and two prompts:
 
-- `round_status`: the round being played, the role of the agent, who draws, the theme, the time left, the wrong answers so far, the score of a duel, and what to do now. Never the word to find while the round is played; once it is over, the word it was. It also tells the agent to stop, when the game is over or the player left. While the game waits, in the lobby or between rounds, it waits too, up to 25 s, and answers as soon as a round starts: an agent cannot wait by itself between two calls, so it only has to call again.
+- `round_status`: the round being played, the role of the agent, who draws, the theme, the time left, the wrong answers so far, the score of a duel, and what to do now. Never the word to find while the round is played; once it is over, the word it was. It also tells the agent to stop, when the game is over or the player left. It always answers at once.
+- `wait_for_your_turn`: waits for something new for the agent, a round that starts or ends, new strokes on the drawing, and answers with the same status as `round_status`, or after 25 s with nothing new. An agent cannot wait by itself between two calls, so the game waits for it, and the agent only has to call again. Why: [ADR 0001](docs/adr/0001-agents-wait-on-the-server.md).
 - `look_at_drawing`: the drawing as it is now, as a PNG image.
 - `suggest_word`: for a copilot, a word shown to you, at most 5 per round.
 - `submit_answer`: for a rival, an answer of its own.
