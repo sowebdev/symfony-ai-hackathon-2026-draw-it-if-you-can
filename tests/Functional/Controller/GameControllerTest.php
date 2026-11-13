@@ -45,7 +45,7 @@ final class GameControllerTest extends WebTestCase
         // The card of the first theme turns over, then the form starts the round by itself.
         $client->request('GET', $game, server: ['HTTP_ACCEPT_LANGUAGE' => 'en']);
         self::assertResponseIsSuccessful();
-        self::assertSelectorExists('form[data-loading-auto-value="true"][data-loading-theme-value="🐾 Animaux"][data-loading-round-value="Manche 1 / 6"]');
+        self::assertSelectorExists('form[data-loading-auto-value="true"][data-loading-theme-value="Animaux"][data-loading-color-value="theme-animals"][data-loading-round-value="Manche 1 / 6"]');
         $client->request('POST', $game.'/rounds');
 
         // The round page speaks the language of its game, whatever the browser says.
@@ -55,7 +55,6 @@ final class GameControllerTest extends WebTestCase
         self::assertSelectorTextContains('.target', 'À dessiner');
         self::assertSelectorTextContains('.target strong', 'girafe');
         self::assertSelectorTextContains('.theme-tag', 'Animaux');
-        self::assertSelectorTextContains('.target-theme', 'Animaux');
         self::assertSelectorExists('canvas[data-canvas-target="canvas"]');
         self::assertSelectorNotExists('.copilot-badge', 'No copilot unless asked');
     }

@@ -218,13 +218,20 @@ button:focus-visible,
 }
 
 /* The theme of the round: a label taped in the bar, as on the card drawn before the round. */
+/* One colour per theme, on its card and its label: a landmark that cannot be taken for a word. */
+.theme-animals { --theme: #2b8a3e; }
+.theme-food { --theme: #c2255c; }
+.theme-everyday-objects { --theme: #5f3dc4; }
+.theme-developer { --theme: #1971c2; }
+
 .theme-tag {
     position: relative;
+    color: var(--theme, var(--ink));
     margin-right: auto !important;
     padding: 0.15rem 0.8rem;
     font-size: 1.4rem;
     background: var(--sheet);
-    border: 2px solid var(--ink);
+    border: 2px solid var(--theme, var(--ink));
     border-radius: 4px 7px 5px 8px;
     box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.1);
     transform: rotate(-2deg);
@@ -241,10 +248,6 @@ button:focus-visible,
     transform: translateX(-50%) rotate(3deg);
 }
 
-.target-theme {
-    color: #777;
-    white-space: nowrap;
-}
 
 .clock {
     color: var(--rust);
@@ -1010,6 +1013,9 @@ button.link:hover {
     padding: 1rem;
     text-align: center;
     background: var(--sheet);
+    border-color: var(--theme, var(--ink));
+    border-width: 3px;
+    box-shadow: inset 0 0 0 0.6rem color-mix(in srgb, var(--theme, var(--ink)) 18%, transparent), 6px 8px 0 rgba(0, 0, 0, 0.12);
     transform: rotateY(180deg);
 }
 
@@ -1019,6 +1025,7 @@ button.link:hover {
 }
 
 .theme-card-theme {
+    color: var(--theme, var(--ink));
     font-size: 2.2rem;
     font-weight: normal;
     line-height: 1.2;

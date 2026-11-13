@@ -2,6 +2,7 @@
    the round, turned over before the AI picks the word (assets/controllers/loading_controller.js). #}
 data-controller="loading" data-action="loading#show"
 {% if game.nextTheme %}
-    data-loading-theme-value="{{ game.nextTheme.icon }} {{ game.nextTheme|trans }}"
+    data-loading-theme-value="{{ game.nextTheme|trans }}"
+    data-loading-color-value="theme-{{ game.nextTheme.value }}"
     data-loading-round-value="{{ 'label.round'|trans({'%number%': number, '%count%': game.roundCount}) }}"
 {% endif %}

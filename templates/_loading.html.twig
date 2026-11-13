@@ -2,12 +2,12 @@
 {# On the page that deals the first theme of a game, the screen and the card are there from the start. #}
 {% set dealing = dealing ?? false %}
 <div class="loading" id="loading" {{ dealing ? '' : 'hidden' }} role="status" aria-live="assertive">
-    <div class="theme-card" {{ dealing ? '' : 'hidden' }}>
+    <div class="theme-card {{ dealing ? 'theme-' ~ game.nextTheme.value }}" {{ dealing ? '' : 'hidden' }}>
         <div class="theme-card-inner">
             <div class="theme-card-back" aria-hidden="true">?</div>
             <div class="theme-card-face">
                 <small class="theme-card-round">{{ dealing ? 'label.round'|trans({'%number%': 1, '%count%': game.roundCount}) }}</small>
-                <strong class="theme-card-theme">{{ dealing ? game.nextTheme.icon ~ ' ' ~ game.nextTheme|trans }}</strong>
+                <strong class="theme-card-theme">{{ dealing ? game.nextTheme|trans }}</strong>
             </div>
         </div>
     </div>

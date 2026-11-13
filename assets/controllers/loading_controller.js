@@ -8,7 +8,7 @@ const DEAL_MS = 1400;
 // it is sent, until the next page comes. On a form that starts a round, the card of its theme
 // turns over first. Coming back with the browser's history hides it all.
 export default class extends Controller {
-    static values = { theme: String, round: String, auto: Boolean };
+    static values = { theme: String, color: String, round: String, auto: Boolean };
 
     connect() {
         // pageshow also comes with the first load: only a page restored from the history is reset.
@@ -19,6 +19,9 @@ export default class extends Controller {
             this.sent = false;
             this.overlay()?.setAttribute('hidden', '');
             this.card()?.classList.remove('dealt');
+            if (this.colorValue) {
+                this.card()?.classList.remove(this.colorValue);
+            }
         };
         window.addEventListener('pageshow', this.hide);
         if (this.autoValue) {
@@ -46,6 +49,9 @@ export default class extends Controller {
         }
         card.querySelector('.theme-card-round').textContent = this.roundValue;
         card.querySelector('.theme-card-theme').textContent = this.themeValue;
+        if (this.colorValue) {
+            card.classList.add(this.colorValue);
+        }
         card.hidden = false;
         // A new frame, so that the card is drawn face down before it turns over.
         requestAnimationFrame(() => requestAnimationFrame(() => card.classList.add('dealt')));

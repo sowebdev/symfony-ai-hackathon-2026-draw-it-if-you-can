@@ -4,7 +4,7 @@
    controllers of the round can act on it. #}
 <header class="scoreboard">
     <p class="round-number">{{ 'label.round'|trans({'%number%': round.number, '%count%': round.game.roundCount}) }}</p>
-    <p class="theme-tag">{{ round.theme.icon }} {{ round.theme|trans }}</p>
+    <p class="theme-tag theme-{{ round.theme.value }}">{{ round.theme|trans }}</p>
     {% if round.game.withCopilot %}
         <p class="copilot-badge {{ round.game.agentConnected ? 'connected' }}">
             {{ include('game/_mode_sketch.html.twig', {mode: 'agent'}) }}
