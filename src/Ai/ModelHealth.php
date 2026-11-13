@@ -2,6 +2,7 @@
 
 namespace App\Ai;
 
+use Symfony\AI\Platform\Exception\BadRequestException;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
@@ -64,6 +65,17 @@ final readonly class ModelHealth
         }
         if (preg_match('/\b40[13]\b/', $message) || stripos($message, 'unauthorized') !== false) {
             return 'The server refused the API key: check AI_<ROLE>_API_KEY. '.$message;
+        }
+        // The generic bridge of Symfony AI reads a text answer only; a reasoning model of Mistral
+        // answers with blocks, its reasoning then its text.
+        if ($exception instanceof \TypeError && str_contains($message, 'array given')) {
+            return 'This model answers with reasoning blocks, which Symfony AI cannot read yet: choose a model that does not reason (e.g. mistral-medium-3.5 rather than mistral-large-4).';
+        }
+        // The generic bridge looks for the reason where OpenAI puts it; Mistral puts it elsewhere.
+        if ($exception instanceof BadRequestException) {
+            return 'Bad Request' === $message
+                ? 'The server refused the request without a reason the game can read. Models that always reason refuse options of the game: choose one that does not reason.'
+                : 'The server refused the request: '.$message;
         }
 
         return 'The call failed: '.$message;

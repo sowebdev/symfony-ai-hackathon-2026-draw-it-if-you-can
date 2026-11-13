@@ -58,12 +58,20 @@ final readonly class ModelCheck
         return $points;
     }
 
+    /**
+     * Low, not zero: some providers refuse greedy sampling, e.g. Mistral for its reasoning models.
+     */
+    private const float TEMPERATURE = 0.2;
+
+    /** Said when a model gives nothing usable: the most likely cause after a missing skill. */
+    private const string REASONING_HINT = 'A model that reasons before answering may spend all its tokens on it: choose one that does not reason.';
+
     private function checkAnswers(): ?string
     {
         // Tool calling is checked once the AI draws; for now, the model must answer at all.
-        $answer = $this->model->ask(Role::Drawer, new MessageBag(Message::ofUser('Answer with the single word: ready')), 0.0);
+        $answer = $this->model->ask(Role::Drawer, new MessageBag(Message::ofUser('Answer with the single word: ready')), self::TEMPERATURE);
 
-        return null === $answer ? 'The model gave no usable answer to a one-word question.' : null;
+        return null === $answer ? 'The model gave no usable answer to a one-word question. '.self::REASONING_HINT : null;
     }
 
     private function checkSeesImages(): ?string
@@ -72,11 +80,12 @@ final readonly class ModelCheck
             new Image($this->renderer->toPng([self::circle()]), 'image/png'),
             'What shape is drawn in this image? Answer with one word in English.',
         ));
-        $answer = $this->model->ask(Role::Guesser, $messages, 0.0);
+        $answer = $this->model->ask(Role::Guesser, $messages, self::TEMPERATURE);
 
-        return self::isCircle($answer) ? null : \sprintf(
-            'The model does not recognize a circle in an image (it answered "%s"): it must be a model that reads images.',
-            $answer ?? 'nothing usable',
-        );
+        if (null === $answer) {
+            return 'The model gave no usable answer about an image: it must be a model that reads images. '.self::REASONING_HINT;
+        }
+
+        return self::isCircle($answer) ? null : \sprintf('The model does not recognize a circle in an image (it answered "%s"): it must be a model that reads images.', $answer);
     }
 }
