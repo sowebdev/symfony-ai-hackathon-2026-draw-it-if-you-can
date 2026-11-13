@@ -1,13 +1,20 @@
 import { Controller } from '@hotwired/stimulus';
 
 // The home page asks the game whether each role can play (GET /health), and says so: a role that
-// fails comes with what is wrong, and the help tells where to configure the models.
+// fails comes with what is wrong, and the help tells where to configure the models. A check that
+// takes long says why it may: a local model loads into memory on its first call.
+const SLOW_MS = 5000;
+
 export default class extends Controller {
-    static targets = ['checking', 'list', 'help'];
+    static targets = ['checking', 'slow', 'list', 'help'];
     static values = { url: String, labels: Object };
 
     connect() {
         this.check(false);
+    }
+
+    disconnect() {
+        clearTimeout(this.slowTimer);
     }
 
     retry() {
@@ -16,6 +23,9 @@ export default class extends Controller {
 
     async check(fresh) {
         this.checkingTarget.hidden = false;
+        this.slowTarget.hidden = true;
+        clearTimeout(this.slowTimer);
+        this.slowTimer = setTimeout(() => (this.slowTarget.hidden = false), SLOW_MS);
         this.helpTarget.hidden = true;
         this.listTarget.replaceChildren();
         let report;
@@ -25,7 +35,9 @@ export default class extends Controller {
         } catch {
             report = { ok: false, roles: [] };
         }
+        clearTimeout(this.slowTimer);
         this.checkingTarget.hidden = true;
+        this.slowTarget.hidden = true;
 
         for (const { role, model, ok, problem } of report.roles) {
             const item = document.createElement('li');

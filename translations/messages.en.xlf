@@ -308,6 +308,11 @@
                 <target>Checking the models…</target>
                 <note>Home page, while the models are tried</note>
             </trans-unit>
+            <trans-unit id="status.models_slow" resname="status.models_slow">
+                <source>status.models_slow</source>
+                <target>The model's server is slow to answer. A local model loads into memory on its first call, which may take a minute.</target>
+                <note>Home page, when checking the models takes more than 5 s</note>
+            </trans-unit>
             <trans-unit id="help.models" resname="help.models">
                 <source>help.models</source>
                 <target>A model does not answer as it should. Set AI_DRAWER_* and AI_GUESSER_* in .env.local (see the README), then try again. "make check" says the same in a terminal.</target>

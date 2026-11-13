@@ -7,6 +7,7 @@
              guesser: 'role.guesser'|trans,
          }|json_encode }}">
     <p class="health-checking" data-health-target="checking">{{ 'status.checking_models'|trans }}</p>
+    <p class="health-checking" data-health-target="slow" hidden>{{ 'status.models_slow'|trans }}</p>
     <ul data-health-target="list"></ul>
     <div class="health-help" data-health-target="help" hidden>
         <p>{{ 'help.models'|trans }}</p>
