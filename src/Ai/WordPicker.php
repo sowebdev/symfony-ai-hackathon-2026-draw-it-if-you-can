@@ -50,7 +50,7 @@ final readonly class WordPicker
         );
 
         for ($attempt = 1; $attempt <= self::ATTEMPTS; ++$attempt) {
-            $word = self::draw($this->model->askList($role, $messages, 1.0), $recent, $this->randomizer);
+            $word = self::draw($this->model->askList($role, $messages), $recent, $this->randomizer);
             if (null !== $word) {
                 return $word;
             }

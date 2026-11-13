@@ -14,6 +14,14 @@ final readonly class OneWordModel
     private const int MAX_LENGTH = 40;
     private const int MAX_WORDS = 3;
 
+    /**
+     * Ceilings, not budgets: a model stops by itself after its word, a cloud model that reasons
+     * spends a few hundred tokens first, and a local model that loops is cut here.
+     */
+    private const int MAX_TOKENS_FOR_A_WORD = 1000;
+
+    private const int MAX_TOKENS_FOR_A_LIST = 2000;
+
     public function __construct(private Models $models)
     {
     }
@@ -21,12 +29,10 @@ final readonly class OneWordModel
     /**
      * @return string|null The word, or null if the answer is not a single word
      */
-    public function ask(Role $role, MessageBag $messages, float $temperature): ?string
+    public function ask(Role $role, MessageBag $messages): ?string
     {
-        $answer = $this->models->invoke($role, $messages, [
-            'temperature' => $temperature,
-            'max_tokens' => 20,
-        ])->asText();
+        // No temperature: the default of each provider suits its models, and some refuse others.
+        $answer = $this->models->invoke($role, $messages, ['max_tokens' => self::MAX_TOKENS_FOR_A_WORD])->asText();
 
         return self::clean($answer);
     }
@@ -36,12 +42,9 @@ final readonly class OneWordModel
      *
      * @return list<string>
      */
-    public function askList(Role $role, MessageBag $messages, float $temperature): array
+    public function askList(Role $role, MessageBag $messages): array
     {
-        $answer = $this->models->invoke($role, $messages, [
-            'temperature' => $temperature,
-            'max_tokens' => 300,
-        ])->asText();
+        $answer = $this->models->invoke($role, $messages, ['max_tokens' => self::MAX_TOKENS_FOR_A_LIST])->asText();
 
         return self::cleanList($answer);
     }

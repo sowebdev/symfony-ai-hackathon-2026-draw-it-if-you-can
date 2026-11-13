@@ -20,9 +20,9 @@ final readonly class Drawer implements DrawsStrokes
     /**
      * Longest answer of the model, between two runs of the tool. A stroke takes 40 to 100 tokens;
      * without a cap, Gemma once looped for 95,000 tokens, and llama.cpp goes on even when nobody
-     * reads the answer any more (10/11/2026).
+     * reads the answer any more (10/11/2026). Room for a cloud model that reasons before it draws.
      */
-    private const int MAX_TOKENS_PER_ANSWER = 1500;
+    private const int MAX_TOKENS_PER_ANSWER = 4000;
 
     public function __construct(private Models $models)
     {
@@ -48,7 +48,7 @@ final readonly class Drawer implements DrawsStrokes
         );
 
         $agent = $this->models->agent(Role::Drawer, new Pen($max), maxToolCalls: $max + 5);
-        $execution = $agent->call($messages, $this->models->options(Role::Drawer, ['stream' => true, 'temperature' => 0.7, 'max_tokens' => self::MAX_TOKENS_PER_ANSWER]));
+        $execution = $agent->call($messages, $this->models->options(Role::Drawer, ['stream' => true, 'max_tokens' => self::MAX_TOKENS_PER_ANSWER]));
 
         $assembler = new ToolCallAssembler();
         $drawn = 0;

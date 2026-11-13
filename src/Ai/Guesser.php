@@ -38,6 +38,6 @@ final readonly class Guesser
             ),
         );
 
-        return $this->model->ask(Role::Guesser, $messages, 0.7);
+        return $this->model->ask(Role::Guesser, $messages);
     }
 }
