@@ -6,7 +6,7 @@ Draw It If You Can is a drawing and guessing game you play with an AI, taking tu
 
 Bring your own agent along over MCP: Claude Code, Mistral Vibe or any client whose model sees images joins from the lobby, picks itself a funny nickname, and plays as your copilot or races you to the answer in a duel.
 
-Plug in the model you like, from a cloud API or running on your own machine. Yes, you can even play with a local model: this may be the first time you want a decent graphics card for something other than 3D games.
+Plug in the model you like, from a cloud API or on your own machine: this may be the first time you want a decent graphics card for something other than 3D games.
 
 Built with Symfony AI for the Symfony AI hackathon (November 2026). The game speaks English and French.
 
