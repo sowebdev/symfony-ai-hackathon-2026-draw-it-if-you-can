@@ -1,124 +1,42 @@
 # Draw It If You Can
 
-A solo drawing and guessing game against an AI, built with Symfony AI and MCP.
+AI doesn't always have to be about productivity. It can also be fun.
 
-- **You draw, the AI guesses**: it calls out single words as your drawing takes shape, like a player around the table.
-- **The AI draws, you guess**: the model draws stroke by stroke, rendered to look hand-drawn.
-- **A copilot over MCP**: an external agent connects to the game to see the drawing in progress, give you hints when you guess and tips when you draw.
-- **A duel over MCP**: the agent guesses against you instead, and the first side to find the word wins its points.
+Draw It If You Can is a drawing and guessing game you play with an AI, taking turns. When you draw, the AI watches your sketch grow and shouts out one word at a time, like a friend around the table. When the AI draws, you guess: it picks up the pencil and draws live, stroke by stroke, with the wobble of a human hand.
 
-The game speaks English and French: the whole game follows the language of the page, the interface, the word to draw and the words of the AI.
+Bring your own agent along over MCP: Claude Code, Mistral Vibe or any client whose model sees images joins from the lobby, picks itself a funny nickname, and plays as your copilot or races you to the answer in a duel.
 
-Built for the Symfony AI hackathon (November 2026).
+Built with Symfony AI for the Symfony AI hackathon (November 2026). The game speaks English and French.
 
-## Requirements
+## Play in three steps
 
-- Docker and make: PHP, Composer and the tests all run in the container
-- A model: an API key (Anthropic or Mistral), or a model server you already run (Ollama, LM Studio, llama.cpp). The game needs an AI to play, there is no offline mode.
+You need Docker, make, and a model: a cloud API key, or a model server of your own.
 
-## Getting started
+1. `make install`, then answer its few questions: where the model runs (a cloud API compatible with OpenAI's, or a server you run), its address, the model, and the key if it needs one.
+2. Open http://127.0.0.1:8040.
+3. Draw, guess, laugh.
 
-1. Install and start the game:
+`make setup` changes the model later, and `make check` tells you whether it can play.
 
-   ```bash
-   make install
-   ```
+## Which model for the most fun?
 
-   At the end, it asks how the AI will play:
+A poor drawer makes you laugh, a good one makes you play.
 
-   - **an Anthropic API key**, recommended: the best drawings we tried, on any machine;
-   - **a Mistral API key**;
-   - **a model server you already run**, on this machine or elsewhere: its address and the names of its models. By default, Ollama on this machine with Qwen3.8 27B, the smallest local model that draws recognisably: `ollama pull hf.co/unsloth/Qwen3.8-27B-GGUF:UD-Q3_K_XL` (14 GB, for a GPU with 16 GB or a Mac with enough memory). On a Mac, run Ollama itself rather than in Docker, which cannot reach the GPU of a Mac. On Linux, start Ollama with `OLLAMA_HOST=0.0.0.0`, or the game, in its container, cannot reach it.
+- **Claude Haiku 5.5** is plenty, for drawing as for guessing.
+- **Qwen 3.8 27B on your own machine** is the sweet spot for fun: it draws a cat with whiskers or a snail with its shell, for free, if you have a GPU with 16 GB or a Mac with enough memory. This may be the first time you want a decent graphics card for something other than 3D games.
+- **Mistral Small 4** is quick, but a poor artist: expect kangaroos nobody will ever guess (sorry, Mistral).
 
-   The answer is saved in `.env.local`, and both models are tried at once.
+The model must see images and call tools. Details, the models we tried, reasoning, and what to do when it does not play: [docs/models.md](docs/models.md).
 
-2. Open http://127.0.0.1:8040 (another port: `APP_PORT=8050 make start`).
+## Play with your agent
 
-The home page checks both models too, and tells you what is wrong if one does not answer. `make setup` changes the models later, `make check` tries them again, and `make` lists the other commands. In a script, the options of the setup skip the questions: `make setup SETUP_ARGS="--provider=anthropic --api-key=..."`.
-
-## The models
-
-The AI has two roles, each with its own OpenAI-compatible endpoint, model and optional API key:
-
-- **the drawer** draws while you guess, and looks at its drawing to add the details that are missing;
-- **the guesser** picks the word you draw, then guesses your drawing.
-
-Both models must read images, and the drawer must also call tools.
-
-`make setup` writes them in `.env.local`, where you can also set them by hand (defaults in `.env`):
-
-```bash
-AI_DRAWER_BASE_URL=https://api.anthropic.com
-AI_DRAWER_MODEL=claude-sonnet-5-5
-AI_DRAWER_API_KEY=...
-AI_DRAWER_DISABLE_THINKING=false   # true turns reasoning off: for local models, an API may refuse it
-```
-
-Then `make check` tries each model on a tiny task whose answer is known (each must name a circle drawn in an image) and tells what is wrong.
-
-### Which model?
-
-The game does not need the best model: a poor drawer makes you laugh, a good one makes you play. Drawing is the hard part; guessing works even with a tiny model. What we tried (November 2026):
-
-| Setup | Guesser | Drawer | Notes |
-|---|---|---|---|
-| **Default**: Ollama, `hf.co/unsloth/Qwen3.8-27B-GGUF:UD-Q3_K_XL` for both roles | 0.7 s per word, finds a swan | a cat with whiskers, a snail with its shell, first stroke after 4 s | 14 GB, fully on a 16 GB GPU; the official `qwen3.8:27b` (18 GB) also works, but spills onto the CPU and draws its first stroke after 10 s. Not tried on a Mac |
-| Anthropic API (`https://api.anthropic.com`) | `claude-haiku-5-5`, about 1 s | `claude-sonnet-5-5`, a whale you recognise in 10 s | the best we tried, on any machine |
-| Mistral API (`https://api.mistral.ai`) | `mistral-small-latest`, 0.5 s, but misses easy drawings | `mistral-medium-3.5`, funny, rarely guessable | models that always reason, such as `mistral-large-4`, answer in a format the game cannot read yet |
-| A small model on the CPU, without a GPU: Ollama, `lfm3-vl:2b` for both roles | finds the swan, 3 to 5 s per word | strokes, but nothing you can guess | 1.5 GB; play "I draw, the AI guesses" (LFM Open License) |
-
-Smaller local models, from 2B to 12B (Qwen 3.5, Gemma 4, Ministral 3, Granite 4, LFM), all guess fairly well, but none drew anything recognisable, on a CPU or a GPU. Each role has its own endpoint: a small local guesser can play with a cloud drawer.
-
-- **Local models must not reason**: keep `DISABLE_THINKING=true`, or a small model takes tens of seconds per word. Cloud models may reason: the answer stays short.
-- **One model for both roles, or two that fit in memory together**: the roles take turns all the time, and loading a model takes 10 to 45 s.
-- **Ollama on Linux** listens on 127.0.0.1 only: start it with `OLLAMA_HOST=0.0.0.0`, so that the game's container reaches it at `host.docker.internal`. Docker Desktop on macOS and Windows does it for you.
-
-Any other OpenAI-compatible server works, llama.cpp or LM Studio. If the game must join a Docker network of yours to reach it, put that in a `compose.override.yaml` (not committed).
-
-The strokes of the AI look drawn by a hand; `HUMANIZED_DRAWING=false` in `.env.local` draws straight segments instead.
-
-## An agent over MCP: copilot or duel
-
-The game is an MCP server (Symfony MCP Bundle). An agent connected to it plays along, in one of two modes chosen on the home page:
-
-- **With a copilot**: when the AI draws, the agent looks at the drawing and whispers words in the margin. A click on one answers it: you decide, the copilot never answers by itself. When you draw, it knows the word like you, watches your drawing and the wrong guesses of your AI, and gives you tips on post-its, e.g. "make the neck longer, the AI sees a duck".
-- **In a duel**: the agent guesses the same drawings as your side, those of the AI and yours, which your AI guesses for you. The first side to find the word wins its points. The agent answers once every 3 seconds at most, and only the exact word counts for it. Its answers show next to yours.
-
-Seven tools and two prompts:
-
-- `round_status`: the round being played, the role of the agent, who draws, the theme, the time left, the wrong answers so far, the score of a duel, and what to do now. Never the word to find while the round is played, except to the copilot of a player who draws, who knows it anyway; once it is over, the word it was. It also tells the agent to stop, when the game is over or the player left. It always answers at once.
-- `wait_for_your_turn`: waits for something new for the agent, a round that starts or ends, new strokes on the drawing of the AI, new guesses of your AI while you draw, and answers with the same status as `round_status`, or after 25 s with nothing new. An agent cannot wait by itself between two calls, so the game waits for it, and the agent only has to call again. Why: [ADR 0002](docs/adr/0002-agents-wait-on-the-server.md).
-- `look_at_drawing`: the drawing as it is now, as a PNG image.
-- `suggest_word`: for a copilot, a word shown to you, at most 5 per round.
-- `give_tip`: for a copilot, a tip shown to you while you draw, one every 5 seconds at most.
-- `submit_answer`: for a rival, an answer of its own.
-- `choose_nickname`: the name you see for the agent, a funny one chosen by the agent in the lobby. Without one, the game shows the name of its client, e.g. "Claude" for `claude-code`.
-- the `copilot` and `duel` prompts tell the agent how to play. A client without prompts can start from `round_status`, which explains the rules too.
-
-The agent needs a model that sees images, since it looks at the drawing: a text-only model fails at the first `look_at_drawing` (seen with Mistral Vibe on `zai-glm-5-3`). The game cannot check it, as MCP does not say what the model of a client reads.
-
-The game does not tell two agents apart: recent clients such as Claude Code speak the stateless protocol (2026-07-28), which has no session. Connect one agent at a time.
-
-With Claude Code, over HTTP while the game runs:
+The game is an MCP server. With Claude Code, while the game runs:
 
 ```bash
 claude mcp add --transport http draw-it http://127.0.0.1:8040/mcp
 ```
 
-Then choose the mode on the home page: the game waits in a lobby, which repeats these steps and tells you when the agent is connected. Open Claude Code in the folder of the game and run the prompt of the `draw-it` server, `/mcp__draw-it__copilot` or `/mcp__draw-it__duel`, then start the game. Clients that start their servers themselves can use STDIO instead: `docker compose exec -T php php bin/console mcp:server`. The HTTP endpoint only answers on localhost.
-
-With Mistral Vibe, add the server by hand to `~/.vibe/config.toml` (`vibe mcp add` only adds OAuth servers, and the game asks for none):
-
-```toml
-[[mcp_servers]]
-name = "draw-it"
-url = "http://127.0.0.1:8040/mcp"
-transport = "streamable-http"
-```
-
-Then ask it in plain words, e.g. "play the duel with draw-it, starting with round_status", and allow the tools of `draw-it` for the session: approving each call makes it too slow to play.
-
-The rival of a duel is asked to play fair, and nothing more: an agent opened in the folder of the game could read the word in the SQLite database. Run it from another folder to rule that out.
+Then pick "With a copilot" or "Duel" on the home page: the lobby tells you what to do next, and when your agent is in. Mistral Vibe, the tools and the rules: [docs/mcp.md](docs/mcp.md).
 
 ## Contributions to Symfony AI
 
