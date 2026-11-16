@@ -40,6 +40,10 @@ claude mcp add --scope user --transport http draw-it http://127.0.0.1:8040/mcp
 
 Then pick "With a copilot" or "Duel" on the home page: the lobby tells you what to do next, and when your agent is in. Mistral Vibe, the tools and the rules: [docs/mcp.md](docs/mcp.md).
 
+## How it works
+
+One Symfony application, SQLite, server-sent events, and Symfony AI between the game and the models: the model plays, the code judges. Diagrams and principles: [docs/architecture.md](docs/architecture.md).
+
 ## Contributions to Symfony AI
 
 Building the game on the beta of Symfony AI turned up a bug: the Generic bridge dropped the arguments carried by the chunk that starts a streamed tool call. The fix, [symfony/ai#2940](https://github.com/symfony/ai/pull/2940), is merged; until it is released, the game assembles streamed tool calls itself.
