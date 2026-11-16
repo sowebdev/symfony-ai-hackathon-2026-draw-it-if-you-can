@@ -61,7 +61,7 @@ final readonly class ModelHealth
     {
         $message = $exception->getMessage();
         if (str_contains($message, 'Failed to connect') || str_contains($message, 'Could not resolve host') || str_contains($message, 'Connection refused')) {
-            return 'Nothing answers at this address: start the model server (with Ollama: ollama serve), or set another address.';
+            return 'Nothing answers at this address: check it in .env.local (make setup), or start your model server.';
         }
         if (preg_match('/\b40[13]\b/', $message) || stripos($message, 'unauthorized') !== false) {
             return 'The server refused the API key: check AI_<ROLE>_API_KEY. '.$message;

@@ -12,7 +12,7 @@ final class ModelHealthTest extends TestCase
     {
         $failure = new \RuntimeException('Failed to connect to host.docker.internal port 11434 after 0 ms: Could not connect to server');
 
-        self::assertStringStartsWith('Nothing answers at this address: start the model server', ModelHealth::explain($failure));
+        self::assertStringStartsWith('Nothing answers at this address: check it in .env.local', ModelHealth::explain($failure));
     }
 
     public function testARefusedKeyIsExplained(): void

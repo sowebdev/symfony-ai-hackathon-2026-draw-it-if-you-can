@@ -2,21 +2,28 @@
 # The image is built with the machine's user, so that the files it writes belong to them.
 
 .DEFAULT_GOAL := help
-.PHONY: help install start stop shell db check test test-unit test-functional
+.PHONY: help install setup start stop shell db check test test-unit test-functional
 
 export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
 EXEC = docker compose exec -T php
+# A terminal gets the questions of make setup; a script or the CI gets -T and skips them.
+TTY := $(shell test -t 0 || echo -T)
 CONSOLE = $(EXEC) php bin/console
 PHPUNIT = $(EXEC) vendor/bin/phpunit
 
 help: ## List the commands
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z0-9_-]+:.*##/ {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-install: start ## Build the image, install the PHP and JavaScript dependencies and the database
+install: start ## Build the image, install the dependencies and the database, then choose the models
 	$(EXEC) composer install
 	$(CONSOLE) importmap:install
 	$(MAKE) db
+	-$(MAKE) setup
+
+setup: start ## Choose the models (an API key or your own server), save them in .env.local and try them
+	docker compose exec $(TTY) php php bin/console app:setup $(SETUP_ARGS)
+	$(MAKE) check
 
 start: ## Build the image if needed and start the game
 	docker compose up -d --build --wait
