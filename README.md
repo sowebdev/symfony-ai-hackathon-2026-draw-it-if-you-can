@@ -6,6 +6,8 @@ Draw It If You Can is a drawing and guessing game you play with an AI, taking tu
 
 Bring your own agent along over MCP: Claude Code, Mistral Vibe or any client whose model sees images joins from the lobby, picks itself a funny nickname, and plays as your copilot or races you to the answer in a duel.
 
+Plug in the model you like, from a cloud API or running on your own machine. Yes, you can even play with a local model: this may be the first time you want a decent graphics card for something other than 3D games.
+
 Built with Symfony AI for the Symfony AI hackathon (November 2026). The game speaks English and French.
 
 ## Play in three steps
@@ -23,7 +25,7 @@ You need Docker, make, and a model: a cloud API key, or a model server of your o
 A poor drawer makes you laugh, a good one makes you play.
 
 - **Claude Haiku 5.5** is plenty, for drawing as for guessing.
-- **Qwen 3.8 27B on your own machine** is the sweet spot for fun: it draws a cat with whiskers or a snail with its shell, for free, if you have a GPU with 16 GB or a Mac with enough memory. This may be the first time you want a decent graphics card for something other than 3D games.
+- **Qwen 3.8 27B on your own machine** is the sweet spot for fun: it draws a cat with whiskers or a snail with its shell, for free, if you have a GPU with 16 GB or a Mac with enough memory.
 - **Mistral Small 4** is quick, but a poor artist: expect kangaroos nobody will ever guess (sorry, Mistral).
 
 The model must see images and call tools. Details, the models we tried, reasoning, and what to do when it does not play: [docs/models.md](docs/models.md).
