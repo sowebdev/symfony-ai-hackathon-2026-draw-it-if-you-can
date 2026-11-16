@@ -23,10 +23,10 @@ The game does not tell two agents apart: recent clients such as Claude Code spea
 With Claude Code, over HTTP while the game runs:
 
 ```bash
-claude mcp add --transport http draw-it http://127.0.0.1:8040/mcp
+claude mcp add --scope user --transport http draw-it http://127.0.0.1:8040/mcp
 ```
 
-Then choose the mode on the home page: the game waits in a lobby, which repeats these steps and tells you when the agent is connected. Open Claude Code in the folder of the game and run the prompt of the `draw-it` server, `/mcp__draw-it__copilot` or `/mcp__draw-it__duel`, then start the game. Clients that start their servers themselves can use STDIO instead: `docker compose exec -T php php bin/console mcp:server`. The HTTP endpoint only answers on localhost.
+Then choose the mode on the home page: the game waits in a lobby, which repeats these steps and tells you when the agent is connected. Open Claude Code in any folder, better not the folder of the game (its agent would read the code and could read the word in the database), and run the prompt of the `draw-it` server, `/mcp__draw-it__copilot` or `/mcp__draw-it__duel`, then start the game. Clients that start their servers themselves can use STDIO instead: `docker compose exec -T php php bin/console mcp:server`. The HTTP endpoint only answers on localhost.
 
 With Mistral Vibe, add the server by hand to `~/.vibe/config.toml` (`vibe mcp add` only adds OAuth servers, and the game asks for none):
 

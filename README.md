@@ -35,7 +35,7 @@ The model must see images and call tools. Details, the models I tried, reasoning
 The game is an MCP server. With Claude Code, while the game runs:
 
 ```bash
-claude mcp add --transport http draw-it http://127.0.0.1:8040/mcp
+claude mcp add --scope user --transport http draw-it http://127.0.0.1:8040/mcp
 ```
 
 Then pick "With a copilot" or "Duel" on the home page: the lobby tells you what to do next, and when your agent is in. Mistral Vibe, the tools and the rules: [docs/mcp.md](docs/mcp.md).

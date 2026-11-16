@@ -275,12 +275,12 @@
             </trans-unit>
             <trans-unit id="lobby.step_add" resname="lobby.step_add">
                 <source>lobby.step_add</source>
-                <target>Avec Claude Code, une seule fois, dans le dossier du jeu :</target>
+                <target>Avec Claude Code, une seule fois :</target>
                 <note>First step of the lobby, before a command</note>
             </trans-unit>
             <trans-unit id="lobby.step_prompt" resname="lobby.step_prompt">
                 <source>lobby.step_prompt</source>
-                <target>Ouvre Claude Code dans ce dossier, puis lance ce prompt :</target>
+                <target>Ouvre Claude Code, puis lance ce prompt :</target>
                 <note>Second step of the lobby, before a command</note>
             </trans-unit>
             <trans-unit id="lobby.other_clients" resname="lobby.other_clients">

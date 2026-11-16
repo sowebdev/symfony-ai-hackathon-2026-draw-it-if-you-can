@@ -31,7 +31,7 @@
         <ol class="lobby-steps">
             <li>
                 {{ 'lobby.step_add'|trans }}
-                <pre><code>claude mcp add --transport http draw-it {{ url('_mcp_endpoint_default') }}</code></pre>
+                <pre><code>claude mcp add --scope user --transport http draw-it {{ url('_mcp_endpoint_default') }}</code></pre>
             </li>
             <li>
                 {{ 'lobby.step_prompt'|trans }}
