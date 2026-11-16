@@ -18,7 +18,7 @@ Seven tools and two prompts:
 
 The agent needs a model that sees images, since it looks at the drawing: a text-only model fails at the first `look_at_drawing` (seen with Mistral Vibe on `zai-glm-5-3`). The game cannot check it, as MCP does not say what the model of a client reads.
 
-The game does not tell two agents apart: recent clients such as Claude Code speak the stateless protocol (2026-07-28), which has no session. Connect one agent at a time.
+The game does not tell two agents apart: recent clients such as Claude Code speak the stateless protocol (2026-07-28), which has no session. Connect one agent at a time, and play one game at a time: the agent always joins the game created last.
 
 With Claude Code, over HTTP while the game runs:
 
