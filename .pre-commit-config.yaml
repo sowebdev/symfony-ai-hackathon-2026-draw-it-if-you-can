@@ -8,3 +8,11 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
+      # A public repository: no secret may enter the history. Skipped, with a warning, where
+      # gitleaks is not installed (https://github.com/gitleaks/gitleaks).
+      - id: gitleaks
+        name: no secret in the commit
+        entry: bash -c 'if command -v gitleaks >/dev/null; then gitleaks protect --staged --no-banner --redact; else echo "gitleaks is not installed, secrets not checked"; fi'
+        language: system
+        pass_filenames: false
+        always_run: true
