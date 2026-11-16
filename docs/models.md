@@ -32,7 +32,7 @@ The game does not need the best model: a poor drawer makes you laugh, a good one
 
 | Setup | Guesser | Drawer | Notes |
 |---|---|---|---|
-| **Default**: Ollama, `hf.co/unsloth/Qwen3.8-27B-GGUF:UD-Q3_K_XL` for both roles | 0.7 s per word, finds a swan | a cat with whiskers, a snail with its shell, first stroke after 4 s | 14 GB, fully on a 16 GB GPU; the official `qwen3.8:27b` (18 GB) also works, but spills onto the CPU and draws its first stroke after 10 s. Not tried on a Mac |
+| **Default**: Ollama, `hf.co/unsloth/Qwen3.8-27B-GGUF:UD-Q3_K_XL` for both roles | 0.7 s per word, finds a swan | a cat with whiskers, a snail with its shell, first stroke after 4 s | 14 GB, fully on a GPU with 16 GB; the official `qwen3.8:27b` (18 GB) also works, but spills onto the CPU and draws its first stroke after 10 s. Not tried on a Mac |
 | Anthropic API (`https://api.anthropic.com`) | `claude-haiku-5-5`, about 1 s | `claude-haiku-5-5` too, the best and quickest drawer of my first tests (10 drawings out of 10, 1.5 to 4.5 s each); `claude-sonnet-5-5`, a whale you recognise in 10 s | the best I tried, on any machine; Haiku alone is plenty |
 | Mistral API (`https://api.mistral.ai`) | `mistral-small-latest`, 0.5 s, but misses easy drawings | `mistral-medium-3.5`, funny, rarely guessable | models that always reason, such as `mistral-large-4`, answer in a format the game cannot read yet |
 | A small model on the CPU, without a GPU: Ollama, `lfm3-vl:2b` for both roles | finds the swan, 3 to 5 s per word | strokes, but nothing you can guess | 1.5 GB; play "I draw, the AI guesses" (LFM Open License) |
