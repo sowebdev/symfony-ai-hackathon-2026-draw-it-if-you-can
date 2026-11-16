@@ -1,6 +1,6 @@
 # Architecture
 
-One Symfony application in one container, a SQLite file, and models reached over the API of OpenAI. No queue, no Mercure, no JavaScript framework: the browser gets server-sent events and a few Stimulus controllers.
+One Symfony application in one container, a SQLite file, and models reached through an OpenAI-compatible API, the format most providers and local servers speak. No queue, no Mercure, no JavaScript framework: the browser gets server-sent events and a few Stimulus controllers.
 
 ```mermaid
 flowchart TB
@@ -21,7 +21,7 @@ Inside the game, the controllers stay thin; the rules (`src/Game`) decide, the A
 ## The principles
 
 - **The model plays, the code judges.** A model never decides what counts. `WordMatcher` tells whether an answer is the word, `OneWordModel` checks that a model said one word, `ModelCheck` tries each model on a task whose answer is known. Points, time and the end of a round are the game's.
-- **Two roles, any model.** The drawer and the guesser each have an endpoint, a model and a key (`Models`), on the Generic platform bridge of Symfony AI, which speaks the API of OpenAI. Both must see images; the drawer must call tools.
+- **Two roles, any model.** The drawer and the guesser each have an endpoint, a model and a key (`Models`), on the Generic platform bridge of Symfony AI, which speaks that OpenAI-compatible format: OpenAI, Anthropic, Mistral, Ollama, LM Studio or llama.cpp alike. Both must see images; the drawer must call tools.
 - **The model draws with a tool.** `Pen` is a Symfony AI tool (`#[AsTool]`), `draw_stroke`, on the 50 x 50 grid of SketchAgent. The answer is streamed, and each stroke goes to the browser as soon as its call is written, without waiting for the end of the answer (`ToolCallAssembler`, see [Contributions to Symfony AI](../README.md#contributions-to-symfony-ai)).
 - **The hand is code.** The model writes grid cells; `StrokeTracer` turns them into a line that wobbles, overshoots and speeds up like a pen, deterministically. `StrokeRenderer` draws strokes into a PNG with GD, which is what the guesser, and the drawer adding details, look at.
 - **The server sets the rhythm.** A round is one server-sent events response: the AI calls out a word every few seconds (`GuessLoop`), or draws until the word is found or the time is up (`DrawingLoop`). A reload replays what is stored, then follows.
