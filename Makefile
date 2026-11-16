@@ -7,8 +7,8 @@
 export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
 EXEC = docker compose exec -T php
-# A terminal gets the questions of make setup; a script or the CI gets -T and skips them.
-TTY := $(shell test -t 0 || echo -T)
+# A terminal gets the questions of make setup; a script or the CI skips them (-T, then -n).
+NO_TTY := $(shell test -t 0 || echo 1)
 CONSOLE = $(EXEC) php bin/console
 PHPUNIT = $(EXEC) vendor/bin/phpunit
 
@@ -22,7 +22,7 @@ install: start ## Build the image, install the dependencies and the database, th
 	-$(MAKE) setup
 
 setup: start ## Choose the models (an API key or your own server), save them in .env.local and try them
-	docker compose exec $(TTY) php php bin/console app:setup $(SETUP_ARGS)
+	docker compose exec $(if $(NO_TTY),-T) php php bin/console app:setup $(if $(NO_TTY),-n) $(SETUP_ARGS)
 	$(MAKE) check
 
 start: ## Build the image if needed and start the game
