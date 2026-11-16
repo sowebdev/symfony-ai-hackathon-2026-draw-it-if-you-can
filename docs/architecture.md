@@ -3,33 +3,20 @@
 One Symfony application in one container, a SQLite file, and models reached over the API of OpenAI. No queue, no Mercure, no JavaScript framework: the browser gets server-sent events and a few Stimulus controllers.
 
 ```mermaid
-flowchart LR
-    player([Player, in the browser])
-    agent([Agent over MCP<br/>Claude Code, Vibe...])
+flowchart TB
+    player([You, in the browser])
+    agent([Your agent, over MCP])
+    app[The game<br/>one Symfony application]
+    db[(SQLite)]
+    models[[The model<br/>a cloud API or your own server]]
 
-    subgraph app [Symfony application, one container]
-        web[Controllers<br/>pages, strokes, answers]
-        sse[Server-sent events<br/>DrawingLoop, GuessLoop, AgentLoop]
-        game[Game rules<br/>RoundStarter, WordMatcher, ScoreGauge,<br/>Copilot, Duel, Dealer]
-        ai[AI roles, Symfony AI<br/>Drawer, Guesser, WordPicker, ModelCheck]
-        drawing[Drawing<br/>StrokeTracer, StrokeRenderer]
-        mcp[MCP server<br/>Symfony MCP Bundle<br/>AgentTools, AgentPrompts]
-        db[(SQLite<br/>games, rounds, strokes,<br/>guesses, hints, tips)]
-    end
-
-    models[[Models<br/>a cloud API or your own server,<br/>OpenAI-compatible]]
-
-    player -- "strokes, answers (HTTP)" --> web
-    sse -- "strokes, words, hints (SSE)" --> player
-    web --> game
-    sse --> game
-    game --> ai
-    ai -- "Generic platform bridge" --> models
-    ai --> drawing
-    game --> db
-    agent -- "tools (MCP over HTTP or STDIO)" --> mcp
-    mcp --> game
+    player <-- "HTTP and server-sent events" --> app
+    agent <-- "MCP tools" --> app
+    app <-- "Symfony AI" --> models
+    app <--> db
 ```
+
+Inside the game, the controllers stay thin; the rules (`src/Game`) decide, the AI roles (`src/Ai`) ask the models, the drawing code (`src/Drawing`) traces and renders the strokes, and the MCP server (`src/Mcp`) lets an agent in.
 
 ## The principles
 
