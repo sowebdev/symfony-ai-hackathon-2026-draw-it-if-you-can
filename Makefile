@@ -2,7 +2,7 @@
 # The image is built with the machine's user, so that the files it writes belong to them.
 
 .DEFAULT_GOAL := help
-.PHONY: help install setup start stop shell db check test test-unit test-functional
+.PHONY: help install setup start up stop shell db check test test-unit test-functional
 
 export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
@@ -15,37 +15,47 @@ PHPUNIT = $(EXEC) vendor/bin/phpunit
 help: ## List the commands
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z0-9_-]+:.*##/ {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-install: start ## Build the image, install the dependencies and the database, then choose the models
-	$(EXEC) composer install
-	$(CONSOLE) importmap:install
-	$(MAKE) db
-	-$(MAKE) setup
+install: ## Build the image, install the dependencies and the database, then choose the models
+	@./docker/start.sh
+	@echo "Installing the dependencies..."
+	@$(EXEC) composer install --no-progress --quiet
+	@$(CONSOLE) importmap:install --quiet
+	@$(CONSOLE) doctrine:migrations:migrate -n --quiet
+	@docker compose exec $(if $(NO_TTY),-T) php php bin/console app:setup $(if $(NO_TTY),-n) $(SETUP_ARGS)
+	@echo "Trying the model..."
+	@$(CONSOLE) app:ai:check || { echo; echo "The model cannot play yet: fix what is said above, then make check (or make setup)."; }
+	@echo
+	@echo "Ready: open http://127.0.0.1:$$(cat .app-port)"
 
-setup: start ## Choose the models (an API key or your own server), save them in .env.local and try them
-	docker compose exec $(if $(NO_TTY),-T) php php bin/console app:setup $(if $(NO_TTY),-n) $(SETUP_ARGS)
-	$(MAKE) check
+setup: up ## Choose the models (an API key or your own server), save them in .env.local and try them
+	@docker compose exec $(if $(NO_TTY),-T) php php bin/console app:setup $(if $(NO_TTY),-n) $(SETUP_ARGS)
+	@echo "Trying the model..."
+	@$(MAKE) --no-print-directory check
 
-start: ## Build the image if needed and start the game (another port: APP_PORT=8050 make start)
-	@docker compose up -d --build --wait || { echo; echo "The game could not start. If port $${APP_PORT:-8040} is taken, choose another one: APP_PORT=8050 make install"; exit 1; }
+start: ## Start the game, on a free port, and tell its address (a port of your own: APP_PORT=8050 make start)
+	@./docker/start.sh --announce
+
+up: ## Start the game without a word (the other commands do it first)
+	@./docker/start.sh > /dev/null
 
 stop: ## Stop the container
 	docker compose stop
 
-shell: start ## Open a shell in the container
+shell: up ## Open a shell in the container
 	docker compose exec php bash
 
-db: start ## Create the development database and run the migrations
+db: up ## Create the development database and run the migrations
 	$(CONSOLE) doctrine:migrations:migrate -n
 
-check: start ## Try the model of each role on a tiny task (after changing AI_* in .env.local)
-	$(CONSOLE) app:ai:check
+check: up ## Try the model of each role on a tiny task (after changing AI_* in .env.local)
+	@$(CONSOLE) app:ai:check
 
 test: test-unit test-functional ## Run all the tests
 
-test-unit: start ## Run the unit tests (the pre-commit hook runs these)
+test-unit: up ## Run the unit tests (the pre-commit hook runs these)
 	$(PHPUNIT) --testsuite unit
 
-test-functional: start ## Run the functional tests, against a fresh test database
+test-functional: up ## Run the functional tests, against a fresh test database
 	$(EXEC) rm -f var/data_test.db
 	$(CONSOLE) doctrine:migrations:migrate --env=test -n -q
 	$(PHPUNIT) --testsuite functional

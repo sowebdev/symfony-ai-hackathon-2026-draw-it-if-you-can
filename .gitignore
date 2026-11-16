@@ -1,5 +1,7 @@
 .idea/
 /compose.override.yaml
+# The port the game runs on, chosen by make start
+/.app-port
 
 
 ###> symfony/framework-bundle ###
