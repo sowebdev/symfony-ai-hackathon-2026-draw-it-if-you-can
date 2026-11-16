@@ -273,6 +273,16 @@
                 <target>Connect your copilot</target>
                 <note>Title of the lobby of a game with a copilot</note>
             </trans-unit>
+            <trans-unit id="action.copy" resname="action.copy">
+                <source>action.copy</source>
+                <target>Copy</target>
+                <note>Button next to a command of the lobby</note>
+            </trans-unit>
+            <trans-unit id="status.copied" resname="status.copied">
+                <source>status.copied</source>
+                <target>Copied!</target>
+                <note>The command was copied to the clipboard</note>
+            </trans-unit>
             <trans-unit id="lobby.step_add" resname="lobby.step_add">
                 <source>lobby.step_add</source>
                 <target>With Claude Code, once:</target>

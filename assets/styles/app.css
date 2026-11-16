@@ -783,6 +783,54 @@ button:focus-visible,
     color: #777;
 }
 
+/* A command and its copy button: a click instead of selecting by hand. */
+.command {
+    position: relative;
+}
+
+.command pre {
+    padding-right: 2.8rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.command .copy {
+    position: absolute;
+    top: 50%;
+    right: 0.4rem;
+    margin-top: 0.15rem;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    border-radius: 6px;
+    box-shadow: none;
+    cursor: pointer;
+}
+
+.command .copy:hover {
+    background: var(--tape);
+}
+
+.command .copy .copy-check,
+.command .copy.copied .copy-sheets {
+    display: none;
+}
+
+.command .copy.copied .copy-check {
+    display: inline;
+}
+
+.command .copy.copied {
+    color: #2f7d32;
+    border-color: #2f7d32;
+}
+
 /* A text-only model fails at the first look at the drawing: said before the player connects it. */
 .lobby-vision {
     color: var(--rust);
