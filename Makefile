@@ -25,8 +25,8 @@ setup: start ## Choose the models (an API key or your own server), save them in 
 	docker compose exec $(if $(NO_TTY),-T) php php bin/console app:setup $(if $(NO_TTY),-n) $(SETUP_ARGS)
 	$(MAKE) check
 
-start: ## Build the image if needed and start the game
-	docker compose up -d --build --wait
+start: ## Build the image if needed and start the game (another port: APP_PORT=8050 make start)
+	@docker compose up -d --build --wait || { echo; echo "The game could not start. If port $${APP_PORT:-8040} is taken, choose another one: APP_PORT=8050 make install"; exit 1; }
 
 stop: ## Stop the container
 	docker compose stop

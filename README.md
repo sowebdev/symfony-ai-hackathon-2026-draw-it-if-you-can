@@ -15,7 +15,7 @@ Built with Symfony AI for the Symfony AI hackathon (November 2026). The game spe
 You need Docker, make, and a model: a cloud API key, or a model server of your own.
 
 1. `make install`, then answer its few questions: where the model runs (a cloud API compatible with OpenAI's, or a server you run), its address, the model, and the key if it needs one.
-2. Open http://127.0.0.1:8040.
+2. Open http://127.0.0.1:8040 (port taken? `APP_PORT=8050 make install`, then use that port).
 3. Draw, guess, laugh.
 
 `make setup` changes the model later, and `make check` tells you whether it can play.
