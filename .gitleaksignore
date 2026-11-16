@@ -1,0 +1,2 @@
+# The APP_SECRET of the dev environment, written by the Symfony recipe: not a real secret.
+bd7282003ee149bd332417076ac11223fc3c1516:.env.dev:generic-api-key:3

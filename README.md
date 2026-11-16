@@ -9,25 +9,32 @@ A solo drawing and guessing game against an AI, built with Symfony AI and MCP.
 
 The game speaks English and French: the whole game follows the language of the page, the interface, the word to draw and the words of the AI.
 
-Work in progress for the Symfony AI hackathon (November 2026).
+Built for the Symfony AI hackathon (November 2026).
 
 ## Requirements
 
 - Docker and make: PHP, Composer and the tests all run in the container
-- A model: a local OpenAI-compatible server (Ollama, llama.cpp, LM Studio) or an API key. The game needs an AI to play, there is no offline mode.
+- A model: an API key (Anthropic or Mistral), or a model server you already run (Ollama, LM Studio, llama.cpp). The game needs an AI to play, there is no offline mode.
 
 ## Getting started
 
-1. Have a model ready. By default the game expects [Ollama](https://ollama.com) on your machine with Qwen3.8 27B, the smallest local model that draws recognisably: `ollama pull hf.co/unsloth/Qwen3.8-27B-GGUF:UD-Q3_K_XL` (14 GB, for a GPU with 16 GB or a Mac with enough memory). On Linux, start Ollama with `OLLAMA_HOST=0.0.0.0`, or the game, in its container, cannot reach it. A smaller machine or an API key: see [Which model?](#which-model).
-2. Install and start the game:
+1. Install and start the game:
 
    ```bash
    make install
    ```
 
-3. Open http://127.0.0.1:8040 (another port: `APP_PORT=8050 make start`).
+   At the end, it asks how the AI will play:
 
-The home page checks both models at once and tells you what is wrong if one does not answer, with where to fix it. `make check` does the same in a terminal, and `make` lists the other commands.
+   - **an Anthropic API key**, recommended: the best drawings we tried, on any machine;
+   - **a Mistral API key**;
+   - **a model server you already run**, on this machine or elsewhere: its address and the names of its models. By default, Ollama on this machine with Qwen3.8 27B, the smallest local model that draws recognisably: `ollama pull hf.co/unsloth/Qwen3.8-27B-GGUF:UD-Q3_K_XL` (14 GB, for a GPU with 16 GB or a Mac with enough memory). On a Mac, run Ollama itself rather than in Docker, which cannot reach the GPU of a Mac. On Linux, start Ollama with `OLLAMA_HOST=0.0.0.0`, or the game, in its container, cannot reach it.
+
+   The answer is saved in `.env.local`, and both models are tried at once.
+
+2. Open http://127.0.0.1:8040 (another port: `APP_PORT=8050 make start`).
+
+The home page checks both models too, and tells you what is wrong if one does not answer. `make setup` changes the models later, `make check` tries them again, and `make` lists the other commands. In a script, the options of the setup skip the questions: `make setup SETUP_ARGS="--provider=anthropic --api-key=..."`.
 
 ## The models
 
@@ -38,7 +45,7 @@ The AI has two roles, each with its own OpenAI-compatible endpoint, model and op
 
 Both models must read images, and the drawer must also call tools.
 
-Set them in `.env.local` (defaults in `.env`):
+`make setup` writes them in `.env.local`, where you can also set them by hand (defaults in `.env`):
 
 ```bash
 AI_DRAWER_BASE_URL=https://api.anthropic.com
@@ -112,6 +119,10 @@ transport = "streamable-http"
 Then ask it in plain words, e.g. "play the duel with draw-it, starting with round_status", and allow the tools of `draw-it` for the session: approving each call makes it too slow to play.
 
 The rival of a duel is asked to play fair, and nothing more: an agent opened in the folder of the game could read the word in the SQLite database. Run it from another folder to rule that out.
+
+## Contributions to Symfony AI
+
+Building the game on the beta of Symfony AI turned up a bug: the Generic bridge dropped the arguments carried by the chunk that starts a streamed tool call. The fix, [symfony/ai#2940](https://github.com/symfony/ai/pull/2940), is merged; until it is released, the game assembles streamed tool calls itself.
 
 ## Licence and credits
 
