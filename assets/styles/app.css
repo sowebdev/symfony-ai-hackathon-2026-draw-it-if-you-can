@@ -1081,6 +1081,71 @@ button.link:hover {
     }
 }
 
+/* Before its first stroke, the AI thinks: a pencil taps on the sheet, with a handwritten bubble. */
+.thinking {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--ink);
+    pointer-events: none;
+}
+
+.thinking[hidden] {
+    display: none;
+}
+
+.thinking-pencil {
+    transform-origin: 20% 90%;
+    animation: thinking-tap 0.9s ease-in-out infinite;
+}
+
+.thinking-bubble {
+    margin: 0;
+    padding: 6px 14px;
+    font-family: var(--hand);
+    font-size: 1.5rem;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 14px 18px 12px 16px;
+    transform: rotate(-2deg);
+}
+
+.thinking-dots span {
+    animation: thinking-dot 1.2s infinite;
+    opacity: 0;
+}
+
+.thinking-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.thinking-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes thinking-tap {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    40% { transform: rotate(-12deg) translateY(-6px); }
+    60% { transform: rotate(4deg) translateY(2px); }
+}
+
+@keyframes thinking-dot {
+    0%, 20% { opacity: 0; }
+    40%, 100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .thinking-pencil,
+    .thinking-dots span {
+        animation: none;
+        opacity: 1;
+    }
+}
+
 /* A duel: the score of each side in the bar, and the answers of the rival in its own column. */
 .rival-score {
     color: var(--pencil);

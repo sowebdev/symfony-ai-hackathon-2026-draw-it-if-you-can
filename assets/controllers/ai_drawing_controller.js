@@ -9,7 +9,7 @@ const PEN = '#2b2b2b';
 const PEN_NOW = '#e8590c';
 
 export default class extends Controller {
-    static targets = ['canvas', 'status', 'form', 'word', 'list', 'result', 'time', 'reveal', 'targetWord', 'giveUp'];
+    static targets = ['canvas', 'thinking', 'status', 'form', 'word', 'list', 'result', 'time', 'reveal', 'targetWord', 'giveUp'];
     static values = { streamUrl: String, answerUrl: String, giveUpUrl: String, over: Boolean, drawingLabel: String, finishedLabel: String, failedLabel: String };
 
     connect() {
@@ -43,10 +43,12 @@ export default class extends Controller {
 
     // The time is up: no more answers.
     stop() {
+        this.stopThinking();
         this.overValue = true;
     }
 
     end(label) {
+        this.stopThinking();
         this.source.close();
         // The status changes once the last stroke is on the canvas.
         this.queue = this.queue.then(() => {
@@ -54,8 +56,16 @@ export default class extends Controller {
         });
     }
 
+    // The pencil that taps while the AI thinks goes away with the first stroke, or when the round ends.
+    stopThinking() {
+        if (this.hasThinkingTarget) {
+            this.thinkingTarget.hidden = true;
+        }
+    }
+
     // Strokes are drawn one after the other, even if the next one arrives during the animation.
     receive({ points, animate }) {
+        this.stopThinking();
         this.queue = this.queue.then(() => (animate ? this.animate(points) : this.add(points)));
     }
 

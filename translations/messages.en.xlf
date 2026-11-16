@@ -123,6 +123,11 @@
                 <target>The word was %word%</target>
                 <note>After giving up; %word% is the word in an HTML element</note>
             </trans-unit>
+            <trans-unit id="status.ai_thinking" resname="status.ai_thinking">
+                <source>status.ai_thinking</source>
+                <target>Hmm… let me think</target>
+                <note>On the sheet, before the first stroke of the AI</note>
+            </trans-unit>
             <trans-unit id="status.ai_drawing" resname="status.ai_drawing">
                 <source>status.ai_drawing</source>
                 <target>The AI is drawing…</target>

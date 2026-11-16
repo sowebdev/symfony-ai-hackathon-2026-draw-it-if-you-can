@@ -18,6 +18,20 @@
         <div class="board">
             <div class="stage">
                 <canvas class="canvas locked" width="1000" height="1000" data-ai-drawing-target="canvas"></canvas>
+                {% if not round.over %}
+                    <div class="thinking" data-ai-drawing-target="thinking" aria-hidden="true">
+                        <svg class="thinking-pencil" viewBox="0 0 64 64" width="56" height="56">
+                            <g fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+                                <path d="M14 50 L44 12 L54 20 L24 58 Z" fill="#fbf7ec"/>
+                                <path d="M44 12 L48 7 L58 15 L54 20"/>
+                                <path d="M14 50 L11 61 L24 58"/>
+                                <path d="M38 19 L48 27"/>
+                            </g>
+                            <path d="M11 61 L13 55 L17 59 Z" fill="currentColor"/>
+                        </svg>
+                        <p class="thinking-bubble">{{ 'status.ai_thinking'|trans }}<span class="thinking-dots"><span>.</span><span>.</span><span>.</span></span></p>
+                    </div>
+                {% endif %}
                 {% if round.over %}{{ include('round/_end.html.twig') }}{% endif %}
             </div>
 
