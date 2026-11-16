@@ -28,7 +28,7 @@ A poor drawer makes you laugh, a good one makes you play.
 - **Qwen 3.8 27B on your own machine** is the sweet spot for fun: it draws a cat with whiskers or a snail with its shell, for free, if you have a GPU with 16 GB or a Mac with enough memory.
 - **Mistral Small 4** is quick, but a poor artist: expect kangaroos nobody will ever guess (sorry, Mistral).
 
-The model must see images and call tools. Details, the models we tried, reasoning, and what to do when it does not play: [docs/models.md](docs/models.md).
+The model must see images and call tools. Details, the models I tried, reasoning, and what to do when it does not play: [docs/models.md](docs/models.md).
 
 ## Play with your agent
 
