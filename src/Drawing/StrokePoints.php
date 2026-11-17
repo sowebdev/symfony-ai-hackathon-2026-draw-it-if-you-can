@@ -13,7 +13,7 @@ final readonly class StrokePoints
     public const int MAX_POINTS = 2000;
 
     /**
-     * @param list<array{int, int, int}> $points
+     * @param non-empty-list<array{int, int, int}> $points
      */
     private function __construct(public array $points)
     {

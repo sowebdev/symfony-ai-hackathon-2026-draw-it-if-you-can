@@ -55,7 +55,7 @@ final class AiDrawingTest extends WebTestCase
         self::assertSame(['stroke', 'stroke', 'finished'], array_column($replay, 'type'));
         self::assertFalse($replay[0]['data']['animate']);
         self::assertSame($events[0]['data']['points'], $replay[0]['data']['points']);
-        self::assertCount(1, $this->drawer->drawn);
+        self::assertSame(1, $this->drawer->timesAskedForASketch());
     }
 
     public function testTheAiAddsDetailsUntilTheEndOfTheRound(): void

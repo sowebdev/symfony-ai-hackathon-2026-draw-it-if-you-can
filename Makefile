@@ -66,8 +66,9 @@ cs: up ## Check the code style, without changing anything
 cs-fix: up ## Fix the code style
 	$(EXEC) vendor/bin/php-cs-fixer fix
 
-phpstan: up ## Run the static analysis
-	$(EXEC) vendor/bin/phpstan analyse --no-progress
+phpstan: up ## Run the static analysis (warms the dev cache first: PHPStan reads the container from it)
+	$(CONSOLE) cache:warmup --env=dev -q
+	$(EXEC) vendor/bin/phpstan analyse --no-progress --memory-limit=1G
 
 audit: up ## Check the dependencies for known vulnerabilities
 	$(EXEC) composer audit

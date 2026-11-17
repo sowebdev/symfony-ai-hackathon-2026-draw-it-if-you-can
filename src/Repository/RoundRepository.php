@@ -26,7 +26,7 @@ class RoundRepository extends ServiceEntityRepository
      */
     public function recentTargetWords(Theme $theme, Language $language, int $limit): array
     {
-        return $this->createQueryBuilder('r')
+        $words = $this->createQueryBuilder('r')
             ->select('r.targetWord')
             ->join('r.game', 'g')
             ->where('r.theme = :theme')
@@ -37,6 +37,8 @@ class RoundRepository extends ServiceEntityRepository
             ->setMaxResults($limit)
             ->getQuery()
             ->getSingleColumnResult();
+
+        return array_values(array_map(static fn (mixed $word): string => (string) $word, $words));
     }
 
     /**

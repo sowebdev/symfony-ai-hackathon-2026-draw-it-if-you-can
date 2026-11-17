@@ -88,9 +88,14 @@ final class ToolCallAssembler
     private function release(): array
     {
         $calls = [];
-        while ([] !== $this->queue && null !== $this->written[$this->queue[0]]) {
-            $id = array_shift($this->queue);
-            $calls[] = $this->written[$id];
+        while ([] !== $this->queue) {
+            $id = $this->queue[0];
+            $call = $this->written[$id];
+            if (null === $call) {
+                break;
+            }
+            array_shift($this->queue);
+            $calls[] = $call;
             $this->out[$id] = true;
         }
 

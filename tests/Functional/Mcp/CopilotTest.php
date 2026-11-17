@@ -230,7 +230,8 @@ final class CopilotTest extends WebTestCase
     {
         $this->startRound('ai');
         Clock::get()->sleep(62);
-        self::assertFalse($this->roundStatus()['stop'], 'The player reads the result of the round');
+        $status = $this->roundStatus();
+        self::assertFalse($status['stop'], 'The player reads the result of the round');
 
         Clock::get()->sleep(120);
         $status = $this->roundStatus();

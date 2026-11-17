@@ -58,6 +58,8 @@ trait McpClient
     }
 
     /**
+     * @phpstan-impure Each call asks the game again
+     *
      * @return array<string, mixed>
      */
     private function roundStatus(): array
@@ -66,6 +68,8 @@ trait McpClient
     }
 
     /**
+     * @phpstan-impure Each call asks the game again
+     *
      * @return array<string, mixed>
      */
     private function waitForYourTurn(): array

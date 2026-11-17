@@ -26,6 +26,11 @@ final class ScriptedDrawer implements DrawsStrokes
     {
     }
 
+    public function timesAskedForASketch(): int
+    {
+        return \count($this->drawn);
+    }
+
     public function draw(string $word, Theme $theme, array $drawn = [], array $wrongAnswers = []): \Generator
     {
         if ([] !== $drawn) {

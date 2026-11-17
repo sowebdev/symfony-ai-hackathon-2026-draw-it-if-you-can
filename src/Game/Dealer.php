@@ -27,6 +27,6 @@ final readonly class Dealer
     {
         $themes = array_values(array_filter(Theme::cases(), static fn (Theme $theme): bool => $theme !== $previous));
 
-        return $themes[$this->randomizer->getInt(0, \count($themes) - 1)];
+        return $themes[$this->randomizer->getInt(0, \count($themes) - 1)] ?? throw new \LogicException('No theme left to deal.');
     }
 }

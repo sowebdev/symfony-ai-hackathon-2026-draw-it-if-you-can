@@ -44,17 +44,15 @@ final readonly class ModelCheck
     /**
      * A black circle on white, in canonical strokes: the simplest drawing to name.
      *
-     * @return list<array{int, int, int}>
+     * @return non-empty-list<array{int, int, int}>
      */
     public static function circle(): array
     {
-        $points = [];
-        for ($i = 0; $i <= 36; ++$i) {
+        return array_map(static function (int $i): array {
             $angle = 2 * M_PI * $i / 36;
-            $points[] = [(int) round(500 + 300 * cos($angle)), (int) round(500 + 300 * sin($angle)), $i * 20];
-        }
 
-        return $points;
+            return [(int) round(500 + 300 * cos($angle)), (int) round(500 + 300 * sin($angle)), $i * 20];
+        }, range(0, 36));
     }
 
     /** Said when a model gives nothing usable: the most likely cause after a missing skill. */

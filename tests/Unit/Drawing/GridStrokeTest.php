@@ -33,6 +33,7 @@ final class GridStrokeTest extends TestCase
     {
         $stroke = GridStroke::fromWritten('scribble', implode(',', array_fill(0, 500, 'x5y5')));
 
-        self::assertCount(GridStroke::MAX_CELLS, $stroke?->cells ?? []);
+        self::assertNotNull($stroke);
+        self::assertCount(GridStroke::MAX_CELLS, $stroke->cells);
     }
 }

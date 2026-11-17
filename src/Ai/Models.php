@@ -39,9 +39,9 @@ final readonly class Models
      */
     public function invoke(Role $role, MessageBag $messages, array $options = []): DeferredResult
     {
-        [$platform, $model] = $this->of($role);
+        $platform = $this->of($role)[0];
 
-        return $platform->invoke($model, $messages, $this->options($role, $options));
+        return $platform->invoke($this->modelName($role), $messages, $this->options($role, $options));
     }
 
     /**
@@ -49,9 +49,9 @@ final readonly class Models
      */
     public function agent(Role $role, object $tool, int $maxToolCalls): Agent
     {
-        [$platform, $model] = $this->of($role);
+        $platform = $this->of($role)[0];
 
-        return new Agent($platform, $model, toolbox: new Toolbox([$tool]), maxToolCalls: $maxToolCalls);
+        return new Agent($platform, $this->modelName($role), toolbox: new Toolbox([$tool]), maxToolCalls: $maxToolCalls);
     }
 
     /**
@@ -82,6 +82,19 @@ final readonly class Models
         [, $model, $baseUrl] = $this->of($role);
 
         return \sprintf('%s at %s', $model, $baseUrl);
+    }
+
+    /**
+     * @return non-empty-string
+     */
+    private function modelName(Role $role): string
+    {
+        $model = $this->of($role)[1];
+        if ('' === $model) {
+            throw new \LogicException(\sprintf('No model is set for the role "%s": fill in its AI_*_MODEL variable.', $role->name));
+        }
+
+        return $model;
     }
 
     /**
