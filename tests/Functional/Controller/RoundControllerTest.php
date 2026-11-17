@@ -134,6 +134,7 @@ final class RoundControllerTest extends WebTestCase
         if ($scripted) {
             self::scriptModel($this->client, $guesses);
         }
+
         return self::startFirstRound($this->client, 'en', ['drawnBy' => 'player']);
     }
 

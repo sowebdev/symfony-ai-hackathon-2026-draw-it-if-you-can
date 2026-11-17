@@ -7,10 +7,10 @@ use App\Drawing\StrokePoints;
 use App\Entity\Guess;
 use App\Entity\Round;
 use App\Entity\Stroke;
+use App\Game\AgentLoop;
 use App\Game\Author;
 use App\Game\DrawingLoop;
 use App\Game\GuessLoop;
-use App\Game\AgentLoop;
 use App\Game\ScoreGauge;
 use App\Game\WordMatcher;
 use App\Repository\GuessRepository;
@@ -115,6 +115,7 @@ final class RoundController extends AbstractController
     public function guesses(Round $round, GuessLoop $loop): EventStreamResponse
     {
         $this->denyUnlessPlayerDraws($round);
+
         return new EventStreamResponse(static fn (): \Generator => $loop->run($round));
     }
 

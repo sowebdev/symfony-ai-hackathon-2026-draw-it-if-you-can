@@ -3,8 +3,8 @@
 namespace App\Tests\Unit\Drawing;
 
 use App\Drawing\GridStroke;
-use App\Drawing\StrokeTracer;
 use App\Drawing\StrokePoints;
+use App\Drawing\StrokeTracer;
 use PHPUnit\Framework\TestCase;
 
 final class StrokeTracerTest extends TestCase

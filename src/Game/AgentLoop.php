@@ -4,12 +4,12 @@ namespace App\Game;
 
 use App\Entity\Guess;
 use App\Entity\Hint;
-use App\Entity\Tip;
 use App\Entity\Round;
+use App\Entity\Tip;
 use App\Repository\GuessRepository;
 use App\Repository\HintRepository;
-use App\Repository\TipRepository;
 use App\Repository\RoundRepository;
+use App\Repository\TipRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\ServerEvent;

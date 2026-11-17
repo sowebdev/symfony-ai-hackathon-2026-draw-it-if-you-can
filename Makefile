@@ -2,7 +2,7 @@
 # The image is built with the machine's user, so that the files it writes belong to them.
 
 .DEFAULT_GOAL := help
-.PHONY: help install setup start up stop shell db check test test-unit test-functional
+.PHONY: help install setup start up stop shell db check test test-unit test-functional cs cs-fix phpstan audit ci
 
 export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
@@ -59,3 +59,21 @@ test-functional: up ## Run the functional tests, against a fresh test database
 	$(EXEC) rm -f var/data_test.db
 	$(CONSOLE) doctrine:migrations:migrate --env=test -n -q
 	$(PHPUNIT) --testsuite functional
+
+cs: up ## Check the code style, without changing anything
+	$(EXEC) vendor/bin/php-cs-fixer fix --dry-run --diff
+
+cs-fix: up ## Fix the code style
+	$(EXEC) vendor/bin/php-cs-fixer fix
+
+phpstan: up ## Run the static analysis
+	$(EXEC) vendor/bin/phpstan analyse --no-progress
+
+audit: up ## Check the dependencies for known vulnerabilities
+	$(EXEC) composer audit
+
+ci: ## Run everything a pull request must pass: style, static analysis, audit, then the tests
+	@$(MAKE) --no-print-directory cs
+	@$(MAKE) --no-print-directory phpstan
+	@$(MAKE) --no-print-directory audit
+	@$(MAKE) --no-print-directory test

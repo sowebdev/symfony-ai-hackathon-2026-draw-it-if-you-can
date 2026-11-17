@@ -87,8 +87,8 @@ a controller or a service call for a service, not just "it didn't throw."
 ## Code style
 
 Symfony's coding standard, the `@Symfony` php-cs-fixer ruleset (a PSR-12-derived
-superset). Run `vendor/bin/php-cs-fixer fix` if `friendsofphp/php-cs-fixer` is
-installed; it isn't part of the skeleton by default.
+superset). `make cs-fix` fixes the style; `make ci` runs everything a pull
+request must pass (style, PHPStan, `composer audit`, then the tests).
 
 ## Documentation
 

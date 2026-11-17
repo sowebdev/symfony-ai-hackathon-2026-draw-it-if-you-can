@@ -2,8 +2,8 @@
 
 namespace App\Repository;
 
-use App\Entity\Tip;
 use App\Entity\Round;
+use App\Entity\Tip;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
