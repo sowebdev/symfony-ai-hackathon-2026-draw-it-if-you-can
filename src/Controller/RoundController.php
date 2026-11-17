@@ -20,6 +20,7 @@ use App\Repository\StrokeRepository;
 use App\Repository\TipRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Clock\DatePoint;
 use Symfony\Component\HttpFoundation\EventStreamResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -46,6 +47,9 @@ final class RoundController extends AbstractController
     #[Route('', name: 'round_show', methods: ['GET'])]
     public function show(Round $round): Response
     {
+        $round->getGame()->opened(new DatePoint());
+        $this->entityManager->flush();
+
         // A round speaks the language of its game, whatever the browser says.
         $this->localeSwitcher->setLocale($round->getGame()->getLanguage()->value);
 

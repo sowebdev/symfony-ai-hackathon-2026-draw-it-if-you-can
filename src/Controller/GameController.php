@@ -101,6 +101,7 @@ final class GameController extends AbstractController
     #[Route('/games/{id}', name: 'game_show', requirements: ['id' => Requirement::UUID_V7], methods: ['GET'])]
     public function show(Game $game): Response
     {
+        $this->opened($game);
         $rounds = $this->rounds->findByGame($game);
         if ([] === $rounds && $game->isWithAgent()) {
             return $this->redirectToRoute('game_lobby', ['id' => $game->getId()]);
@@ -131,6 +132,7 @@ final class GameController extends AbstractController
     #[Route('/games/{id}/lobby', name: 'game_lobby', requirements: ['id' => Requirement::UUID_V7], methods: ['GET'])]
     public function lobby(Game $game): Response
     {
+        $this->opened($game);
         $last = $this->rounds->findLastOfGame($game);
         if (null !== $last) {
             return $this->redirectToRoute('round_show', ['id' => $last->getId()]);
@@ -159,6 +161,15 @@ final class GameController extends AbstractController
     public function agent(Game $game): JsonResponse
     {
         return $this->json(['connected' => $game->isAgentConnected(), 'name' => $game->getAgentDisplayName()]);
+    }
+
+    /**
+     * A page of the game is loaded: the agent now follows this game.
+     */
+    private function opened(Game $game): void
+    {
+        $game->opened(new DatePoint());
+        $this->entityManager->flush();
     }
 
     /**

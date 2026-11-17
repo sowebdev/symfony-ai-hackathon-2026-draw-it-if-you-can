@@ -41,6 +41,10 @@ class Game
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $leftAt = null;
 
+    /** When the player last opened a page of the game, or created it: the agent follows the game opened last. */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $openedAt = null;
+
     /** Dealt ahead of the next round, so that its card is shown while the AI picks the word. */
     #[ORM\Column(enumType: Theme::class, nullable: true)]
     private ?Theme $nextTheme = null;
@@ -61,6 +65,7 @@ class Game
         }
         $this->id = Uuid::v7();
         $this->createdAt = new \DateTimeImmutable();
+        $this->openedAt = $this->createdAt;
     }
 
     public function getId(): Uuid
@@ -173,6 +178,19 @@ class Game
     public function getAgentSeenAt(): ?\DateTimeImmutable
     {
         return $this->agentSeenAt;
+    }
+
+    /**
+     * The player loaded a page of the game: its page, its lobby or one of its rounds.
+     */
+    public function opened(\DateTimeImmutable $at): void
+    {
+        $this->openedAt = $at;
+    }
+
+    public function getOpenedAt(): \DateTimeImmutable
+    {
+        return $this->openedAt ?? $this->createdAt;
     }
 
     public function leave(\DateTimeImmutable $at): void

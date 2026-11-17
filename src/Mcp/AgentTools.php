@@ -282,14 +282,14 @@ final readonly class AgentTools
     }
 
     /**
-     * The game and round asked for, by default the last ones; the agent is marked as seen on the game.
+     * The game and round asked for, by default those the player opened last; the agent is marked as seen on the game.
      *
      * @return array{Game, ?Round} No round yet while the game waits in its lobby
      */
     private function find(?string $round, ?RequestContext $context): array
     {
         if (null === $round || '' === trim($round)) {
-            $game = $this->games->findLatest() ?? throw new ToolCallException('No game has started yet: the player starts one at http://127.0.0.1:8040, with a copilot or in a duel.');
+            $game = $this->games->findToFollow() ?? throw new ToolCallException('No game has started yet: the player starts one at http://127.0.0.1:8040, with a copilot or in a duel.');
             $found = $this->rounds->findLastOfGame($game);
         } elseif (!Uuid::isValid($round)) {
             throw new ToolCallException('A round id looks like 019a6e2c-0000-7000-8000-000000000000; leave it empty for the round being played.');
