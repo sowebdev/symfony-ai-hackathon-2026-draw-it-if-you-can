@@ -2,7 +2,6 @@
 
 namespace App\Tests\Functional\Mcp;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 /**
@@ -20,9 +19,6 @@ trait McpClient
      */
     private function connect(string $name = 'test'): string
     {
-        // The database is shared by the tests, and the agent follows the game opened last: games of
-        // earlier tests, opened after a sleep of the mocked clock, would be ahead of this one.
-        self::getContainer()->get(EntityManagerInterface::class)->getConnection()->executeStatement('DELETE FROM game');
         unset($this->session);
         $this->rpc('initialize', ['protocolVersion' => '2025-06-18', 'capabilities' => [], 'clientInfo' => ['name' => $name, 'version' => '1']]);
         $this->session = (string) $this->client->getResponse()->headers->get('Mcp-Session-Id');

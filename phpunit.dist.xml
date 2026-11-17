@@ -43,5 +43,7 @@
     </source>
 
     <extensions>
+        <!-- Wraps each test in a database transaction and rolls it back: tests do not see each other's data. -->
+        <bootstrap class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension" />
     </extensions>
 </phpunit>
