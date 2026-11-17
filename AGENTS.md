@@ -111,3 +111,5 @@ things up in the project instead of relying on memory:
 - Read the installed source and docblocks under `vendor/`.
 - Docs: https://symfony.com/doc/current/ (switch to the version matching
   `composer.json` if it differs).
+
+The CI on GitHub runs `make ci`, so what passes locally passes there.

@@ -1,5 +1,7 @@
 # Draw It If You Can
 
+[![CI](https://github.com/sowebdev/symfony-ai-hackathon-2026-draw-it-if-you-can/actions/workflows/ci.yml/badge.svg)](https://github.com/sowebdev/symfony-ai-hackathon-2026-draw-it-if-you-can/actions/workflows/ci.yml)
+
 AI doesn't always have to be about productivity. It can also be fun.
 
 Draw It If You Can is a drawing and guessing game you play with an AI, taking turns. When you draw, the AI watches your sketch grow and shouts out one word at a time, like a friend around the table. When the AI draws, you guess: it picks up the pencil and draws live, stroke by stroke, with the wobble of a human hand.
@@ -9,6 +11,10 @@ Bring your own agent along over MCP: Claude Code, Mistral Vibe or any client who
 Plug in the model you like, from a cloud API or on your own machine: this may be the first time you want a decent graphics card for something other than 3D games.
 
 Built with Symfony AI for the Symfony AI hackathon (November 2026). The game speaks English and French.
+
+[![The AI draws a whale](docs/demo.gif)](https://youtu.be/XdfOClg2UO0)
+
+Click the whale to watch the 90-second video.
 
 ## Play in three steps
 
