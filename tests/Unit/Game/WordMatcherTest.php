@@ -21,6 +21,10 @@ final class WordMatcherTest extends TestCase
         yield 'english article' => ['a cat', 'cat'];
         yield 'french article' => ['Les chats', 'chat'];
         yield 'elided article' => ["l'éléphant", 'éléphant'];
+        yield 'german article' => ['Die Katze', 'Katze'];
+        yield 'italian article' => ['il gatto', 'gatto'];
+        yield 'italian elided article' => ["l'albero", 'albero'];
+        yield 'spanish article' => ['el perro', 'perro'];
         yield 'punctuation' => ['cat!', 'cat'];
         yield 'two words' => ['Coffee Mugs', 'coffee mug'];
     }
@@ -38,6 +42,7 @@ final class WordMatcherTest extends TestCase
     {
         yield 'near word' => ['kitten', 'cat'];
         yield 'longer word' => ['catfish', 'cat'];
+        yield 'an article alone is a word' => ['die', 'katze'];
         yield 'empty guess' => ['', 'cat'];
         yield 'punctuation only' => ['?!', 'cat'];
         yield 'short word ending in s is kept' => ['bus', 'bu'];

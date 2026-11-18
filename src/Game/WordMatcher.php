@@ -5,11 +5,16 @@ namespace App\Game;
 /**
  * Tells whether a guess is the word to find, without asking anyone: case, accents, a leading
  * article and a plural do not count ("Les Chats" finds "chat"). A near word ("kitten" for "cat")
- * does not count.
+ * does not count. The plurals of German, Spanish and Italian are not handled (only the final "s" or "x").
  */
 final class WordMatcher
 {
-    private const array ARTICLES = ['a', 'an', 'the', 'le', 'la', 'les', 'l', 'un', 'une', 'des', 'du'];
+    private const array ARTICLES = [
+        'a', 'an', 'the', 'le', 'la', 'les', 'l', 'un', 'une', 'des', 'du',
+        'der', 'die', 'das', 'den', 'dem', 'ein', 'eine',
+        'el', 'los', 'las', 'una', 'unos', 'unas',
+        'il', 'lo', 'gli', 'i', 'uno',
+    ];
 
     public function matches(string $guess, string $target): bool
     {

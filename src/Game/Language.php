@@ -9,12 +9,18 @@ enum Language: string
 {
     case English = 'en';
     case French = 'fr';
+    case German = 'de';
+    case Spanish = 'es';
+    case Italian = 'it';
 
     public function label(): string
     {
         return match ($this) {
             self::English => 'English',
             self::French => 'Français',
+            self::German => 'Deutsch',
+            self::Spanish => 'Español',
+            self::Italian => 'Italiano',
         };
     }
 
@@ -26,6 +32,9 @@ enum Language: string
         return match ($this) {
             self::English => 'English',
             self::French => 'French',
+            self::German => 'German',
+            self::Spanish => 'Spanish',
+            self::Italian => 'Italian',
         };
     }
 }

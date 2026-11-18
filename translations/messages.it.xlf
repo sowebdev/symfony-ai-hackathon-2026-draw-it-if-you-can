@@ -1,0 +1,578 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Keys describe their purpose, not where they are shown (Symfony best practices). Same keys in every language: tests/Unit/TranslationsTest.php -->
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+    <file source-language="en" target-language="it" datatype="plaintext" original="file.ext">
+        <body>
+            <trans-unit id="tagline" resname="tagline">
+                <source>tagline</source>
+                <target>Disegna per l'IA, o indovina i suoi disegni.</target>
+                <note>Under the title of the home page</note>
+            </trans-unit>
+            <trans-unit id="label.dealt" resname="label.dealt">
+                <source>label.dealt</source>
+                <target>Chi disegna per primo e il tema di ogni round sono scelti a caso.</target>
+                <note>Above the button that starts a game</note>
+            </trans-unit>
+            <trans-unit id="label.language" resname="label.language">
+                <source>label.language</source>
+                <target>Lingua</target>
+                <note>Name of the language switcher, for screen readers</note>
+            </trans-unit>
+            <trans-unit id="label.theme" resname="label.theme">
+                <source>label.theme</source>
+                <target>Tema</target>
+                <note>Column of the final score: the theme of each round</note>
+            </trans-unit>
+            <trans-unit id="action.new_game" resname="action.new_game">
+                <source>action.new_game</source>
+                <target>Nuova partita</target>
+                <note>Button and link that start a new game</note>
+            </trans-unit>
+            <trans-unit id="action.leave_game" resname="action.leave_game">
+                <source>action.leave_game</source>
+                <target>Esci dalla partita</target>
+                <note>In the bar of a round and in the lobby: leaves the game for the home page</note>
+            </trans-unit>
+            <trans-unit id="action.undo" resname="action.undo">
+                <source>action.undo</source>
+                <target>↶ Cancella l'ultimo tratto</target>
+                <note>Removes the last stroke</note>
+            </trans-unit>
+            <trans-unit id="instruction.draw" resname="instruction.draw">
+                <source>instruction.draw</source>
+                <target>Disegna:</target>
+                <note>Before the word the player must draw</note>
+            </trans-unit>
+            <trans-unit id="heading.ai_guesses" resname="heading.ai_guesses">
+                <source>heading.ai_guesses</source>
+                <target>L'IA dice…</target>
+                <note>Above the words the AI calls out</note>
+            </trans-unit>
+            <trans-unit id="result.found_in" resname="result.found_in">
+                <source>result.found_in</source>
+                <target>Trovato in %seconds% s</target>
+                <note>When the AI found the word; %seconds% is a number in an HTML element</note>
+            </trans-unit>
+            <trans-unit id="error.no_word" resname="error.no_word">
+                <source>error.no_word</source>
+                <target>L'IA non è riuscita a scegliere una parola. Il modello è attivo? «make check» dice cosa non va.</target>
+                <note>The model gave no word to draw</note>
+            </trans-unit>
+            <trans-unit id="theme.animals" resname="theme.animals">
+                <source>theme.animals</source>
+                <target>Animali</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+            <trans-unit id="theme.everyday-objects" resname="theme.everyday-objects">
+                <source>theme.everyday-objects</source>
+                <target>Oggetti di tutti i giorni</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+            <trans-unit id="theme.developer" resname="theme.developer">
+                <source>theme.developer</source>
+                <target>Vita da sviluppatore</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+            <trans-unit id="theme.places" resname="theme.places">
+                <source>theme.places</source>
+                <target>Luoghi</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+            <trans-unit id="theme.characters" resname="theme.characters">
+                <source>theme.characters</source>
+                <target>Personaggi</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+            <trans-unit id="theme.nature" resname="theme.nature">
+                <source>theme.nature</source>
+                <target>Natura</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+            <trans-unit id="theme.transport" resname="theme.transport">
+                <source>theme.transport</source>
+                <target>Trasporti</target>
+                <note>Name of a theme</note>
+            </trans-unit>
+            <trans-unit id="instruction.guess" resname="instruction.guess">
+                <source>instruction.guess</source>
+                <target>Cosa sta disegnando l'IA?</target>
+                <note>Above the drawing of the AI</note>
+            </trans-unit>
+            <trans-unit id="label.answer" resname="label.answer">
+                <source>label.answer</source>
+                <target>La tua risposta</target>
+                <note>Field where the player types a guess</note>
+            </trans-unit>
+            <trans-unit id="action.answer" resname="action.answer">
+                <source>action.answer</source>
+                <target>Indovina</target>
+                <note>Sends the guess of the player</note>
+            </trans-unit>
+            <trans-unit id="heading.player_guesses" resname="heading.player_guesses">
+                <source>heading.player_guesses</source>
+                <target>I tuoi tentativi</target>
+                <note>Above the words the player tried</note>
+            </trans-unit>
+            <trans-unit id="action.give_up" resname="action.give_up">
+                <source>action.give_up</source>
+                <target>Mi arrendo</target>
+                <note>The player gives up and sees the word</note>
+            </trans-unit>
+            <trans-unit id="result.word_was" resname="result.word_was">
+                <source>result.word_was</source>
+                <target>La parola era %word%</target>
+                <note>After giving up; %word% is the word in an HTML element</note>
+            </trans-unit>
+            <trans-unit id="status.ai_thinking" resname="status.ai_thinking">
+                <source>status.ai_thinking</source>
+                <target>Mmm… fammi pensare</target>
+                <note>On the sheet, before the first stroke of the AI</note>
+            </trans-unit>
+            <trans-unit id="status.ai_drawing" resname="status.ai_drawing">
+                <source>status.ai_drawing</source>
+                <target>L'IA sta disegnando…</target>
+                <note>While the AI draws</note>
+            </trans-unit>
+            <trans-unit id="status.ai_finished" resname="status.ai_finished">
+                <source>status.ai_finished</source>
+                <target>L'IA ha finito il suo disegno.</target>
+                <note>When the AI has drawn its last stroke</note>
+            </trans-unit>
+            <trans-unit id="error.ai_drawing" resname="error.ai_drawing">
+                <source>error.ai_drawing</source>
+                <target>L'IA non è riuscita a disegnare. «make check» dice cosa non va.</target>
+                <note>The model could not draw</note>
+            </trans-unit>
+            <trans-unit id="label.round" resname="label.round">
+                <source>label.round</source>
+                <target>Round %number% di %count%</target>
+                <note>Number of the round being played</note>
+            </trans-unit>
+            <trans-unit id="label.team_score" resname="label.team_score">
+                <source>label.team_score</source>
+                <target>Punteggio</target>
+                <note>Points of the player and the AI together</note>
+            </trans-unit>
+            <trans-unit id="label.time_left" resname="label.time_left">
+                <source>label.time_left</source>
+                <target>Tempo rimasto</target>
+                <note>Before the seconds left in the round</note>
+            </trans-unit>
+            <trans-unit id="label.points_at_stake" resname="label.points_at_stake">
+                <source>label.points_at_stake</source>
+                <target>Questa parola vale</target>
+                <note>Before the points the word is worth now, above the gauge</note>
+            </trans-unit>
+            <trans-unit id="heading.round_found" resname="heading.round_found">
+                <source>heading.round_found</source>
+                <target>Trovato!</target>
+                <note>End of a round: the word was found</note>
+            </trans-unit>
+            <trans-unit id="heading.round_time_up" resname="heading.round_time_up">
+                <source>heading.round_time_up</source>
+                <target>Tempo scaduto!</target>
+                <note>End of a round: nobody found the word in time</note>
+            </trans-unit>
+            <trans-unit id="heading.round_given_up" resname="heading.round_given_up">
+                <source>heading.round_given_up</source>
+                <target>Non stavolta</target>
+                <note>End of a round: the player gave up</note>
+            </trans-unit>
+            <trans-unit id="result.points_won" resname="result.points_won">
+                <source>result.points_won</source>
+                <target>+%points% punti</target>
+                <note>Points won in the round</note>
+            </trans-unit>
+            <trans-unit id="action.next_round_player" resname="action.next_round_player">
+                <source>action.next_round_player</source>
+                <target>Round successivo: tocca a te disegnare</target>
+                <note>Starts the next round, drawn by the player</note>
+            </trans-unit>
+            <trans-unit id="action.next_round_ai" resname="action.next_round_ai">
+                <source>action.next_round_ai</source>
+                <target>Round successivo: disegna l'IA</target>
+                <note>Starts the next round, drawn by the AI</note>
+            </trans-unit>
+            <trans-unit id="action.final_score" resname="action.final_score">
+                <source>action.final_score</source>
+                <target>Vedi il punteggio finale</target>
+                <note>After the last round</note>
+            </trans-unit>
+            <trans-unit id="action.retry" resname="action.retry">
+                <source>action.retry</source>
+                <target>Riprova</target>
+                <note>Asks again for a word to draw</note>
+            </trans-unit>
+            <trans-unit id="heading.game_over" resname="heading.game_over">
+                <source>heading.game_over</source>
+                <target>Partita finita</target>
+                <note>Title of the final score page</note>
+            </trans-unit>
+            <trans-unit id="result.final_score" resname="result.final_score">
+                <source>result.final_score</source>
+                <target>Punteggio di squadra: %points% punti</target>
+                <note>Final score; %points% is a number in an HTML element</note>
+            </trans-unit>
+            <trans-unit id="result.not_found" resname="result.not_found">
+                <source>result.not_found</source>
+                <target>non trovata</target>
+                <note>In the table of the final score, for a word nobody found</note>
+            </trans-unit>
+            <trans-unit id="column.round" resname="column.round">
+                <source>column.round</source>
+                <target>Round</target>
+                <note>Column of the final score table</note>
+            </trans-unit>
+            <trans-unit id="column.drawer" resname="column.drawer">
+                <source>column.drawer</source>
+                <target>Disegnato da</target>
+                <note>Column of the final score table</note>
+            </trans-unit>
+            <trans-unit id="column.word" resname="column.word">
+                <source>column.word</source>
+                <target>Parola</target>
+                <note>Column of the final score table</note>
+            </trans-unit>
+            <trans-unit id="column.found_in" resname="column.found_in">
+                <source>column.found_in</source>
+                <target>Trovato in</target>
+                <note>Column of the final score table</note>
+            </trans-unit>
+            <trans-unit id="column.points" resname="column.points">
+                <source>column.points</source>
+                <target>Punti</target>
+                <note>Column of the final score table</note>
+            </trans-unit>
+            <trans-unit id="drawer.player" resname="drawer.player">
+                <source>drawer.player</source>
+                <target>tu</target>
+                <note>Who drew a round: the player</note>
+            </trans-unit>
+            <trans-unit id="drawer.ai" resname="drawer.ai">
+                <source>drawer.ai</source>
+                <target>l'IA</target>
+                <note>Who drew a round: the AI</note>
+            </trans-unit>
+            <trans-unit id="label.decimal_separator" resname="label.decimal_separator">
+                <source>label.decimal_separator</source>
+                <target>,</target>
+                <note>Between the units and the tenths of a number of seconds</note>
+            </trans-unit>
+            <trans-unit id="heading.copilot_hints" resname="heading.copilot_hints">
+                <source>heading.copilot_hints</source>
+                <target>%name% ti suggerisce…</target>
+                <note>Above the words an agent connected over MCP suggests to the player</note>
+            </trans-unit>
+            <trans-unit id="heading.copilot_tips" resname="heading.copilot_tips">
+                <source>heading.copilot_tips</source>
+                <target>I consigli di %name%</target>
+                <note>Above the tips an agent connected over MCP gives to the player who draws</note>
+            </trans-unit>
+            <trans-unit id="heading.lobby" resname="heading.lobby">
+                <source>heading.lobby</source>
+                <target>Collega il tuo copilota</target>
+                <note>Title of the lobby of a game with a copilot</note>
+            </trans-unit>
+            <trans-unit id="action.copy" resname="action.copy">
+                <source>action.copy</source>
+                <target>Copia</target>
+                <note>Button next to a command of the lobby</note>
+            </trans-unit>
+            <trans-unit id="status.copied" resname="status.copied">
+                <source>status.copied</source>
+                <target>Copiato!</target>
+                <note>The command was copied to the clipboard</note>
+            </trans-unit>
+            <trans-unit id="lobby.step_add" resname="lobby.step_add">
+                <source>lobby.step_add</source>
+                <target>Con Claude Code, una volta sola:</target>
+                <note>First step of the lobby, before a command</note>
+            </trans-unit>
+            <trans-unit id="lobby.step_prompt" resname="lobby.step_prompt">
+                <source>lobby.step_prompt</source>
+                <target>Apri Claude Code, poi lancia questo prompt:</target>
+                <note>Second step of the lobby, before a command</note>
+            </trans-unit>
+            <trans-unit id="lobby.other_clients" resname="lobby.other_clients">
+                <source>lobby.other_clients</source>
+                <target>Un altro client MCP: collegalo a %url%, poi chiedigli il prompt %prompt%. Se non conosce i prompt, digli di chiamare lo strumento round_status, che spiega le regole.</target>
+                <note>Under the steps of the lobby</note>
+            </trans-unit>
+            <trans-unit id="status.copilot_waiting" resname="status.copilot_waiting">
+                <source>status.copilot_waiting</source>
+                <target>In attesa del tuo copilota…</target>
+                <note>In the lobby, until the agent calls the game</note>
+            </trans-unit>
+            <trans-unit id="status.copilot_connected" resname="status.copilot_connected">
+                <source>status.copilot_connected</source>
+                <target>Copilota collegato: %name%</target>
+                <note>In the lobby, once the agent called the game; %name% is the name of its MCP client</note>
+            </trans-unit>
+            <trans-unit id="status.copilot_absent" resname="status.copilot_absent">
+                <source>status.copilot_absent</source>
+                <target>Il tuo copilota non è collegato</target>
+                <note>In the bar of a round, when the copilot never called the game</note>
+            </trans-unit>
+            <trans-unit id="action.start_game" resname="action.start_game">
+                <source>action.start_game</source>
+                <target>Inizia la partita</target>
+                <note>Leaves the lobby: the first round starts</note>
+            </trans-unit>
+            <trans-unit id="role.drawer" resname="role.drawer">
+                <source>role.drawer</source>
+                <target>Il disegnatore</target>
+                <note>Name of the role of the model that draws, on the home page</note>
+            </trans-unit>
+            <trans-unit id="role.guesser" resname="role.guesser">
+                <source>role.guesser</source>
+                <target>L'indovino</target>
+                <note>Name of the role of the model that picks the word and guesses, on the home page</note>
+            </trans-unit>
+            <trans-unit id="status.checking_models" resname="status.checking_models">
+                <source>status.checking_models</source>
+                <target>Controllo dei modelli…</target>
+                <note>Home page, while the models are tried</note>
+            </trans-unit>
+            <trans-unit id="status.models_slow" resname="status.models_slow">
+                <source>status.models_slow</source>
+                <target>Il server del modello è lento a rispondere. Un modello locale si carica in memoria alla prima chiamata, e può volerci un minuto.</target>
+                <note>Home page, when checking the models takes more than 5 s</note>
+            </trans-unit>
+            <trans-unit id="help.models" resname="help.models">
+                <source>help.models</source>
+                <target>Un modello non risponde come dovrebbe. Imposta AI_DRAWER_* e AI_GUESSER_* in .env.local (vedi il README), poi riprova. «make check» dice la stessa cosa in un terminale.</target>
+                <note>Home page, when a model fails its check</note>
+            </trans-unit>
+            <trans-unit id="action.check_again" resname="action.check_again">
+                <source>action.check_again</source>
+                <target>Controlla di nuovo</target>
+                <note>Home page: tries the models again</note>
+            </trans-unit>
+            <trans-unit id="status.picking_word" resname="status.picking_word">
+                <source>status.picking_word</source>
+                <target>L'IA sceglie una parola…</target>
+                <note>Loading screen, while the model picks the word of a round</note>
+            </trans-unit>
+            <trans-unit id="status.picking_word_note" resname="status.picking_word_note">
+                <source>status.picking_word_note</source>
+                <target>Può volerci qualche secondo.</target>
+                <note>Loading screen, under the title</note>
+            </trans-unit>
+            <trans-unit id="label.mode" resname="label.mode">
+                <source>label.mode</source>
+                <target>Come gioco</target>
+                <note>Home page, above the choice of the mode</note>
+            </trans-unit>
+            <trans-unit id="mode.solo" resname="mode.solo">
+                <source>mode.solo</source>
+                <target>In squadra con l'IA</target>
+                <note>Home page, a mode of the game</note>
+            </trans-unit>
+            <trans-unit id="mode.copilot" resname="mode.copilot">
+                <source>mode.copilot</source>
+                <target>Con un copilota</target>
+                <note>Home page, a mode of the game</note>
+            </trans-unit>
+            <trans-unit id="mode.duel" resname="mode.duel">
+                <source>mode.duel</source>
+                <target>In duello</target>
+                <note>Home page, a mode of the game</note>
+            </trans-unit>
+            <trans-unit id="heading.lobby_duel" resname="heading.lobby_duel">
+                <source>heading.lobby_duel</source>
+                <target>Collega il tuo rivale</target>
+                <note>Title of the lobby of a duel</note>
+            </trans-unit>
+            <trans-unit id="status.rival_waiting" resname="status.rival_waiting">
+                <source>status.rival_waiting</source>
+                <target>In attesa del tuo rivale…</target>
+                <note>In the lobby of a duel, until the agent calls the game</note>
+            </trans-unit>
+            <trans-unit id="status.rival_connected" resname="status.rival_connected">
+                <source>status.rival_connected</source>
+                <target>Rivale collegato: %name%</target>
+                <note>In the lobby of a duel, once the agent called the game; %name% is the name of its MCP client</note>
+            </trans-unit>
+            <trans-unit id="label.you" resname="label.you">
+                <source>label.you</source>
+                <target>Tu e la tua IA</target>
+                <note>In the bar of a duel, before the score of the player</note>
+            </trans-unit>
+            <trans-unit id="label.rival_unknown" resname="label.rival_unknown">
+                <source>label.rival_unknown</source>
+                <target>Rivale</target>
+                <note>Name of the rival of a duel before it called the game</note>
+            </trans-unit>
+            <trans-unit id="heading.rival_answers" resname="heading.rival_answers">
+                <source>heading.rival_answers</source>
+                <target>%name% indovina contro di te…</target>
+                <note>Above the answers of the rival in a duel; %name% is the name of its MCP client</note>
+            </trans-unit>
+            <trans-unit id="heading.round_found_by_rival" resname="heading.round_found_by_rival">
+                <source>heading.round_found_by_rival</source>
+                <target>%name% l'ha trovato!</target>
+                <note>End of a round of a duel, when the rival found the word</note>
+            </trans-unit>
+            <trans-unit id="result.points_won_by_rival" resname="result.points_won_by_rival">
+                <source>result.points_won_by_rival</source>
+                <target>+%points% punti per %name%</target>
+                <note>End of a round of a duel, when the rival found the word</note>
+            </trans-unit>
+            <trans-unit id="result.duel_score" resname="result.duel_score">
+                <source>result.duel_score</source>
+                <target>Tu e la tua IA %you% punti, %name% %rival% punti</target>
+                <note>Final screen of a duel</note>
+            </trans-unit>
+            <trans-unit id="result.duel_won" resname="result.duel_won">
+                <source>result.duel_won</source>
+                <target>Tu e la tua IA vincete il duello!</target>
+                <note>Final screen of a duel</note>
+            </trans-unit>
+            <trans-unit id="result.duel_lost" resname="result.duel_lost">
+                <source>result.duel_lost</source>
+                <target>%name% vince il duello.</target>
+                <note>Final screen of a duel</note>
+            </trans-unit>
+            <trans-unit id="result.duel_tie" resname="result.duel_tie">
+                <source>result.duel_tie</source>
+                <target>Pareggio!</target>
+                <note>Final screen of a duel</note>
+            </trans-unit>
+            <trans-unit id="column.found_by" resname="column.found_by">
+                <source>column.found_by</source>
+                <target>Trovato da</target>
+                <note>Final screen of a duel, a column</note>
+            </trans-unit>
+            <trans-unit id="found_by.player" resname="found_by.player">
+                <source>found_by.player</source>
+                <target>tu</target>
+                <note>Who found the word of a round: the player</note>
+            </trans-unit>
+            <trans-unit id="found_by.ai" resname="found_by.ai">
+                <source>found_by.ai</source>
+                <target>la tua IA</target>
+                <note>Who found the word of a round: the AI of the player</note>
+            </trans-unit>
+            <trans-unit id="label.copilot_unknown" resname="label.copilot_unknown">
+                <source>label.copilot_unknown</source>
+                <target>Il tuo copilota</target>
+                <note>Name of the copilot when its MCP client gives none</note>
+            </trans-unit>
+            <trans-unit id="heading.round_found_by_you" resname="heading.round_found_by_you">
+                <source>heading.round_found_by_you</source>
+                <target>L'hai trovato!</target>
+                <note>End of a round of a duel, when the player found the word</note>
+            </trans-unit>
+            <trans-unit id="heading.round_found_by_your_ai" resname="heading.round_found_by_your_ai">
+                <source>heading.round_found_by_your_ai</source>
+                <target>La tua IA l'ha trovato!</target>
+                <note>End of a round of a duel, when the AI of the player found the word</note>
+            </trans-unit>
+            <trans-unit id="result.points_won_by_you" resname="result.points_won_by_you">
+                <source>result.points_won_by_you</source>
+                <target>+%points% punti per te e la tua IA</target>
+                <note>End of a round of a duel, when the side of the player found the word</note>
+            </trans-unit>
+            <trans-unit id="heading.your_ai_guesses" resname="heading.your_ai_guesses">
+                <source>heading.your_ai_guesses</source>
+                <target>La tua IA dice…</target>
+                <note>In a duel, above the words of the AI of the player while the player draws</note>
+            </trans-unit>
+            <trans-unit id="mode.solo_hint" resname="mode.solo_hint">
+                <source>mode.solo_hint</source>
+                <target>Disegni per lei, indovini i suoi disegni, fate punti insieme.</target>
+                <note>Home page, under a mode of the game</note>
+            </trans-unit>
+            <trans-unit id="mode.copilot_hint" resname="mode.copilot_hint">
+                <source>mode.copilot_hint</source>
+                <target>Un agente come Claude Code o Vibe ti aiuta a indovinare e a disegnare.</target>
+                <note>Home page, under a mode of the game</note>
+            </trans-unit>
+            <trans-unit id="mode.duel_hint" resname="mode.duel_hint">
+                <source>mode.duel_hint</source>
+                <target>Un agente come Claude Code o Vibe gioca contro di te e la tua IA.</target>
+                <note>Home page, under a mode of the game</note>
+            </trans-unit>
+            <trans-unit id="mode.via_mcp" resname="mode.via_mcp">
+                <source>mode.via_mcp</source>
+                <target>via MCP</target>
+                <note>Home page, on the cards of the modes with an agent</note>
+            </trans-unit>
+            <trans-unit id="lobby.copilot_does" resname="lobby.copilot_does">
+                <source>lobby.copilot_does</source>
+                <target>Cosa fa il tuo copilota</target>
+                <note>Lobby of a game with a copilot, above the list of what the agent does</note>
+            </trans-unit>
+            <trans-unit id="lobby.copilot_does_1" resname="lobby.copilot_does_1">
+                <source>lobby.copilot_does_1</source>
+                <target>Quando l'IA disegna, guarda il disegno, come te.</target>
+                <note>Lobby, what the copilot does</note>
+            </trans-unit>
+            <trans-unit id="lobby.copilot_does_2" resname="lobby.copilot_does_2">
+                <source>lobby.copilot_does_2</source>
+                <target>Ti suggerisce parole a margine, al massimo 5 per round.</target>
+                <note>Lobby, what the copilot does</note>
+            </trans-unit>
+            <trans-unit id="lobby.copilot_does_3" resname="lobby.copilot_does_3">
+                <source>lobby.copilot_does_3</source>
+                <target>Clicchi su una parola per rispondere: decidi sempre tu.</target>
+                <note>Lobby, what the copilot does</note>
+            </trans-unit>
+            <trans-unit id="lobby.copilot_does_4" resname="lobby.copilot_does_4">
+                <source>lobby.copilot_does_4</source>
+                <target>Quando disegni tu, ti dà consigli perché l'IA trovi la parola.</target>
+                <note>Lobby, what the copilot does</note>
+            </trans-unit>
+            <trans-unit id="lobby.duel_does" resname="lobby.duel_does">
+                <source>lobby.duel_does</source>
+                <target>Cosa fa il tuo rivale</target>
+                <note>Lobby of a duel, above the list of what the agent does</note>
+            </trans-unit>
+            <trans-unit id="lobby.duel_does_1" resname="lobby.duel_does_1">
+                <source>lobby.duel_does_1</source>
+                <target>Indovina gli stessi disegni che indovini tu, quelli dell'IA e i tuoi.</target>
+                <note>Lobby, what the rival does</note>
+            </trans-unit>
+            <trans-unit id="lobby.duel_does_2" resname="lobby.duel_does_2">
+                <source>lobby.duel_does_2</source>
+                <target>Quando disegni tu, la tua IA indovina per te.</target>
+                <note>Lobby, what the rival does</note>
+            </trans-unit>
+            <trans-unit id="lobby.duel_does_3" resname="lobby.duel_does_3">
+                <source>lobby.duel_does_3</source>
+                <target>Il primo che trova la parola vince i suoi punti.</target>
+                <note>Lobby, what the rival does</note>
+            </trans-unit>
+            <trans-unit id="lobby.duel_does_4" resname="lobby.duel_does_4">
+                <source>lobby.duel_does_4</source>
+                <target>Risponde al massimo una volta ogni 3 secondi, e per lui conta solo la parola esatta.</target>
+                <note>Lobby, what the rival does</note>
+            </trans-unit>
+            <trans-unit id="lobby.connect" resname="lobby.connect">
+                <source>lobby.connect</source>
+                <target>Collegalo</target>
+                <note>Lobby, above the steps to connect the agent</note>
+            </trans-unit>
+            <trans-unit id="lobby.vision" resname="lobby.vision">
+                <source>lobby.vision</source>
+                <target>Il suo modello deve vedere le immagini, perché l'agente guarda il disegno. Un modello che legge solo testo si ferma alla prima occhiata.</target>
+                <note>Lobby, under the heading of the steps to connect the agent</note>
+            </trans-unit>
+            <trans-unit id="status.copilot_connected_unnamed" resname="status.copilot_connected_unnamed">
+                <source>status.copilot_connected_unnamed</source>
+                <target>Il tuo copilota è collegato.</target>
+                <note>In the lobby, once the agent called the game, when it has no name</note>
+            </trans-unit>
+            <trans-unit id="status.rival_connected_unnamed" resname="status.rival_connected_unnamed">
+                <source>status.rival_connected_unnamed</source>
+                <target>Il tuo rivale è collegato.</target>
+                <note>In the lobby of a duel, once the agent called the game, when it has no name</note>
+            </trans-unit>
+            <trans-unit id="label.copilot_named" resname="label.copilot_named">
+                <source>label.copilot_named</source>
+                <target>%name%, il tuo copilota</target>
+                <note>In the bar of a round with a copilot</note>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

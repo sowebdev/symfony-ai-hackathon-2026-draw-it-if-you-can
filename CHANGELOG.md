@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The game speaks German, Spanish and Italian too, and the language menu on the home page is now a drop-down.
 - Continuous integration on GitHub: every push and pull request runs the same checks as `make ci`.
 - `make ci` runs everything a pull request must pass: code style, static analysis, the Symfony linters, a check of the database migrations, a dependency audit and the tests.
 - A demo video of the game in the README.

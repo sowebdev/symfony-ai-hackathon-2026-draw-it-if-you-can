@@ -10,7 +10,7 @@ Bring your own agent along over MCP: Claude Code, Mistral Vibe or any client who
 
 Plug in the model you like, from a cloud API or on your own machine: this may be the first time you want a decent graphics card for something other than 3D games.
 
-Built with Symfony AI for the Symfony AI hackathon (November 2026). The game speaks English and French.
+Built with Symfony AI for the Symfony AI hackathon (November 2026). The game speaks English, French, German, Spanish and Italian.
 
 [![The AI draws a whale](docs/demo.gif)](https://youtu.be/XdfOClg2UO0)
 

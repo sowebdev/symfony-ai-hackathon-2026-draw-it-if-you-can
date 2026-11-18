@@ -79,7 +79,7 @@ lint: up ## Lint composer.json, the container, the Twig templates, the YAML and 
 	$(CONSOLE) lint:twig templates
 	$(CONSOLE) lint:yaml config --parse-tags
 	$(CONSOLE) lint:xliff translations
-	$(CONSOLE) lint:translations --locale=en --locale=fr
+	$(CONSOLE) lint:translations --locale=en --locale=fr --locale=de --locale=es --locale=it
 
 schema: up ## Check the mapping against a fresh test database, and that the migrations run both ways
 	$(EXEC) rm -f var/data_test.db

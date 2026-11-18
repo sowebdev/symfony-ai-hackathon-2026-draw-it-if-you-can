@@ -128,9 +128,50 @@ button:focus-visible,
 }
 
 .languages {
-    display: flex;
-    gap: 1rem;
+    position: relative;
     align-self: flex-end;
+}
+
+.languages summary {
+    cursor: pointer;
+    padding: 0.4rem 0.2rem;
+    min-height: 2.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    list-style: none;
+    font-weight: bold;
+}
+
+.languages summary::-webkit-details-marker {
+    display: none;
+}
+
+.languages summary::after {
+    content: '▾';
+}
+
+.languages details[open] summary::after {
+    content: '▴';
+}
+
+.languages ul {
+    position: absolute;
+    right: 0;
+    z-index: 10;
+    margin: 0;
+    padding: 0.4rem;
+    list-style: none;
+    min-width: 10rem;
+    background: var(--sheet);
+    border: 2px solid var(--ink);
+    border-radius: 6px 10px 7px 12px;
+    box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.08);
+}
+
+.languages li a {
+    display: block;
+    padding: 0.7rem 0.8rem;
 }
 
 .languages a[aria-current] {

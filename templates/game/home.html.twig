@@ -3,10 +3,17 @@
 {% block body %}
     <main class="home">
         <nav class="languages" aria-label="{{ 'label.language'|trans }}">
-            {% for language in languages %}
-                <a href="{{ path('home', {_locale: language.value}) }}" hreflang="{{ language.value }}" lang="{{ language.value }}"
-                   {{ language.value == app.locale ? 'aria-current="page"' }}>{{ language.label }}</a>
-            {% endfor %}
+            <details>
+                <summary lang="{{ app.locale }}">{% for language in languages %}{{ language.value == app.locale ? language.label }}{% endfor %}</summary>
+                <ul>
+                    {% for language in languages %}
+                        <li>
+                            <a href="{{ path('home', {_locale: language.value}) }}" hreflang="{{ language.value }}" lang="{{ language.value }}"
+                               {{ language.value == app.locale ? 'aria-current="page"' }}>{{ language.label }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </details>
         </nav>
         <h1>Draw It If You Can</h1>
         <p>{{ 'tagline'|trans }}</p>

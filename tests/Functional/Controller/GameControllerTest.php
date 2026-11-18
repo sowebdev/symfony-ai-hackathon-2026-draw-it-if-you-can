@@ -16,16 +16,47 @@ final class GameControllerTest extends WebTestCase
         $client->request('GET', '/', server: ['HTTP_ACCEPT_LANGUAGE' => 'fr-FR,fr;q=0.9,en;q=0.8']);
         self::assertResponseRedirects('/fr');
 
-        $client->request('GET', '/', server: ['HTTP_ACCEPT_LANGUAGE' => 'de-DE']);
+        $client->request('GET', '/', server: ['HTTP_ACCEPT_LANGUAGE' => 'ja-JP']);
         self::assertResponseRedirects('/en');
     }
 
     public function testAnUnknownLanguageIsNotFound(): void
     {
         $client = self::createClient();
-        $client->request('GET', '/de');
+        $client->request('GET', '/ja');
 
         self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testTheRootSpeaksEachLanguageOfTheGame(): void
+    {
+        $client = self::createClient();
+
+        foreach (['de', 'es', 'it'] as $locale) {
+            $client->request('GET', '/', server: ['HTTP_ACCEPT_LANGUAGE' => $locale]);
+            self::assertResponseRedirects('/'.$locale);
+        }
+    }
+
+    public function testTheLanguageSelectorIsAClosedDropDownOfFiveLanguages(): void
+    {
+        $client = self::createClient();
+        $crawler = $client->request('GET', '/es');
+
+        self::assertResponseIsSuccessful();
+        self::assertCount(1, $crawler->filter('nav.languages > details:not([open])'));
+        self::assertSame('Español', trim($crawler->filter('nav.languages summary')->text()));
+        self::assertSame(
+            ['Deutsch', 'English', 'Español', 'Français', 'Italiano'],
+            (function () use ($crawler): array {
+                $names = $crawler->filter('nav.languages a[hreflang]')->each(static fn ($a) => trim($a->text()));
+                sort($names);
+
+                return $names;
+            })(),
+        );
+        self::assertSame('/es', $crawler->filter('nav.languages a[aria-current="page"]')->attr('href'));
+        self::assertSame('it', $crawler->filter('nav.languages a[hreflang="it"]')->attr('lang'));
     }
 
     public function testAGameIsPlayedInTheLanguageOfThePage(): void
