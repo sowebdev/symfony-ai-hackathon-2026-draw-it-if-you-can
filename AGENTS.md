@@ -100,6 +100,8 @@ decision records in `docs/adr/` (`NNNN-title.md`: context, options considered,
 decision, consequences). A choice that would surprise a reader of the code gets
 an ADR.
 
+A change a reader cares about adds a line under `[Unreleased]` in `CHANGELOG.md`, in the same commit.
+
 ## Discover, don't guess
 
 Framework APIs change between versions and your training data may be stale. Look

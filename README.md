@@ -50,6 +50,8 @@ Then pick "With a copilot" or "Duel" on the home page: the lobby tells you what 
 
 One Symfony application, SQLite, server-sent events, and Symfony AI between the game and the models: the model plays, the code judges. Diagrams and principles: [docs/architecture.md](docs/architecture.md).
 
+What changed in each version: [CHANGELOG.md](CHANGELOG.md).
+
 ## Contributions to Symfony AI
 
 Building the game on the beta of Symfony AI turned up a bug: the Generic bridge dropped the arguments carried by the chunk that starts a streamed tool call. The fix, [symfony/ai#2940](https://github.com/symfony/ai/pull/2940), is merged; until it is released, the game assembles streamed tool calls itself.
