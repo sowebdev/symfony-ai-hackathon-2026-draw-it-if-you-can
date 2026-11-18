@@ -320,12 +320,12 @@
             </trans-unit>
             <trans-unit id="role.drawer" resname="role.drawer">
                 <source>role.drawer</source>
-                <target>Il disegnatore</target>
+                <target>Chi disegna</target>
                 <note>Name of the role of the model that draws, on the home page</note>
             </trans-unit>
             <trans-unit id="role.guesser" resname="role.guesser">
                 <source>role.guesser</source>
-                <target>L'indovino</target>
+                <target>Chi indovina</target>
                 <note>Name of the role of the model that picks the word and guesses, on the home page</note>
             </trans-unit>
             <trans-unit id="status.checking_models" resname="status.checking_models">
@@ -555,7 +555,7 @@
             </trans-unit>
             <trans-unit id="lobby.vision" resname="lobby.vision">
                 <source>lobby.vision</source>
-                <target>Il suo modello deve vedere le immagini, perché l'agente guarda il disegno. Un modello che legge solo testo si ferma alla prima occhiata.</target>
+                <target>Il suo modello deve vedere le immagini, perché l'agente guarda il disegno. Un modello che legge solo testo si blocca già alla prima occhiata.</target>
                 <note>Lobby, under the heading of the steps to connect the agent</note>
             </trans-unit>
             <trans-unit id="status.copilot_connected_unnamed" resname="status.copilot_connected_unnamed">

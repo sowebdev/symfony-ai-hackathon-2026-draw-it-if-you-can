@@ -125,7 +125,7 @@
             </trans-unit>
             <trans-unit id="status.ai_thinking" resname="status.ai_thinking">
                 <source>status.ai_thinking</source>
-                <target>Hmm… ich überlege</target>
+                <target>Hmm… mal überlegen</target>
                 <note>On the sheet, before the first stroke of the AI</note>
             </trans-unit>
             <trans-unit id="status.ai_drawing" resname="status.ai_drawing">
@@ -160,7 +160,7 @@
             </trans-unit>
             <trans-unit id="label.points_at_stake" resname="label.points_at_stake">
                 <source>label.points_at_stake</source>
-                <target>Dieses Wort ist wert</target>
+                <target>Dieses Wort bringt</target>
                 <note>Before the points the word is worth now, above the gauge</note>
             </trans-unit>
             <trans-unit id="heading.round_found" resname="heading.round_found">
@@ -320,12 +320,12 @@
             </trans-unit>
             <trans-unit id="role.drawer" resname="role.drawer">
                 <source>role.drawer</source>
-                <target>Der Zeichner</target>
+                <target>Die Zeichen-KI</target>
                 <note>Name of the role of the model that draws, on the home page</note>
             </trans-unit>
             <trans-unit id="role.guesser" resname="role.guesser">
                 <source>role.guesser</source>
-                <target>Der Rater</target>
+                <target>Die Rate-KI</target>
                 <note>Name of the role of the model that picks the word and guesses, on the home page</note>
             </trans-unit>
             <trans-unit id="status.checking_models" resname="status.checking_models">
@@ -555,7 +555,7 @@
             </trans-unit>
             <trans-unit id="lobby.vision" resname="lobby.vision">
                 <source>lobby.vision</source>
-                <target>Sein Modell muss Bilder sehen können: Der Agent schaut sich die Zeichnung an. Ein reines Textmodell kommt schon beim ersten Blick nicht weiter.</target>
+                <target>Sein Modell muss Bilder sehen können: Der Agent schaut sich die Zeichnung an. Ein reines Textmodell scheitert gleich beim ersten Blick.</target>
                 <note>Lobby, under the heading of the steps to connect the agent</note>
             </trans-unit>
             <trans-unit id="status.copilot_connected_unnamed" resname="status.copilot_connected_unnamed">

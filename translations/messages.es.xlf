@@ -50,7 +50,7 @@
             </trans-unit>
             <trans-unit id="result.found_in" resname="result.found_in">
                 <source>result.found_in</source>
-                <target>Acertado en %seconds% s</target>
+                <target>Adivinada en %seconds% s</target>
                 <note>When the AI found the word; %seconds% is a number in an HTML element</note>
             </trans-unit>
             <trans-unit id="error.no_word" resname="error.no_word">
@@ -65,7 +65,7 @@
             </trans-unit>
             <trans-unit id="theme.everyday-objects" resname="theme.everyday-objects">
                 <source>theme.everyday-objects</source>
-                <target>Objetos de cada día</target>
+                <target>Objetos cotidianos</target>
                 <note>Name of a theme</note>
             </trans-unit>
             <trans-unit id="theme.developer" resname="theme.developer">
@@ -215,7 +215,7 @@
             </trans-unit>
             <trans-unit id="result.not_found" resname="result.not_found">
                 <source>result.not_found</source>
-                <target>no encontrada</target>
+                <target>no adivinada</target>
                 <note>In the table of the final score, for a word nobody found</note>
             </trans-unit>
             <trans-unit id="column.round" resname="column.round">
@@ -235,7 +235,7 @@
             </trans-unit>
             <trans-unit id="column.found_in" resname="column.found_in">
                 <source>column.found_in</source>
-                <target>Acertado en</target>
+                <target>Adivinada en</target>
                 <note>Column of the final score table</note>
             </trans-unit>
             <trans-unit id="column.points" resname="column.points">
@@ -320,12 +320,12 @@
             </trans-unit>
             <trans-unit id="role.drawer" resname="role.drawer">
                 <source>role.drawer</source>
-                <target>El dibujante</target>
+                <target>El que dibuja</target>
                 <note>Name of the role of the model that draws, on the home page</note>
             </trans-unit>
             <trans-unit id="role.guesser" resname="role.guesser">
                 <source>role.guesser</source>
-                <target>El adivinador</target>
+                <target>El que adivina</target>
                 <note>Name of the role of the model that picks the word and guesses, on the home page</note>
             </trans-unit>
             <trans-unit id="status.checking_models" resname="status.checking_models">
@@ -440,7 +440,7 @@
             </trans-unit>
             <trans-unit id="column.found_by" resname="column.found_by">
                 <source>column.found_by</source>
-                <target>Acertado por</target>
+                <target>Adivinada por</target>
                 <note>Final screen of a duel, a column</note>
             </trans-unit>
             <trans-unit id="found_by.player" resname="found_by.player">
@@ -555,7 +555,7 @@
             </trans-unit>
             <trans-unit id="lobby.vision" resname="lobby.vision">
                 <source>lobby.vision</source>
-                <target>Su modelo tiene que ver imágenes, porque el agente mira el dibujo. Un modelo que solo lee texto se queda en la primera mirada.</target>
+                <target>Su modelo tiene que ver imágenes, porque el agente mira el dibujo. Un modelo que solo entiende texto se queda parado en cuanto lo intenta.</target>
                 <note>Lobby, under the heading of the steps to connect the agent</note>
             </trans-unit>
             <trans-unit id="status.copilot_connected_unnamed" resname="status.copilot_connected_unnamed">
