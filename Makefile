@@ -2,7 +2,7 @@
 # The image is built with the machine's user, so that the files it writes belong to them.
 
 .DEFAULT_GOAL := help
-.PHONY: help install setup start up stop shell db check test test-unit test-functional cs cs-fix phpstan audit ci
+.PHONY: help install setup start up stop shell db check test test-unit test-functional lint schema cs cs-fix phpstan audit ci
 
 export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
@@ -73,8 +73,27 @@ phpstan: up ## Run the static analysis (warms the dev cache first: PHPStan reads
 audit: up ## Check the dependencies for known vulnerabilities
 	$(EXEC) composer audit
 
-ci: ## Run everything a pull request must pass: style, static analysis, audit, then the tests
+lint: up ## Lint composer.json, the container, the Twig templates, the YAML and the translations
+	$(EXEC) composer validate --strict --no-check-publish
+	$(CONSOLE) lint:container
+	$(CONSOLE) lint:twig templates
+	$(CONSOLE) lint:yaml config --parse-tags
+	$(CONSOLE) lint:xliff translations
+	$(CONSOLE) lint:translations --locale=en --locale=fr
+
+schema: up ## Check the mapping against a fresh test database, and that the migrations run both ways
+	$(EXEC) rm -f var/data_test.db
+	$(CONSOLE) doctrine:migrations:migrate --env=test -n -q
+	$(CONSOLE) doctrine:schema:validate --env=test
+	$(CONSOLE) doctrine:migrations:migrate first --env=test -n -q
+	$(CONSOLE) doctrine:migrations:migrate latest --env=test -n -q
+	$(CONSOLE) doctrine:schema:validate --env=test
+	@echo "The schema matches the mapping and the migrations run both ways."
+
+ci: ## Run everything a pull request must pass: lint, style, static analysis, audit, schema, then the tests
+	@$(MAKE) --no-print-directory lint
 	@$(MAKE) --no-print-directory cs
 	@$(MAKE) --no-print-directory phpstan
 	@$(MAKE) --no-print-directory audit
+	@$(MAKE) --no-print-directory schema
 	@$(MAKE) --no-print-directory test

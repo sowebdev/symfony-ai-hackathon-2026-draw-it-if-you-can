@@ -88,7 +88,10 @@ a controller or a service call for a service, not just "it didn't throw."
 
 Symfony's coding standard, the `@Symfony` php-cs-fixer ruleset (a PSR-12-derived
 superset). `make cs-fix` fixes the style; `make ci` runs everything a pull
-request must pass (style, PHPStan, `composer audit`, then the tests).
+request must pass (lint, style, PHPStan, `composer audit`, schema, then the tests).
+
+- `make lint`: composer.json, container, Twig, YAML and translations linters.
+- `make schema`: on a fresh test database, mapping validates and the migrations run down to `first` and back up.
 
 ## Documentation
 
