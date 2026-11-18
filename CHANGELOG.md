@@ -9,7 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- German, Spanish and Italian: a more natural wording of several strings (points at stake, the model roles, the vision note, the Spanish words for a found word).
 - Your agent now plays the game you are looking at: it follows the last game page you opened, instead of the last game created. With several games or tabs open, it no longer plays one you left behind.
 
 ### Added
