@@ -1,52 +1,43 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ 'models.title'|trans }} · Draw It If You Can{% endblock %}
+{% block title %}{{ ('models.question_provider_' ~ role.value)|trans }} · Draw It If You Can{% endblock %}
 
-{# Step 1: who answers. The API key is a password field: it is never sent back to the page. #}
+{# Question 1 of a role: which provider. Nothing else: the next question comes with "Continue". #}
 {% block body %}
     <main class="models">
-        <a class="models-home" href="{{ path('home') }}">← {{ 'action.back_home'|trans }}</a>
-        {{ include('models/_steps.html.twig', {step: 1}) }}
-        <h1>{{ 'models.title'|trans }}</h1>
-        <p class="models-intro">{{ 'models.provider_intro'|trans }}</p>
+        <a class="models-home" href="{{ back }}">← {{ 'action.back'|trans }}</a>
+        <ul class="role-lines">
+            {% for other in others %}
+                {{ include('models/_line.html.twig', {role: other.role, view: other.view}) }}
+            {% endfor %}
+        </ul>
+        <h1>{{ ('models.question_provider_' ~ role.value)|trans }}</h1>
 
         {{ form_start(form, {attr: {class: 'models-form', novalidate: 'novalidate'}}) }}
             <fieldset class="providers">
-                <legend>{{ 'models.provider'|trans }}</legend>
+                <legend class="sr-only">{{ ('models.question_provider_' ~ role.value)|trans }}</legend>
                 <div class="provider-cards">
                     {% for choice in form.provider %}
                         <label class="provider-card provider-{{ choice.vars.value }}">
                             {{ form_widget(choice) }}
                             <strong>{{ choice.vars.label|trans }}</strong>
-                            <small>{{ (choice.vars.label ~ '_hint')|trans }}</small>
+                            {% if choice.vars.value in saved %}<em class="saved-mark">{{ 'models.key_saved_tag'|trans }}</em>{% endif %}
                         </label>
                     {% endfor %}
                 </div>
                 {{ form_errors(form.provider) }}
             </fieldset>
 
-            <div class="field">
-                {{ form_label(form.apiKey) }}
-                {{ form_widget(form.apiKey) }}
-                {% if saved and saved.hasApiKey %}
-                    <small class="hint">{{ 'models.key_saved'|trans({'%provider%': ('provider.' ~ saved.provider.value)|trans, '%end%': saved.maskedApiKey}) }}</small>
-                {% else %}
-                    <small class="hint">{{ 'models.key_hint'|trans }}</small>
-                {% endif %}
-                {{ form_errors(form.apiKey) }}
-            </div>
-
-            <div class="field field-address">
-                {{ form_label(form.address) }}
-                {{ form_widget(form.address) }}
-                <small class="hint">{{ 'models.address_hint'|trans }}</small>
-                {{ form_errors(form.address) }}
-            </div>
-
             <div class="models-actions">
-                {{ form_widget(form.list) }}
+                {{ form_widget(form.continue) }}
             </div>
             {{ form_rest(form) }}
         {{ form_end(form, {render_rest: false}) }}
+
+        {% if same %}
+            {{ form_start(same, {attr: {class: 'same-as-drawer'}}) }}
+                {{ form_widget(same.same, {label: ('models.same_as_' ~ role.fallback.value), attr: {class: 'link'}}) }}
+            {{ form_end(same) }}
+        {% endif %}
     </main>
 {% endblock %}

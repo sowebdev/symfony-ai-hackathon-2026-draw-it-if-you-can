@@ -42,7 +42,9 @@ final class ModelCheckToolsTest extends KernelTestCase
             return 'circle';
         });
         self::getContainer()->set(PlatformFactory::class, new ScriptedPlatforms($platform));
-        self::getContainer()->get(ModelSettings::class)->save(Provider::Compatible, 'http://scripted:8000', 'scripted', 'scripted', true);
+        $settings = self::getContainer()->get(ModelSettings::class);
+        $settings->choose(Role::Drawer, Provider::Compatible, 'http://scripted:8000', 'scripted', true);
+        $settings->choose(Role::Guesser, Provider::Compatible, 'http://scripted:8000', 'scripted', true);
 
         return self::getContainer()->get(ModelCheck::class);
     }
@@ -100,7 +102,9 @@ final class ModelCheckToolsTest extends KernelTestCase
             return 'cat';
         });
         self::getContainer()->set(PlatformFactory::class, new ScriptedPlatforms($platform));
-        self::getContainer()->get(ModelSettings::class)->save(Provider::Compatible, 'http://scripted:8000', 'scripted', 'scripted', true);
+        $settings = self::getContainer()->get(ModelSettings::class);
+        $settings->choose(Role::Drawer, Provider::Compatible, 'http://scripted:8000', 'scripted', true);
+        $settings->choose(Role::Guesser, Provider::Compatible, 'http://scripted:8000', 'scripted', true);
 
         self::assertContains(self::getContainer()->get(ModelCheck::class)->check(Role::Drawer)?->id, ['problem.no_image_answer', 'problem.not_a_circle']);
         self::assertSame(['image'], $asked);

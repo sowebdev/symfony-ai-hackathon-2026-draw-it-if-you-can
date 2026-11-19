@@ -2,6 +2,9 @@
 
 namespace App\Tests\Functional\Controller;
 
+use App\Ai\ModelSettings;
+use App\Ai\Provider;
+use App\Ai\Role;
 use App\Tests\Functional\ScriptedModel;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpClient\Exception\TransportException;
@@ -115,6 +118,38 @@ final class GameControllerTest extends WebTestCase
         $report = json_decode((string) $client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
         self::assertTrue($report['ok']);
         self::assertSame(['drawer', 'guesser'], array_column($report['roles'], 'role'));
+    }
+
+    public function testTheHealthCardIsOneLineWhenTheGuesserFollowsTheDrawer(): void
+    {
+        $client = self::createClient();
+        self::scriptModel($client, ['circle', 'circle'], chosen: false);
+        $client->getContainer()->get(ModelSettings::class)->choose(Role::Drawer, Provider::Anthropic, null, 'claude-haiku-5-5', false, 'sk-ant-api03-0123456789abcdef3f9a');
+
+        $client->request('GET', '/fr/health?fresh=1');
+        $report = json_decode((string) $client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
+
+        self::assertTrue($report['ok']);
+        self::assertCount(1, $report['roles']);
+        self::assertSame('both', $report['roles'][0]['role']);
+        self::assertSame('claude-haiku-5-5 chez Anthropic', $report['roles'][0]['model']);
+        $crawler = $client->request('GET', '/fr');
+        self::assertStringContainsString('Il dessine et devine', $crawler->filter('.health')->attr('data-health-labels-value') ?? '');
+    }
+
+    public function testTheHealthCardHasALinePerRoleWhenEachHasItsOwnModel(): void
+    {
+        $client = self::createClient();
+        self::scriptModel($client, ['circle', 'circle'], chosen: false);
+        $settings = $client->getContainer()->get(ModelSettings::class);
+        $settings->choose(Role::Drawer, Provider::Anthropic, null, 'claude-haiku-5-5', false, 'sk-ant-api03-0123456789abcdef3f9a');
+        $settings->choose(Role::Guesser, Provider::Compatible, 'http://gate:8001', 'qwen', false);
+
+        $client->request('GET', '/en/health?fresh=1');
+        $report = json_decode((string) $client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
+
+        self::assertSame(['drawer', 'guesser'], array_column($report['roles'], 'role'));
+        self::assertSame(['claude-haiku-5-5 at Anthropic', 'qwen at http://gate:8001'], array_column($report['roles'], 'model'));
     }
 
     public function testTheHealthCardNamesTheAddressInTheLanguageOfThePage(): void

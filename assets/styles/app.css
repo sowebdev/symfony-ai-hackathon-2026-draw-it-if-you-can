@@ -1338,7 +1338,7 @@ button.link:hover {
     margin-right: 0.5rem;
 }
 
-/* The model screen: a sheet of the sketchbook, three steps, no script. */
+/* The model screen: a sheet of the sketchbook, one question at a time, no script. */
 .models {
     max-width: 46rem;
     margin: 0 auto;
@@ -1369,39 +1369,6 @@ button.link:hover {
     background: rgba(255, 212, 59, 0.35);
     border-radius: 4px;
     overflow-wrap: anywhere;
-}
-
-.model-steps {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem 1.2rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    font-size: 1rem;
-    color: #777;
-}
-
-.model-steps li span {
-    display: inline-block;
-    width: 1.6rem;
-    height: 1.6rem;
-    line-height: 1.35rem;
-    text-align: center;
-    border: 2px solid currentColor;
-    border-radius: 50% 45% 55% 48%;
-}
-
-.model-steps li.done {
-    color: var(--found);
-}
-
-.model-steps li[aria-current] {
-    color: var(--ink);
-}
-
-.model-steps li[aria-current] span {
-    background: var(--marker);
 }
 
 .models-form {
@@ -1439,17 +1406,6 @@ button.link:hover {
     padding: 0;
     margin-bottom: 0.4rem;
     font-size: 1.3rem;
-}
-
-.provider-cards {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.9rem;
-}
-
-/* The three named providers share a row; the open service has the next one to itself. */
-.provider-card.provider-openai_compatible {
-    grid-column: 1 / -1;
 }
 
 .provider-card,
@@ -1520,25 +1476,10 @@ button.link:hover {
     line-height: 1.15;
 }
 
-.provider-card small {
-    font-size: 0.95rem;
-    color: #666;
-    line-height: 1.25;
-}
-
 .models-form .field {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
-}
-
-/* The address only matters for the open service: no JavaScript, the checked card decides. */
-.models-form .field-address {
-    display: none;
-}
-
-.models-form:has(.provider-openai_compatible input:checked) .field-address {
-    display: flex;
 }
 
 .models-form .field input[type='text'],
@@ -1569,11 +1510,6 @@ button.link:hover {
     display: flex;
     flex-direction: column;
     gap: 0.7rem;
-}
-
-.role-models:not(:last-of-type) {
-    padding-bottom: 0.9rem;
-    border-bottom: 2px dashed #d8cfbd;
 }
 
 .model-cards {
@@ -1611,15 +1547,6 @@ button.link:hover {
     flex-direction: column;
     gap: 0.5rem;
     margin-top: 0.5rem;
-}
-
-/* The second choice, for a guesser other than the model above: shown by CSS alone. */
-.guesser-models {
-    display: none;
-}
-
-.models-form:has(.other-guesser input:checked) .guesser-models {
-    display: flex;
 }
 
 .role-models .hint {
@@ -1730,68 +1657,7 @@ button.link:hover {
     margin: 0;
 }
 
-.check-results {
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.check-results li {
-    padding: 0.9rem 1rem 0.9rem 2.6rem;
-    position: relative;
-    background: #fff;
-    border: 2px solid var(--ink);
-    border-radius: 6px 10px 7px 12px;
-    box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.08);
-    overflow-wrap: anywhere;
-}
-
-.check-results li::before {
-    position: absolute;
-    left: 0.9rem;
-    top: 0.8rem;
-    font-size: 1.3rem;
-}
-
-.check-results li.ok::before {
-    content: '✓';
-    color: var(--found);
-}
-
-.check-results li.failed {
-    border-color: #b42318;
-    background: #fff5f5;
-}
-
-.check-results li.failed::before {
-    content: '✗';
-    color: #b42318;
-}
-
-.check-results .verdict {
-    color: var(--found);
-}
-
-.check-results p {
-    margin: 0.4rem 0 0;
-}
-
-.check-results .why {
-    color: #b42318;
-}
-
 @media (max-width: 40rem) {
-    .provider-cards {
-        grid-template-columns: 1fr;
-    }
-
-    .provider-card.provider-openai_compatible {
-        grid-column: auto;
-    }
-
     .models-form {
         padding: 1.6rem 1rem 1.2rem;
     }
@@ -1817,6 +1683,187 @@ button.link:hover {
     margin: 0 0 0.6rem;
 }
 
-.check-results .where {
+/* A question's list of providers: one choice per line, nothing else. */
+.provider-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.provider-card {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem 0.8rem;
+    min-height: 3.25rem;
+}
+
+.saved-mark {
+    font-style: normal;
+    font-size: 0.85rem;
+    padding: 0.05rem 0.5rem;
+    color: #fff;
+    background: var(--found);
+    border-radius: 999px;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
     white-space: nowrap;
+}
+
+/* The AI of each role, one line each: what it does, its model, where it answers, "change". */
+.role-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.role-line {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.6rem;
+    padding: 0.75rem 1rem;
+    background: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 6px 10px 7px 12px;
+    box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.08);
+    overflow-wrap: anywhere;
+}
+
+.role-line .role-what {
+    flex: 1 1 14rem;
+}
+
+.role-line .sep {
+    color: #999;
+}
+
+.role-line .where {
+    color: #666;
+}
+
+.role-line.follows {
+    color: #666;
+    background: transparent;
+    border: 2px dashed #c9bfa9;
+    box-shadow: none;
+}
+
+.role-line .mark {
+    font-size: 1.4rem;
+    line-height: 1;
+}
+
+.role-line.ok {
+    border-color: var(--found);
+}
+
+.role-line.ok .mark {
+    color: var(--found);
+}
+
+.role-line.failed {
+    border-color: #b42318;
+    background: #fff5f5;
+}
+
+.role-line.failed .mark {
+    color: #b42318;
+}
+
+.role-line p {
+    flex-basis: 100%;
+    margin: 0.2rem 0 0;
+}
+
+.role-line .why {
+    color: #b42318;
+}
+
+.role-line form {
+    flex-basis: 100%;
+    margin-top: 0.3rem;
+}
+
+/* "Another AI to guess?", under the model of the drawer. */
+.follows-line {
+    margin: 0;
+    color: #666;
+}
+
+.same-as-drawer {
+    margin: 0;
+}
+
+.models .notice {
+    margin: 0;
+    color: var(--found);
+}
+
+.saved-keys {
+    margin-top: 0.6rem;
+    color: #555;
+}
+
+.saved-keys summary {
+    cursor: pointer;
+    min-height: 2.75rem;
+    display: flex;
+    align-items: center;
+}
+
+.saved-keys ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.saved-keys li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.2rem 0.8rem;
+    padding: 0.3rem 0;
+    border-top: 1px dashed #d8cfbd;
+}
+
+.saved-keys .account {
+    flex: 1 1 12rem;
+    overflow-wrap: anywhere;
+}
+
+.saved-keys form {
+    margin: 0;
+}
+
+.saved-keys button.link {
+    min-height: 2.75rem;
+}
+
+.saved-keys button.link:disabled {
+    color: #999;
+    cursor: not-allowed;
+    text-decoration: none;
+}
+
+.models .role-lines + h1 {
+    margin-top: 0.3rem;
+}
+
+.models h1 + .role-lines {
+    margin-top: 0.3rem;
+}
+
+.long-list[open] > :not(summary) {
+    margin-top: 0.7rem;
 }

@@ -19,18 +19,20 @@ final readonly class CheckModelsCommand
     public function __invoke(SymfonyStyle $io): int
     {
         if (!$this->settings->isStored()) {
-            $io->writeln('<error>No model is chosen yet.</error> Choose one on the models screen: '.$this->urls->generate('models_provider', ['_locale' => 'en'], UrlGeneratorInterface::ABSOLUTE_URL));
+            $io->writeln('<error>No model is chosen yet.</error> Choose one on the models screen: '.$this->urls->generate('models', ['_locale' => 'en'], UrlGeneratorInterface::ABSOLUTE_URL));
 
             return Command::FAILURE;
         }
         $failed = false;
-        foreach ($this->health->report(fresh: true, roleBudgetS: null) as ['role' => $role, 'model' => $model, 'problem' => $problem]) {
+        // One line per role, saying where it answers; a role that follows another says so, and has its result.
+        foreach ($this->health->report(fresh: true, roleBudgetS: null) as ['role' => $role, 'model' => $model, 'problem' => $problem, 'follows' => $follows]) {
+            $name = null === $follows ? $role : "{$role} follows {$follows}";
             if (null === $problem) {
-                $io->writeln("<info>OK</info>   {$role} ({$model})");
+                $io->writeln("<info>OK</info>   {$name} ({$model})");
                 continue;
             }
             $failed = true;
-            $io->writeln("<error>FAIL</error> {$role} ({$model}): {$problem}");
+            $io->writeln("<error>FAIL</error> {$name} ({$model}): {$problem}");
         }
 
         return $failed ? Command::FAILURE : Command::SUCCESS;

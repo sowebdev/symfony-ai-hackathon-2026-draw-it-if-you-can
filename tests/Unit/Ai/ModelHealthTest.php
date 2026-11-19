@@ -97,4 +97,24 @@ final class ModelHealthTest extends TestCase
         $translator = new \Symfony\Component\Translation\IdentityTranslator();
         self::assertSame('problem.not_a_circle advice.reasoning_tick', $problem->trans($translator));
     }
+
+    public function testAGuesserThatFollowsTheDrawerIsOneLineForBoth(): void
+    {
+        $report = [
+            ['role' => 'drawer', 'model' => 'm at Anthropic', 'ok' => false, 'problem' => 'nope', 'follows' => null],
+            ['role' => 'guesser', 'model' => 'm at Anthropic', 'ok' => false, 'problem' => 'nope', 'follows' => 'drawer'],
+        ];
+
+        self::assertSame([['role' => 'both', 'model' => 'm at Anthropic', 'ok' => false, 'problem' => 'nope']], ModelHealth::lines($report));
+    }
+
+    public function testRolesWithAModelOfTheirOwnKeepTheirLine(): void
+    {
+        $report = [
+            ['role' => 'drawer', 'model' => 'a', 'ok' => true, 'problem' => null, 'follows' => null],
+            ['role' => 'guesser', 'model' => 'b', 'ok' => true, 'problem' => null, 'follows' => null],
+        ];
+
+        self::assertSame(['drawer', 'guesser'], array_column(ModelHealth::lines($report), 'role'));
+    }
 }

@@ -2,18 +2,18 @@
 
 namespace App\Tests\Functional\Ai;
 
-use App\Ai\ModelSettings;
-use App\Ai\Provider;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Schema\Schema;
 use DoctrineMigrations\Version20261119120000;
+use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
  * A setting stored as "ollama" (or "own server") is the same case after the migration: another OpenAI-compatible service.
+ * It runs on a table of its own, as the database was at that time (ai_setting is gone since).
  */
-final class ProviderMigrationTest extends KernelTestCase
+final class ProviderMigrationTest extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
@@ -21,10 +21,13 @@ final class ProviderMigrationTest extends KernelTestCase
         require_once \dirname(__DIR__, 3).'/migrations/Version20261119120000.php';
     }
 
-    private function insert(Connection $connection, string $provider, ?string $address): void
+    private function connection(string $provider, ?string $address): Connection
     {
-        $connection->executeStatement('DELETE FROM ai_setting');
+        $connection = DriverManager::getConnection(['driver' => 'pdo_sqlite', 'memory' => true]);
+        $connection->executeStatement('CREATE TABLE ai_setting (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, provider VARCHAR(20) NOT NULL, address VARCHAR(255) DEFAULT NULL, drawer_model VARCHAR(200) NOT NULL, guesser_model VARCHAR(200) NOT NULL, reasoning_off BOOLEAN DEFAULT 0 NOT NULL, updated_at DATETIME NOT NULL)');
         $connection->insert('ai_setting', ['provider' => $provider, 'address' => $address, 'drawer_model' => 'qwen', 'guesser_model' => 'qwen', 'reasoning_off' => 1, 'updated_at' => '2026-11-19 10:00:00']);
+
+        return $connection;
     }
 
     private function migrate(Connection $connection, bool $up = true): void
@@ -36,52 +39,52 @@ final class ProviderMigrationTest extends KernelTestCase
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    private function row(Connection $connection): array
+    {
+        return $connection->fetchAssociative('SELECT * FROM ai_setting') ?: [];
+    }
+
     public function testOllamaBecomesTheOtherServerAtItsAddress(): void
     {
-        self::bootKernel();
-        $connection = self::getContainer()->get(Connection::class);
-        $this->insert($connection, 'ollama', null);
+        $connection = $this->connection('ollama', null);
 
         $this->migrate($connection);
 
-        $view = self::getContainer()->get(ModelSettings::class)->view();
-        self::assertSame(Provider::Compatible, $view?->provider);
-        self::assertSame('http://host.docker.internal:11434', $view->address, 'The address Ollama had by default is written down');
-        self::assertTrue($view->reasoningOff);
+        $row = $this->row($connection);
+        self::assertSame('openai_compatible', $row['provider']);
+        self::assertSame('http://host.docker.internal:11434', $row['address'], 'The address Ollama had by default is written down');
+        self::assertSame(1, (int) $row['reasoning_off']);
     }
 
     public function testAnOwnServerKeepsItsAddress(): void
     {
-        self::bootKernel();
-        $connection = self::getContainer()->get(Connection::class);
-        $this->insert($connection, 'own_server', 'http://gate:8001');
+        $connection = $this->connection('own_server', 'http://gate:8001');
 
         $this->migrate($connection);
 
-        $view = self::getContainer()->get(ModelSettings::class)->view();
-        self::assertSame(Provider::Compatible, $view?->provider);
-        self::assertSame('http://gate:8001', $view->address);
+        $row = $this->row($connection);
+        self::assertSame('openai_compatible', $row['provider']);
+        self::assertSame('http://gate:8001', $row['address']);
     }
 
     public function testOtherProvidersAreLeftAlone(): void
     {
-        self::bootKernel();
-        $connection = self::getContainer()->get(Connection::class);
-        $this->insert($connection, 'mistral', null);
+        $connection = $this->connection('mistral', null);
 
         $this->migrate($connection);
 
-        self::assertSame(Provider::Mistral, self::getContainer()->get(ModelSettings::class)->view()?->provider);
+        self::assertSame('mistral', $this->row($connection)['provider']);
     }
 
     public function testGoingDownGivesTheOldNameBack(): void
     {
-        self::bootKernel();
-        $connection = self::getContainer()->get(Connection::class);
-        $this->insert($connection, 'openai_compatible', 'http://gate:8001');
+        $connection = $this->connection('openai_compatible', 'http://gate:8001');
 
         $this->migrate($connection, up: false);
 
-        self::assertSame('own_server', $connection->fetchOne('SELECT provider FROM ai_setting'));
+        self::assertSame('own_server', $this->row($connection)['provider']);
     }
 }

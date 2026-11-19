@@ -69,7 +69,7 @@ final class GameController extends AbstractController
     #[Route('/{_locale}/health', name: 'health', requirements: ['_locale' => new EnumRequirement(Language::class)], methods: ['GET'])]
     public function health(Request $request, ModelHealth $health): JsonResponse
     {
-        $report = $health->report($request->query->getBoolean('fresh'));
+        $report = ModelHealth::lines($health->report($request->query->getBoolean('fresh')));
 
         return $this->json(['ok' => [] !== $report && [] === array_filter($report, static fn (array $role): bool => !$role['ok']), 'roles' => $report]);
     }
@@ -82,7 +82,7 @@ final class GameController extends AbstractController
     {
         // No model is chosen yet: nobody could draw or guess, so the player goes and chooses one.
         if (!$this->settings->isStored()) {
-            return $this->redirectToRoute('models_provider');
+            return $this->redirectToRoute('models');
         }
         $game = new Game(Language::from($request->getLocale()), $this->roundCount, $payload->drawnBy ?? $dealer->firstDrawer(), $payload->mode);
         $this->starter->open($game);

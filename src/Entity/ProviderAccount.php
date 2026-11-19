@@ -3,16 +3,17 @@
 namespace App\Entity;
 
 use App\Ai\Provider;
-use App\Repository\AiSettingRepository;
+use App\Repository\ProviderAccountRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * The model of the game, chosen in the game rather than in .env.local: one for the whole
- * installation. The API key is kept sealed (Encryption) and is never read from here but by the
- * code that calls the provider.
+ * A place the game can call: a provider and, for a server of one's own, its address, with the API key
+ * for it. The key is kept sealed (Encryption) and is never read from here but by the code that calls
+ * the provider. An account stays until the player forgets it, even when no role uses it any more.
  */
-#[ORM\Entity(repositoryClass: AiSettingRepository::class)]
-class AiSetting
+#[ORM\Entity(repositoryClass: ProviderAccountRepository::class)]
+#[ORM\UniqueConstraint(name: 'provider_account_place', columns: ['provider', 'address'])]
+class ProviderAccount
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -33,14 +34,9 @@ class AiSetting
     public function __construct(
         #[ORM\Column(length: 20, enumType: Provider::class)]
         private Provider $provider,
+        /** Null when the provider has a fixed address. */
         #[ORM\Column(nullable: true)]
-        private ?string $address,
-        #[ORM\Column(length: 200)]
-        private string $drawerModel,
-        #[ORM\Column(length: 200)]
-        private string $guesserModel,
-        #[ORM\Column(options: ['default' => false])]
-        private bool $reasoningOff,
+        private ?string $address = null,
     ) {
         $this->updatedAt = new \DateTimeImmutable();
     }
@@ -58,21 +54,6 @@ class AiSetting
     public function getAddress(): ?string
     {
         return $this->address;
-    }
-
-    public function getDrawerModel(): string
-    {
-        return $this->drawerModel;
-    }
-
-    public function getGuesserModel(): string
-    {
-        return $this->guesserModel;
-    }
-
-    public function isReasoningOff(): bool
-    {
-        return $this->reasoningOff;
     }
 
     public function hasApiKey(): bool
@@ -104,22 +85,10 @@ class AiSetting
     /**
      * @internal for ModelSettings
      */
-    public function change(Provider $provider, ?string $address, string $drawerModel, string $guesserModel, bool $reasoningOff): void
-    {
-        $this->provider = $provider;
-        $this->address = $address;
-        $this->drawerModel = $drawerModel;
-        $this->guesserModel = $guesserModel;
-        $this->reasoningOff = $reasoningOff;
-        $this->updatedAt = new \DateTimeImmutable();
-    }
-
-    /**
-     * @internal for ModelSettings
-     */
     public function seal(?string $sealedApiKey, ?string $maskedApiKey): void
     {
         $this->sealedApiKey = $sealedApiKey;
         $this->maskedApiKey = $maskedApiKey;
+        $this->updatedAt = new \DateTimeImmutable();
     }
 }

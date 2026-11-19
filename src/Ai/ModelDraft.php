@@ -3,66 +3,75 @@
 namespace App\Ai;
 
 /**
- * What the player has chosen so far on the model screen, kept in the session between the steps. The API key
- * is in it only sealed (Encryption), and the draft is dropped once saved or abandoned.
+ * What the player has chosen so far on the models screen, kept in the session between the questions:
+ * the roles changed and not saved yet, the role whose questions are being answered, and which roles
+ * passed the check. API keys are in it only sealed (Encryption), and the draft is dropped once saved
+ * or abandoned.
  */
 final readonly class ModelDraft
 {
     public function __construct(
-        public Provider $provider,
-        public ?string $address,
-        /** The API key, sealed with Encryption; null when there is none. */
-        #[\SensitiveParameter]
-        public ?string $sealedKey,
-        public string $guesserModel = '',
-        public string $drawerModel = '',
-        public bool $reasoningOff = false,
-        /** The fingerprint of the draft when both roles passed the check; "Save" only saves a draft that was checked. */
-        public ?string $checked = null,
+        /** @var array<string, ?RoleDraft> The roles changed, by role value; null: the role follows its fallback again */
+        public array $roles = [],
+        /** The role whose questions are being answered... */
+        public ?Role $editing = null,
+        /** ...and its answers so far. */
+        public ?RoleDraft $edit = null,
+        /** @var array<string, string> The fingerprint of what passed the check, by role value */
+        public array $checked = [],
     ) {
     }
 
     /**
-     * Changes whenever what the check judged changes.
+     * The role is changed: its questions are over.
      */
-    public function fingerprint(): string
+    public function withRole(Role $role, ?RoleDraft $choice): self
     {
-        return hash('sha256', implode("\0", [$this->provider->value, $this->address, (string) $this->sealedKey, $this->guesserModel, $this->drawerModel, $this->reasoningOff ? '1' : '0']));
-    }
-
-    public function withModels(string $guesserModel, string $drawerModel, bool $reasoningOff): self
-    {
-        return new self($this->provider, $this->address, $this->sealedKey, $guesserModel, $drawerModel, $reasoningOff);
-    }
-
-    public function passedTheCheck(): self
-    {
-        return new self($this->provider, $this->address, $this->sealedKey, $this->guesserModel, $this->drawerModel, $this->reasoningOff, $this->fingerprint());
-    }
-
-    public function isChecked(): bool
-    {
-        return $this->checked === $this->fingerprint();
-    }
-
-    public function hasModels(): bool
-    {
-        return '' !== $this->guesserModel && '' !== $this->drawerModel;
+        return new self([...$this->roles, $role->value => $choice], null, null, $this->checked);
     }
 
     /**
-     * What each role calls, for the check: the same provider and key, the model of the role.
-     *
-     * @return array{RoleSetup, RoleSetup} The drawer, then the guesser
+     * The questions of a role begin, or go on with other answers.
      */
-    public function setups(#[\SensitiveParameter] ?string $apiKey): array
+    public function withEdit(Role $role, RoleDraft $edit): self
     {
-        $reasoningOff = $this->reasoningOff && $this->provider->hasReasoningSwitch();
+        return new self($this->roles, $role, $edit, $this->checked);
+    }
 
-        return [
-            new RoleSetup($this->provider, $this->address, $apiKey, $this->drawerModel, $reasoningOff),
-            new RoleSetup($this->provider, $this->address, $apiKey, $this->guesserModel, $reasoningOff),
-        ];
+    /**
+     * @param array<string, string> $checked
+     */
+    public function withChecked(array $checked): self
+    {
+        return new self($this->roles, $this->editing, $this->edit, $checked);
+    }
+
+    /**
+     * The key typed for a place, still sealed: in the answers so far, or in a role changed.
+     */
+    public function sealedKeyAt(Provider $provider, ?string $address): ?string
+    {
+        foreach ([$this->edit, ...array_values($this->roles)] as $choice) {
+            if (null !== $choice?->sealedKey && $choice->isAt($provider, $address)) {
+                return $choice->sealedKey;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Whether a role changed here is at the place: its questions about the place are answered.
+     */
+    public function knowsPlace(Provider $provider, ?string $address): bool
+    {
+        foreach ($this->roles as $choice) {
+            if (null !== $choice && $choice->isAt($provider, $address)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -71,39 +80,29 @@ final readonly class ModelDraft
     public function toArray(): array
     {
         return [
-            'provider' => $this->provider->value,
-            'address' => $this->address,
-            'key' => $this->sealedKey,
-            'guesser' => $this->guesserModel,
-            'drawer' => $this->drawerModel,
-            'reasoning_off' => $this->reasoningOff,
+            'roles' => array_map(static fn (?RoleDraft $choice): ?array => $choice?->toArray(), $this->roles),
+            'editing' => $this->editing?->value,
+            'edit' => $this->edit?->toArray(),
             'checked' => $this->checked,
         ];
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param array<mixed> $data
      */
-    public static function fromArray(array $data): ?self
+    public static function fromArray(array $data): self
     {
-        $provider = \is_string($data['provider'] ?? null) ? Provider::tryFrom($data['provider']) : null;
-        if (null === $provider) {
-            return null;
+        $roles = [];
+        foreach (\is_array($data['roles'] ?? null) ? $data['roles'] : [] as $value => $choice) {
+            $role = \is_string($value) ? Role::tryFrom($value) : null;
+            if (null !== $role && (null === $choice || \is_array($choice))) {
+                $roles[$role->value] = null === $choice ? null : RoleDraft::fromArray($choice);
+            }
         }
+        $editing = \is_string($data['editing'] ?? null) ? Role::tryFrom($data['editing']) : null;
+        $edit = \is_array($data['edit'] ?? null) ? RoleDraft::fromArray($data['edit']) : null;
+        $checked = array_filter(\is_array($data['checked'] ?? null) ? $data['checked'] : [], static fn (mixed $fingerprint, mixed $role): bool => \is_string($fingerprint) && \is_string($role), \ARRAY_FILTER_USE_BOTH);
 
-        return new self(
-            $provider,
-            \is_string($data['address'] ?? null) ? $data['address'] : null,
-            \is_string($data['key'] ?? null) ? $data['key'] : null,
-            \is_string($data['guesser'] ?? null) ? $data['guesser'] : '',
-            \is_string($data['drawer'] ?? null) ? $data['drawer'] : '',
-            true === ($data['reasoning_off'] ?? false),
-            \is_string($data['checked'] ?? null) ? $data['checked'] : null,
-        );
-    }
-
-    public function __debugInfo(): array
-    {
-        return ['provider' => $this->provider, 'address' => $this->address, 'sealedKey' => null === $this->sealedKey ? null : '…', 'guesserModel' => $this->guesserModel, 'drawerModel' => $this->drawerModel];
+        return new self($roles, null === $edit ? null : $editing, null === $editing ? null : $edit, $checked);
     }
 }

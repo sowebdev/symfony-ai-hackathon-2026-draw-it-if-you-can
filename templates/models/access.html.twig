@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ ('provider.' ~ provider.value)|trans }} · Draw It If You Can{% endblock %}
+
+{# Question 2 of a role: what its place is still missing. The API key is a password field: it is never sent back to the page. #}
+{% block body %}
+    <main class="models">
+        <a class="models-home" href="{{ path('models_provider', {role: role.value}) }}">← {{ 'action.back'|trans }}</a>
+        <ul class="role-lines">
+            {% for other in others %}
+                {{ include('models/_line.html.twig', {role: other.role, view: other.view}) }}
+            {% endfor %}
+        </ul>
+        <h1>{{ ('provider.' ~ provider.value)|trans }}</h1>
+
+        {{ form_start(form, {attr: {class: 'models-form', novalidate: 'novalidate'}}) }}
+            {% if form.address is defined %}
+                <div class="field field-address">
+                    {{ form_label(form.address) }}
+                    {{ form_widget(form.address) }}
+                    <small class="hint">{{ 'models.address_hint'|trans }}</small>
+                    {{ form_errors(form.address) }}
+                </div>
+            {% endif %}
+
+            {% set keyField %}
+                <div class="field">
+                    {{ form_label(form.apiKey) }}
+                    {{ form_widget(form.apiKey) }}
+                    {% if stored and stored.hasApiKey %}
+                        <small class="hint">{{ 'models.key_saved'|trans({'%end%': stored.maskedApiKey}) }}</small>
+                    {% elseif not provider.needsKey %}
+                        <small class="hint">{{ 'models.key_hint'|trans }}</small>
+                    {% endif %}
+                    {{ form_errors(form.apiKey) }}
+                </div>
+            {% endset %}
+            {% if provider.needsKey %}
+                {{ keyField }}
+            {% else %}
+                {# A server often needs none: the key is folded away. #}
+                <details class="long-list"{% if form.apiKey.vars.errors|length %} open{% endif %}>
+                    <summary>{{ 'models.need_key'|trans }}</summary>
+                    {{ keyField }}
+                </details>
+            {% endif %}
+
+            <div class="models-actions">
+                {{ form_widget(form.continue) }}
+            </div>
+            {{ form_rest(form) }}
+        {{ form_end(form, {render_rest: false}) }}
+    </main>
+{% endblock %}

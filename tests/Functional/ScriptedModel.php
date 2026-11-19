@@ -6,6 +6,7 @@ use App\Ai\Drawer;
 use App\Ai\ModelSettings;
 use App\Ai\PlatformFactory;
 use App\Ai\Provider;
+use App\Ai\Role;
 use App\Game\Dealer;
 use Random\Engine;
 use Random\Randomizer;
@@ -59,7 +60,9 @@ trait ScriptedModel
         $client->getContainer()->set(PlatformFactory::class, new ScriptedPlatforms($platform));
         // The stored setting is the only source of the model: one is chosen, the platform behind it is the script.
         if ($chosen) {
-            $client->getContainer()->get(ModelSettings::class)->save(Provider::Compatible, 'http://scripted:8000', 'scripted', 'scripted', true);
+            $settings = $client->getContainer()->get(ModelSettings::class);
+            $settings->choose(Role::Drawer, Provider::Compatible, 'http://scripted:8000', 'scripted', true);
+            $settings->choose(Role::Guesser, Provider::Compatible, 'http://scripted:8000', 'scripted', true);
         }
         $client->getContainer()->set(Drawer::class, $drawer = new ScriptedDrawer($strokes, $drawingFailure, $details));
         $client->getContainer()->set(Dealer::class, new Dealer(new Randomizer(new class implements Engine {

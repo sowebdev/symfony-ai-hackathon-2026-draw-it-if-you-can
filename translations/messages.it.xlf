@@ -330,12 +330,12 @@
             </trans-unit>
             <trans-unit id="role.drawer" resname="role.drawer">
                 <source>role.drawer</source>
-                <target>Chi disegna</target>
+                <target>Disegna</target>
                 <note>Name of the role of the model that draws, on the home page</note>
             </trans-unit>
             <trans-unit id="role.guesser" resname="role.guesser">
                 <source>role.guesser</source>
-                <target>Chi indovina</target>
+                <target>Indovina</target>
                 <note>Name of the role of the model that picks the word and guesses, on the home page</note>
             </trans-unit>
             <trans-unit id="status.checking_models" resname="status.checking_models">
@@ -613,55 +613,10 @@
                 <target>Cambia modello</target>
                 <note>Permanent link at the bottom of the home page</note>
             </trans-unit>
-            <trans-unit id="action.list_models" resname="action.list_models">
-                <source>action.list_models</source>
-                <target>Elenca i modelli</target>
-                <note>Button of step 1 of the model screen</note>
-            </trans-unit>
-            <trans-unit id="action.check_models" resname="action.check_models">
-                <source>action.check_models</source>
-                <target>Verifica i modelli</target>
-                <note>Button of step 2 of the model screen</note>
-            </trans-unit>
-            <trans-unit id="action.save_and_play" resname="action.save_and_play">
-                <source>action.save_and_play</source>
-                <target>Salva e gioca</target>
-                <note>Button of step 3 of the model screen, shown when both models passed</note>
-            </trans-unit>
             <trans-unit id="models.title" resname="models.title">
                 <source>models.title</source>
                 <target>Scegliere il modello</target>
                 <note>Title of the model screen, step 1</note>
-            </trans-unit>
-            <trans-unit id="models.steps" resname="models.steps">
-                <source>models.steps</source>
-                <target>Passaggi</target>
-                <note>Name of the list of steps of the model screen, for screen readers</note>
-            </trans-unit>
-            <trans-unit id="models.step_provider" resname="models.step_provider">
-                <source>models.step_provider</source>
-                <target>Fornitore</target>
-                <note>Step 1 of the model screen</note>
-            </trans-unit>
-            <trans-unit id="models.step_models" resname="models.step_models">
-                <source>models.step_models</source>
-                <target>Modelli</target>
-                <note>Step 2 of the model screen</note>
-            </trans-unit>
-            <trans-unit id="models.step_check" resname="models.step_check">
-                <source>models.step_check</source>
-                <target>Verifica</target>
-                <note>Step 3 of the model screen</note>
-            </trans-unit>
-            <trans-unit id="models.provider_intro" resname="models.provider_intro">
-                <source>models.provider_intro</source>
-                <target>L’IA disegna e indovina con un modello. Scegli chi lo esegue e inserisci la tua chiave API: il gioco elenca i modelli che possono giocare.</target>
-                <note>Under the title of step 1</note>
-            </trans-unit>
-            <trans-unit id="models.provider" resname="models.provider">
-                <source>models.provider</source>
-                <target>Fornitore</target>
-                <note>Legend of the provider cards</note>
             </trans-unit>
             <trans-unit id="models.api_key" resname="models.api_key">
                 <source>models.api_key</source>
@@ -675,12 +630,12 @@
             </trans-unit>
             <trans-unit id="models.key_saved" resname="models.key_saved">
                 <source>models.key_saved</source>
-                <target>Una chiave per %provider% è salvata (%end%). Lascia vuoto per tenerla.</target>
+                <target>C’è una chiave salvata (%end%). Lascia vuoto per tenerla.</target>
                 <note>Under the API key field, when a key is saved; %provider% is the provider of the saved setting, %end% the end of its key (…3f9a)</note>
             </trans-unit>
             <trans-unit id="models.address" resname="models.address">
                 <source>models.address</source>
-                <target>Indirizzo, per un altro servizio compatibile con OpenAI</target>
+                <target>Il suo indirizzo</target>
                 <note>Label of the address field</note>
             </trans-unit>
             <trans-unit id="models.address_hint" resname="models.address_hint">
@@ -693,19 +648,9 @@
                 <target>Anthropic</target>
                 <note>Card of step 1</note>
             </trans-unit>
-            <trans-unit id="provider.anthropic_hint" resname="provider.anthropic_hint">
-                <source>provider.anthropic_hint</source>
-                <target>I modelli Claude, con la tua chiave API Anthropic.</target>
-                <note>Card of step 1</note>
-            </trans-unit>
             <trans-unit id="provider.openai" resname="provider.openai">
                 <source>provider.openai</source>
                 <target>OpenAI</target>
-                <note>Card of step 1</note>
-            </trans-unit>
-            <trans-unit id="provider.openai_hint" resname="provider.openai_hint">
-                <source>provider.openai_hint</source>
-                <target>I modelli GPT, con la tua chiave API OpenAI.</target>
                 <note>Card of step 1</note>
             </trans-unit>
             <trans-unit id="provider.mistral" resname="provider.mistral">
@@ -713,20 +658,10 @@
                 <target>Mistral</target>
                 <note>Card of step 1</note>
             </trans-unit>
-            <trans-unit id="provider.mistral_hint" resname="provider.mistral_hint">
-                <source>provider.mistral_hint</source>
-                <target>I modelli Mistral, con la tua chiave API Mistral.</target>
-                <note>Card of step 1</note>
-            </trans-unit>
             <trans-unit id="provider.openai_compatible" resname="provider.openai_compatible">
                 <source>provider.openai_compatible</source>
-                <target>Un altro servizio compatibile con OpenAI (Ollama, LM Studio, OpenRouter…)</target>
+                <target>Il tuo server, o un altro servizio</target>
                 <note>Card of step 1: a service that speaks the API of OpenAI, local or on the internet</note>
-            </trans-unit>
-            <trans-unit id="provider.openai_compatible_hint" resname="provider.openai_compatible_hint">
-                <source>provider.openai_compatible_hint</source>
-                <target>Sulla tua macchina (Ollama, LM Studio, llama.cpp) o su internet (OpenRouter, Groq, Hugging Face): un indirizzo e, se serve, una chiave.</target>
-                <note>Card of step 1</note>
             </trans-unit>
             <trans-unit id="error.choose_provider" resname="error.choose_provider">
                 <source>error.choose_provider</source>
@@ -768,16 +703,6 @@
                 <target>Questo modello non è nell’elenco: digita invece il suo nome.</target>
                 <note>Step 2 of the model screen</note>
             </trans-unit>
-            <trans-unit id="models.choose_title" resname="models.choose_title">
-                <source>models.choose_title</source>
-                <target>Scegliere i modelli</target>
-                <note>Title of step 2</note>
-            </trans-unit>
-            <trans-unit id="models.using" resname="models.using">
-                <source>models.using</source>
-                <target>Fornitore: %provider%</target>
-                <note>Step 2: %provider% is the provider chosen in step 1</note>
-            </trans-unit>
             <trans-unit id="models.list_unreadable" resname="models.list_unreadable">
                 <source>models.list_unreadable</source>
                 <target>Non è possibile leggere l’elenco dei modelli.</target>
@@ -797,11 +722,6 @@
                 <source>models.model_name</source>
                 <target>Nome del modello</target>
                 <note>Label of the field where a model name is typed, when there is no list</note>
-            </trans-unit>
-            <trans-unit id="models.needs_guesser" resname="models.needs_guesser">
-                <source>models.needs_guesser</source>
-                <target>Indovina il tuo disegno.</target>
-                <note>Under the legend of the guesser, step 2</note>
             </trans-unit>
             <trans-unit id="models.pick_from" resname="models.pick_from">
                 <source>models.pick_from</source>
@@ -827,16 +747,6 @@
                 <source>models.reasoning_hint</source>
                 <target>Attivo all’inizio per un indirizzo della tua macchina o rete, spento altrimenti: un’API cloud può rifiutare questa opzione. Se la verifica fallisce, dice in che senso cambiarlo.</target>
                 <note>Under the switch of step 2</note>
-            </trans-unit>
-            <trans-unit id="models.check_title" resname="models.check_title">
-                <source>models.check_title</source>
-                <target>Verifica dei modelli</target>
-                <note>Title of step 3</note>
-            </trans-unit>
-            <trans-unit id="models.nothing_saved" resname="models.nothing_saved">
-                <source>models.nothing_saved</source>
-                <target>Non è stato salvato nulla. Torna indietro per cambiare modello, o verifica di nuovo.</target>
-                <note>Step 3, when a check failed</note>
             </trans-unit>
             <trans-unit id="check.slow" resname="check.slow">
                 <source>check.slow</source>
@@ -963,21 +873,6 @@
                 <target>%provider% non ha risposto con un elenco di modelli.</target>
                 <note>The answer is not a list of models</note>
             </trans-unit>
-            <trans-unit id="models.the_model" resname="models.the_model">
-                <source>models.the_model</source>
-                <target>Il modello</target>
-                <note>Step 2, legend of the one choice</note>
-            </trans-unit>
-            <trans-unit id="models.the_model_hint" resname="models.the_model_hint">
-                <source>models.the_model_hint</source>
-                <target>Disegna, e indovina anche il tuo disegno.</target>
-                <note>Step 2, under the legend of the model</note>
-            </trans-unit>
-            <trans-unit id="models.other_guesser" resname="models.other_guesser">
-                <source>models.other_guesser</source>
-                <target>Un altro modello per indovinare</target>
-                <note>Step 2, checkbox that shows a second choice</note>
-            </trans-unit>
             <trans-unit id="models.cheapest" resname="models.cheapest">
                 <source>models.cheapest</source>
                 <target>il più economico</target>
@@ -988,35 +883,155 @@
                 <target>Vedi tutti i modelli</target>
                 <note>Step 2, summary of the folded list</note>
             </trans-unit>
-            <trans-unit id="models.ok_guesser" resname="models.ok_guesser">
-                <source>models.ok_guesser</source>
-                <target>Indovina</target>
-                <note>Step 3, the guesser passed its check</note>
-            </trans-unit>
-            <trans-unit id="models.ok_drawer" resname="models.ok_drawer">
-                <source>models.ok_drawer</source>
-                <target>Disegna</target>
-                <note>Step 3, the drawer passed its check</note>
-            </trans-unit>
             <trans-unit id="models.unknown_capabilities" resname="models.unknown_capabilities">
                 <source>models.unknown_capabilities</source>
                 <target>capacità sconosciute</target>
                 <note>Step 2, mark of a model neither the list nor the catalog describes</note>
             </trans-unit>
-            <trans-unit id="models.checked_at" resname="models.checked_at">
-                <source>models.checked_at</source>
-                <target>presso %provider%</target>
-                <note>Step 3, where a cloud model runs</note>
-            </trans-unit>
-            <trans-unit id="models.checked_own" resname="models.checked_own">
-                <source>models.checked_own</source>
-                <target>sul tuo server</target>
-                <note>Step 3, where a model of an OpenAI-compatible service runs</note>
-            </trans-unit>
             <trans-unit id="label.thousands_separator" resname="label.thousands_separator">
                 <source>label.thousands_separator</source>
                 <target>.</target>
                 <note>Separator of the thousands in the scores of the end of a duel</note>
+            </trans-unit>
+            <trans-unit id="action.continue" resname="action.continue">
+                <source>action.continue</source>
+                <target>Continua</target>
+                <note>Button of each question of the model screen</note>
+            </trans-unit>
+            <trans-unit id="action.check_and_play" resname="action.check_and_play">
+                <source>action.check_and_play</source>
+                <target>Verifica e gioca</target>
+                <note>Button that checks the models of the roles, then saves them and goes home</note>
+            </trans-unit>
+            <trans-unit id="action.change" resname="action.change">
+                <source>action.change</source>
+                <target>cambia</target>
+                <note>Link of a role line of the model screen, leads to its questions</note>
+            </trans-unit>
+            <trans-unit id="action.forget" resname="action.forget">
+                <source>action.forget</source>
+                <target>Dimentica</target>
+                <note>Button that forgets a stored API key</note>
+            </trans-unit>
+            <trans-unit id="role.both" resname="role.both">
+                <source>role.both</source>
+                <target>Disegna e indovina</target>
+                <note>The home page line when the guesser uses the model of the drawer</note>
+            </trans-unit>
+            <trans-unit id="label.model_at_provider" resname="label.model_at_provider">
+                <source>label.model_at_provider</source>
+                <target>%model% presso %provider%</target>
+                <note>A model and the provider where it answers (home page, console)</note>
+            </trans-unit>
+            <trans-unit id="models.summary_title" resname="models.summary_title">
+                <source>models.summary_title</source>
+                <target>Le IA del gioco</target>
+                <note>Title of the model screen, the AI of each role</note>
+            </trans-unit>
+            <trans-unit id="models.follows_guesser" resname="models.follows_guesser">
+                <source>models.follows_guesser</source>
+                <target>Indovina anche il tuo disegno.</target>
+                <note>Muted line when the guesser has no model of its own</note>
+            </trans-unit>
+            <trans-unit id="models.other_guesser_q" resname="models.other_guesser_q">
+                <source>models.other_guesser_q</source>
+                <target>Un'altra IA per indovinare?</target>
+                <note>Link that starts the questions of the guesser</note>
+            </trans-unit>
+            <trans-unit id="models.saved_keys" resname="models.saved_keys">
+                <source>models.saved_keys</source>
+                <target>Chiavi salvate (%count%)</target>
+                <note>Folded list of the stored keys</note>
+            </trans-unit>
+            <trans-unit id="models.used_by_drawer" resname="models.used_by_drawer">
+                <source>models.used_by_drawer</source>
+                <target>Disegna con essa</target>
+                <note>Why a stored key cannot be forgotten</note>
+            </trans-unit>
+            <trans-unit id="models.used_by_guesser" resname="models.used_by_guesser">
+                <source>models.used_by_guesser</source>
+                <target>Indovina con essa</target>
+                <note>Why a stored key cannot be forgotten</note>
+            </trans-unit>
+            <trans-unit id="models.question_provider_drawer" resname="models.question_provider_drawer">
+                <source>models.question_provider_drawer</source>
+                <target>Quale IA disegna?</target>
+                <note>Question 1 of the drawer</note>
+            </trans-unit>
+            <trans-unit id="models.question_provider_guesser" resname="models.question_provider_guesser">
+                <source>models.question_provider_guesser</source>
+                <target>Quale IA indovina il tuo disegno?</target>
+                <note>Question 1 of the guesser</note>
+            </trans-unit>
+            <trans-unit id="models.question_model_drawer" resname="models.question_model_drawer">
+                <source>models.question_model_drawer</source>
+                <target>Quale modello disegna?</target>
+                <note>Question 3 of the drawer</note>
+            </trans-unit>
+            <trans-unit id="models.question_model_guesser" resname="models.question_model_guesser">
+                <source>models.question_model_guesser</source>
+                <target>Quale modello indovina?</target>
+                <note>Question 3 of the guesser</note>
+            </trans-unit>
+            <trans-unit id="models.key_saved_tag" resname="models.key_saved_tag">
+                <source>models.key_saved_tag</source>
+                <target>chiave salvata</target>
+                <note>Tag of a provider whose key is stored</note>
+            </trans-unit>
+            <trans-unit id="models.same_as_drawer" resname="models.same_as_drawer">
+                <source>models.same_as_drawer</source>
+                <target>La stessa IA di quella che disegna</target>
+                <note>Link of the guesser’s questions: it uses the model of the drawer</note>
+            </trans-unit>
+            <trans-unit id="models.your_key" resname="models.your_key">
+                <source>models.your_key</source>
+                <target>La tua chiave %provider%</target>
+                <note>Label of the API key field</note>
+            </trans-unit>
+            <trans-unit id="models.need_key" resname="models.need_key">
+                <source>models.need_key</source>
+                <target>Serve una chiave?</target>
+                <note>Folded key field of a server</note>
+            </trans-unit>
+            <trans-unit id="models.change_key" resname="models.change_key">
+                <source>models.change_key</source>
+                <target>Cambia la chiave</target>
+                <note>Label of the key field when the place is stored, and link to it</note>
+            </trans-unit>
+            <trans-unit id="models.advanced" resname="models.advanced">
+                <source>models.advanced</source>
+                <target>Impostazioni avanzate</target>
+                <note>Folded settings of a server</note>
+            </trans-unit>
+            <trans-unit id="models.at_provider" resname="models.at_provider">
+                <source>models.at_provider</source>
+                <target>presso %provider%</target>
+                <note>Where a model answers: a provider with a fixed address</note>
+            </trans-unit>
+            <trans-unit id="models.at_own" resname="models.at_own">
+                <source>models.at_own</source>
+                <target>sul tuo server</target>
+                <note>Where a model answers: a server of one’s own</note>
+            </trans-unit>
+            <trans-unit id="models.passed" resname="models.passed">
+                <source>models.passed</source>
+                <target>Superato</target>
+                <note>Mark of a role that passed the check, for screen readers</note>
+            </trans-unit>
+            <trans-unit id="models.failed" resname="models.failed">
+                <source>models.failed</source>
+                <target>Fallito</target>
+                <note>Mark of a role that failed the check, for screen readers</note>
+            </trans-unit>
+            <trans-unit id="models.forgotten" resname="models.forgotten">
+                <source>models.forgotten</source>
+                <target>La chiave è dimenticata.</target>
+                <note>Flash after a stored key is forgotten</note>
+            </trans-unit>
+            <trans-unit id="models.forget_refused" resname="models.forget_refused">
+                <source>models.forget_refused</source>
+                <target>Una chiave usata da un’IA non può essere dimenticata.</target>
+                <note>Flash when a stored key is used by a role</note>
             </trans-unit>
         </body>
     </file>

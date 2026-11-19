@@ -1,21 +1,31 @@
 # The models
 
-The AI has two roles, one provider for both, and by default one model for both (you may choose another one to guess):
+The AI has two roles, and each can use any provider, for instance the drawer on Anthropic and the guesser on a server of your own:
 
 - **the drawer** draws while you guess, and looks at its drawing to add the details that are missing;
-- **the guesser** guesses your drawing (the word to draw is drawn at random from a list the model gives).
+- **the guesser** guesses your drawing (the word to draw is drawn at random from a list the model gives). Until you give it a model of its own, it uses the one of the drawer.
 
 Both models must read images, and the drawer must also call tools.
 
-## Choosing the model on the screen
+## Choosing the models on the screen
 
-Open the game and follow the page (the home page invites you there while no model is chosen, its health card leads there when a model does not answer, and "Change the model" at the bottom of the home page always does):
+Open the game and follow the page (the home page invites you there while no model is chosen, its health card leads there when a model does not answer, and "Change the model" at the bottom of the home page always does). The screen asks **one question at a time**, with no JavaScript: each "Continue" is a round trip, and what you answered so far lives in your session.
 
-1. **Provider.** Four cards: Anthropic, OpenAI, Mistral, or another OpenAI-compatible service. Paste your API key (a password field: empty means "keep the saved key", of which only the end is shown, `…3f9a`; a saved key is never sent to another address than the one it was saved for). For another service, the address too: the field shows only when that card is checked, and starts empty. The game runs in Docker, so your machine is `host.docker.internal` there, not `localhost`; the usual ports are Ollama 11434, LM Studio 1234, llama.cpp 8080, among others (`http://host.docker.internal:11434`). Leave the key empty if your server asks for none. Then "List the models".
-2. **The model.** One choice, used for both roles: the model that draws can always guess too. The list shows only what can play, as one card per family (its most recent version), from the cheapest family; the cheapest is preselected and marked « the cheapest » (`src/Ai/ModelFamilies.php`: no list of models carries prices, so the order of the families is kept by hand, to be reviewed when a provider adds one). Older versions and unknown families are under "See all models". A field takes any model name: the typed name wins. The box "Another model to guess" shows a second choice, in CSS alone; a saved setting whose two models differ opens with it checked. The models saved already, if any, stay selected: the preselection is only for a first choice. For a server of your own the capabilities are unknown and the screen says so once.
-3. **Check.** Each role is tried on a tiny task whose answer is known (the guesser names a circle drawn in an image; the drawer draws one stroke with its tool); the card shows the image the guesser was sent and its answer, or the stroke the drawer drew, and where the model ran (at the provider, or on your server). The loading screen shows while the models are tried. Only when both pass does "Save and play" appear, which saves the setting and goes home. On a failure nothing is saved and your choices stay filled.
+**The summary** is the entry once a drawer is stored: « Les IA du jeu », one line per role that has a model of its own (« Il dessine · `claude-haiku-5-5` chez Anthropic · changer », « Il devine · `qwen3.8-27b-vision` sur ton serveur · changer »). A guesser that follows the drawer is a muted line, « Il devine aussi ton dessin. Une autre IA pour deviner ? », the question being the link that starts the guesser's questions. "Check and play" tries the models; the stored keys are folded at the bottom.
 
-Between the steps the API key is kept in your session, sealed with `APP_ENCRYPTION_KEY`, and never goes back to the browser; it is dropped once saved, or when you leave for the home page. The screen has no login: the game listens on 127.0.0.1 only and must not be exposed.
+**The questions of a role** ("change", or the first visit, which starts on the drawer):
+
+1. **Which AI draws?** (or guesses): four choices, nothing else: Anthropic, OpenAI, Mistral, "your server, or another service". A provider whose key is stored is tagged « clé enregistrée ». In the guesser's questions, "the same AI as the one that draws" gives the guesser no model of its own again.
+2. **What is missing**: your key for a provider whose key is not stored; for a server, its address, with the key folded behind "Does it need a key?" (leave it empty if your server asks for none). A stored place goes straight to the next question; its key is changed from here too ("Change the key"). The key is a password field: empty means "keep the stored key", of which only the end is shown (`…3f9a`), and a stored key is never sent to another address than the one it was stored for. The game runs in Docker, so your machine is `host.docker.internal` there, not `localhost`; the usual ports are Ollama 11434, LM Studio 1234, llama.cpp 8080, among others (`http://host.docker.internal:11434`); the address starts empty, the game names no default server.
+3. **Which model?** The list shows only what can play, as one card per family (its most recent version), from the cheapest family; the cheapest is preselected and marked « le moins cher » (`src/Ai/ModelFamilies.php`: no list of models carries prices, so the order of the families is kept by hand, to be reviewed when a provider adds one). A model stored for the role at this place stays selected. Older versions and unknown families are under "See all models". A field takes any model name: the typed name wins. For a server, the capabilities are unknown (the screen says so once), and the reasoning switch is folded behind "Advanced settings". In the drawer's questions, while the guesser follows the drawer, a muted line offers "Another AI to guess?": it saves this model and goes on with the guesser's questions.
+
+While the questions of a role run, the other role already chosen is shown on top as one summary line with "change".
+
+**The check** is on the spot, no separate page. "Check and play" tries each role (the guesser names a circle drawn in an image; the drawer also draws one stroke with its tool; a guesser that follows the drawer is not tried twice) and, when all pass, saves the setting and goes home. On a failure the summary shows ✓ or ✗ on each line, the cause and the advice under the line that failed, "change" and "Try again"; the role that passed stays visible and is not tried again. Nothing is saved until every role passes. The loading screen shows during the wait.
+
+**Stored keys.** Folded at the bottom of the summary, "Saved keys (n)" lists the accounts (provider and `…3f9a`, or the address) with "Forget". An account stays when no role uses it any more, so that you can switch back without typing the key again; one that a role uses cannot be forgotten (the button is disabled, with « Il dessine avec »).
+
+Between the questions the API keys are kept in your session, sealed with `APP_ENCRYPTION_KEY`, and never go back to the browser; the draft is dropped once saved, or when you leave for the home page. The screen has no login: the game listens on 127.0.0.1 only and must not be exposed.
 
 ## Providers
 
@@ -30,7 +40,7 @@ Ollama is not a provider of its own: the game does not use its bridge, which sen
 
 The limit of an answer is sent as `max_output_tokens`, which each bridge turns into the name its API wants (`max_tokens` for Generic, Anthropic and Mistral). A model the catalog does not know yet still works: the game does not trust a catalog, the check tries the model.
 
-**Where the model is chosen.** Only here: the setting stored in the database is the only source, there is no environment variable and no command to set it up. Until one is stored the game has no model: the home page says so, "Start the game" leads to the models screen, and `make check` says no model is chosen yet and gives the address of the page. The stored setting keeps the API key encrypted with `APP_ENCRYPTION_KEY` (32 random bytes in base64): `make install` writes one into `.env.local` (`bin/console app:encryption-key`) if there is none and never replaces it. Without it, a setting with an API key cannot be saved; lose it and the stored key cannot be read again, so save the setting again. See [ADR 4](adr/0004-platforms-built-at-runtime-from-a-stored-setting.md) for what this protects and what it does not. Coming from 0.2: choose the model again on the page; the `AI_*` lines of `.env.local` can be deleted.
+**Where the models are chosen.** Only here: the accounts and the role models stored in the database are the only source, there is no environment variable and no command to set it up. Until a drawer is stored the game has no model: the home page says so, "Start the game" leads to the models screen, and `make check` says no model is chosen yet and gives the address of the page. The stored accounts keep their API key encrypted with `APP_ENCRYPTION_KEY` (32 random bytes in base64): `make install` writes one into `.env.local` (`bin/console app:encryption-key`) if there is none and never replaces it. Without it, a setting with an API key cannot be saved; lose it and the stored key cannot be read again, so enter the key again. See [ADR 4](adr/0004-platforms-built-at-runtime-from-a-stored-setting.md) for what this protects and what it does not. Coming from 0.2: choose the model again on the page; the `AI_*` lines of `.env.local` can be deleted.
 
 **The lists of models** are the provider's `GET /v1/models`, kept an hour for Anthropic, OpenAI and Mistral, 30 seconds for another service. They show only the models that can play, for each role:
 
@@ -38,16 +48,16 @@ The limit of an answer is sent as `max_output_tokens`, which each bridge turns i
 - Mistral: its own answer carries capabilities (vision, function calling) and decides when present; else the catalog of the bridge.
 - Another service: no catalog. When its answer carries capabilities in a known shape (OpenRouter and the Hugging Face router: `architecture.input_modalities`, `output_modalities`, `supported_parameters`) the list is filtered on them; otherwise it is shown as it is, sorted by name, with "capabilities unknown, the check will tell". Past 50 models the list is folded under the text field.
 
-The screen says only what is known now: "capabilities unknown" for a server whose list does not say, and "checked" after the check passed, with where the model ran. New models come out every month: nothing is "tested" or "suggested" by the game. The table "What I tried" below is a dated record of what I tried, not a promise.
+The screen says only what is known now: "capabilities unknown" for a server whose list does not say. New models come out every month: nothing is "tested" or "suggested" by the game. The table "What I tried" below is a dated record of what I tried, not a promise.
 
-`make check` tries the model of each role on a tiny task whose answer is known (each must name a circle drawn in an image; the drawer must also draw one stroke with its tool) and tells what is wrong.
+`make check` tries the model of each role on a tiny task whose answer is known (each must name a circle drawn in an image; the drawer must also draw one stroke with its tool), says where each role answers and which role follows another, and tells what is wrong.
 
 ## Reasoning
 
 The game needs short answers every few seconds, and the providers disagree on how to turn reasoning off: a wrong option is a 400.
 
 - **Anthropic, OpenAI, Mistral**: the game decides from the catalog and you see no switch. A model the catalog marks as thinking gets the least effort its API takes (OpenAI: `low`; Anthropic and Mistral: nothing, which is the right thing for the first and what is safe for the second); one that does not think, or a model you typed by name, gets no reasoning option at all.
-- **Another OpenAI-compatible service**: the game cannot know, so the screen shows a switch, "Turn reasoning off, for a local model that thinks for too long". It starts on when the address is local (`localhost`, `127.0.0.1`, `host.docker.internal`, a private network or a name without a dot) and off otherwise, since a cloud API may refuse `reasoning_effort: none` or `chat_template_kwargs`.
+- **Another OpenAI-compatible service**: the game cannot know, so the screen shows a switch, "Turn reasoning off, for a local model that thinks for too long", under "Advanced settings". It belongs to the role: it is a property of the model chosen. It starts on when the address is local (`localhost`, `127.0.0.1`, `host.docker.internal`, a private network or a name without a dot) and off otherwise, since a cloud API may refuse `reasoning_effort: none` or `chat_template_kwargs`.
 - **When the check fails** because of it (a refused option, a block answer, a very slow answer, no usable answer), the message says which way to flip the switch.
 - **A model that always reasons** may answer in blocks: the bridges of Mistral read them; the Generic bridge may not (seen with `mistral-large-4` before the bridge of Mistral was used): choose another model, or turn reasoning off.
 

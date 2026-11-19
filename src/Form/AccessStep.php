@@ -7,13 +7,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
- * Step 1 of the model screen: who answers, with which key, at which address.
+ * The second question of a role: what the place is still missing, its key and, for a server of one's
+ * own, its address.
  */
-final class ProviderStep
+final class AccessStep
 {
     public function __construct(
-        #[Assert\NotNull(message: 'error.choose_provider')]
-        public ?Provider $provider = null,
+        public Provider $provider,
         public ?string $apiKey = null,
         #[Assert\Length(max: 255, maxMessage: 'error.too_long')]
         public ?string $address = null,
@@ -23,7 +23,7 @@ final class ProviderStep
     #[Assert\Callback]
     public function validate(ExecutionContextInterface $context): void
     {
-        if (null === $this->provider || !$this->provider->hasAddress()) {
+        if (!$this->provider->hasAddress()) {
             return;
         }
         $address = trim((string) $this->address);

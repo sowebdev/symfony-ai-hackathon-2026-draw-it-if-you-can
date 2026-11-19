@@ -10,7 +10,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 /**
  * Whether each role can play, for the home page: the checks of make check, kept a few minutes so
  * that the home page does not call the models at each visit. A change of model or endpoint is a
- * new check.
+ * new check. A role that follows another is not checked twice.
  */
 final readonly class ModelHealth
 {
@@ -33,7 +33,10 @@ final readonly class ModelHealth
     }
 
     /**
-     * @return list<array{role: string, model: string, ok: bool, problem: ?string}> Empty when no model is chosen yet
+     * One entry per role, in the order of the roles. A role that follows another has no check of its
+     * own: it calls the same model, so it has the result of the role it follows.
+     *
+     * @return list<array{role: string, model: string, ok: bool, problem: ?string, follows: ?string}> Empty when no model is chosen yet
      */
     public function report(bool $fresh = false, ?int $roleBudgetS = self::ROLE_BUDGET_S): array
     {
@@ -41,9 +44,15 @@ final readonly class ModelHealth
         if (!$this->settings->isStored()) {
             return $report;
         }
+        $results = [];
         foreach (Role::cases() as $role) {
             $setup = $this->models->setup($role);
-            $model = $this->translator->trans('label.model_at', ['%model%' => $setup->model, '%address%' => $setup->place()]);
+            $follows = $this->settings->follows($role);
+            $model = $this->translator->trans($setup->provider->hasAddress() ? 'label.model_at' : 'label.model_at_provider', ['%model%' => $setup->model, '%address%' => $setup->place(), '%provider%' => $this->translator->trans('provider.'.$setup->provider->value)]);
+            if (null !== $follows && isset($results[$follows->value])) {
+                $report[] = ['role' => $role->value, 'model' => $model, 'ok' => $results[$follows->value]['ok'], 'problem' => $results[$follows->value]['problem'], 'follows' => $follows->value];
+                continue;
+            }
             $key = $this->key($role);
             if ($fresh) {
                 $this->cache->delete($key);
@@ -60,10 +69,38 @@ final readonly class ModelHealth
 
                 return $problem?->toArray();
             });
-            $report[] = ['role' => $role->value, 'model' => $model, 'ok' => null === $problem, 'problem' => null === $problem ? null : Problem::fromArray($problem)->trans($this->translator)];
+            $results[$role->value] = ['ok' => null === $problem, 'problem' => null === $problem ? null : Problem::fromArray($problem)->trans($this->translator)];
+            $report[] = ['role' => $role->value, 'model' => $model, 'ok' => $results[$role->value]['ok'], 'problem' => $results[$role->value]['problem'], 'follows' => null];
         }
 
         return $report;
+    }
+
+    /**
+     * The report as the home page shows it: one line per role with a model of its own, and one line for
+     * "it draws and guesses" when the guesser follows the drawer.
+     *
+     * @param list<array{role: string, model: string, ok: bool, problem: ?string, follows: ?string}> $report
+     *
+     * @return list<array{role: string, model: string, ok: bool, problem: ?string}>
+     */
+    public static function lines(array $report): array
+    {
+        $followed = array_column(array_filter($report, static fn (array $entry): bool => null !== $entry['follows']), 'follows');
+        $lines = [];
+        foreach ($report as $entry) {
+            if (null !== $entry['follows']) {
+                continue;
+            }
+            $lines[] = [
+                'role' => \in_array($entry['role'], $followed, true) && Role::Drawer->value === $entry['role'] ? 'both' : $entry['role'],
+                'model' => $entry['model'],
+                'ok' => $entry['ok'],
+                'problem' => $entry['problem'],
+            ];
+        }
+
+        return $lines;
     }
 
     /**

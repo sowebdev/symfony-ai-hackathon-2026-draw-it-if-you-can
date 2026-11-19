@@ -5,7 +5,7 @@ namespace App\Ai;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
- * The draft of the model screen, in the session. The API key goes there sealed, never in clear, and
+ * The draft of the model screen, in the session. The API keys go there sealed, never in clear, and
  * never back to the browser.
  */
 final readonly class DraftStore
@@ -46,8 +46,8 @@ final readonly class DraftStore
     /**
      * @throws EncryptionException when the sealed key cannot be opened
      */
-    public function open(ModelDraft $draft): ?string
+    public function open(#[\SensitiveParameter] ?string $sealedKey): ?string
     {
-        return null === $draft->sealedKey ? null : $this->encryption->decrypt($draft->sealedKey);
+        return null === $sealedKey ? null : $this->encryption->decrypt($sealedKey);
     }
 }

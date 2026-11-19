@@ -1,0 +1,20 @@
+{# One role on the models screen: what it does, its model, where it answers, "change". With a result, the mark of the check, and for a failure its cause and "try again". #}
+{% set result = result ?? null %}
+<li class="role-line{{ result ? (result.ok ? ' ok' : ' failed') : '' }}">
+    {% if result %}<span class="mark" role="img" aria-label="{{ (result.ok ? 'models.passed' : 'models.failed')|trans }}">{{ result.ok ? '✓' : '✗' }}</span>{% endif %}
+    <span class="role-what">
+        <strong>{{ ('role.' ~ role.value)|trans }}</strong>
+        <span class="sep" aria-hidden="true">·</span>
+        <code>{{ view.model }}</code>
+        <span class="where">{{ view.provider.hasAddress ? 'models.at_own'|trans : 'models.at_provider'|trans({'%provider%': ('provider.' ~ view.provider.value)|trans}) }}</span>
+        <span class="sep" aria-hidden="true">·</span>
+        <a href="{{ path('models_provider', {role: role.value}) }}">{{ 'action.change'|trans }}</a>
+    </span>
+    {% if result and result.slow %}<p class="hint">{{ result.slow }}</p>{% endif %}
+    {% if result and not result.ok %}
+        <p class="why">{{ result.problem }}</p>
+        <form method="get" action="{{ path('models_check') }}" data-controller="loading" data-action="loading#show">
+            <button type="submit">{{ 'action.retry'|trans }}</button>
+        </form>
+    {% endif %}
+</li>

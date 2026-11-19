@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'models.summary_title'|trans }} · Draw It If You Can{% endblock %}
+
+{# The AI of each role, one line each; after "Check and play" the marks of the check, and for a failure its cause. #}
+{% block loading %}{{ include('_loading.html.twig', {loading_title: 'status.checking_models'}) }}{% endblock %}
+
+{% block body %}
+    <main class="models">
+        <a class="models-home" href="{{ path('home') }}">← {{ 'action.back_home'|trans }}</a>
+        <h1>{{ 'models.summary_title'|trans }}</h1>
+
+        {% for message in app.flashes('error') %}
+            <p class="error" role="alert">{{ message }}</p>
+        {% endfor %}
+        {% for message in app.flashes('notice') %}
+            <p class="notice" role="status">{{ message }}</p>
+        {% endfor %}
+
+        <ul class="role-lines">
+            {% for line in lines %}
+                {% if line.view %}
+                    {{ include('models/_line.html.twig', {role: line.role, view: line.view, result: line.result}) }}
+                {% elseif line.follows %}
+                    <li class="role-line follows">
+                        <span>{{ ('models.follows_' ~ line.role.value)|trans }}</span>
+                        <a href="{{ path('models_provider', {role: line.role.value}) }}">{{ ('models.other_' ~ line.role.value ~ '_q')|trans }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+
+        {% if not checked %}
+            <form method="get" action="{{ path('models_check') }}" class="models-actions" data-controller="loading" data-action="loading#show">
+                <button type="submit">{{ 'action.check_and_play'|trans }}</button>
+            </form>
+        {% endif %}
+
+        {% if accounts %}
+            <details class="saved-keys">
+                <summary>{{ 'models.saved_keys'|trans({'%count%': accounts|length}) }}</summary>
+                <ul>
+                    {% for account in accounts %}
+                        <li>
+                            <span class="account">
+                                {% if account.provider.hasAddress %}
+                                    <code>{{ account.address }}</code>
+                                {% else %}
+                                    <strong>{{ ('provider.' ~ account.provider.value)|trans }}</strong>
+                                {% endif %}
+                                {% if account.hasApiKey %}<code>{{ account.maskedApiKey }}</code>{% endif %}
+                            </span>
+                            {% if account.isUsed %}
+                                <button type="button" class="link" disabled>{{ 'action.forget'|trans }}</button>
+                                <small class="hint">{% for role in account.usedBy %}{{ ('models.used_by_' ~ role.value)|trans }}{{ loop.last ? '' : ' · ' }}{% endfor %}</small>
+                            {% else %}
+                                {{ form_start(forget[account.id], {attr: {class: 'forget'}}) }}
+                                    {{ form_widget(forget[account.id].forget, {attr: {class: 'link'}}) }}
+                                {{ form_end(forget[account.id]) }}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </details>
+        {% endif %}
+    </main>
+{% endblock %}

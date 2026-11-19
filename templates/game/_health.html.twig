@@ -5,13 +5,14 @@
          data-health-labels-value="{{ {
              drawer: 'role.drawer'|trans,
              guesser: 'role.guesser'|trans,
+             both: 'role.both'|trans,
          }|json_encode }}">
     <p class="health-checking" data-health-target="checking">{{ 'status.checking_models'|trans }}</p>
     <p class="health-checking" data-health-target="slow" hidden>{{ 'status.models_slow'|trans }}</p>
     <ul data-health-target="list"></ul>
     <div class="health-help" data-health-target="help" hidden>
         <p>{{ 'help.models'|trans }}</p>
-        <a class="button" href="{{ path('models_provider') }}">{{ 'action.choose_model'|trans }}</a>
+        <a class="button" href="{{ path('models') }}">{{ 'action.choose_model'|trans }}</a>
         <button type="button" class="link" data-action="health#retry">{{ 'action.check_again'|trans }}</button>
     </div>
 </section>

@@ -34,6 +34,10 @@ export default class extends Controller {
     }
 
     show(event) {
+        // A button that only goes on to another question (data-plain) sends the form as it is, without the screen.
+        if (event?.submitter?.hasAttribute('data-plain')) {
+            return;
+        }
         event?.preventDefault();
         if (this.sent) {
             return;
