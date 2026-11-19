@@ -33,7 +33,15 @@ final readonly class RoleSetup
      */
     public function describe(): string
     {
-        return \sprintf('%s at %s', $this->model, $this->provider->hasAddress() ? $this->provider->addressOr($this->address) : $this->provider->label());
+        return \sprintf('%s at %s', $this->model, $this->place());
+    }
+
+    /**
+     * Where the model answers: its address, or the name of the provider when the address is not a choice.
+     */
+    public function place(): string
+    {
+        return $this->provider->hasAddress() ? $this->provider->addressOr($this->address) : $this->provider->label();
     }
 
     /**

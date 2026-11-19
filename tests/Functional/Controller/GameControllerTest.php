@@ -105,6 +105,20 @@ final class GameControllerTest extends WebTestCase
         self::assertSame(['drawer', 'guesser'], array_column($report['roles'], 'role'));
     }
 
+    public function testTheHealthCardNamesTheAddressInTheLanguageOfThePage(): void
+    {
+        $client = self::createClient();
+        self::scriptModel($client);
+
+        $client->request('GET', '/fr/health?fresh=1');
+        $report = json_decode((string) $client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
+
+        foreach ($report['roles'] as $role) {
+            self::assertStringNotContainsString(' at ', $role['model']);
+            self::assertStringContainsString(' sur http', $role['model']);
+        }
+    }
+
     public function testAModelThatDoesNotSeeImagesIsReported(): void
     {
         $client = self::createClient();

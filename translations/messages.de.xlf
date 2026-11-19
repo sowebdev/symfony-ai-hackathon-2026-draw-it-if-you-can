@@ -318,6 +318,11 @@
                 <target>Spiel starten</target>
                 <note>Leaves the lobby: the first round starts</note>
             </trans-unit>
+            <trans-unit id="label.model_at" resname="label.model_at">
+                <source>label.model_at</source>
+                <target>%model% unter %address%</target>
+                <note>Health card of the home page: the model, then where it answers (an address or a provider)</note>
+            </trans-unit>
             <trans-unit id="role.drawer" resname="role.drawer">
                 <source>role.drawer</source>
                 <target>Die Zeichen-KI</target>
