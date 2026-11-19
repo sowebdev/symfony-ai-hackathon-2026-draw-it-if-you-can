@@ -938,9 +938,9 @@
                 <target>Another AI to guess?</target>
                 <note>Link that starts the questions of the guesser</note>
             </trans-unit>
-            <trans-unit id="models.saved_keys" resname="models.saved_keys">
-                <source>models.saved_keys</source>
-                <target>Saved keys (%count%)</target>
+            <trans-unit id="models.saved_providers" resname="models.saved_providers">
+                <source>models.saved_providers</source>
+                <target>Saved providers (%count%)</target>
                 <note>Folded list of the stored keys</note>
             </trans-unit>
             <trans-unit id="models.used_by_drawer" resname="models.used_by_drawer">
@@ -1030,12 +1030,12 @@
             </trans-unit>
             <trans-unit id="models.forgotten" resname="models.forgotten">
                 <source>models.forgotten</source>
-                <target>The key is forgotten.</target>
+                <target>The provider is forgotten.</target>
                 <note>Flash after a stored key is forgotten</note>
             </trans-unit>
             <trans-unit id="models.forget_refused" resname="models.forget_refused">
                 <source>models.forget_refused</source>
-                <target>A key an AI uses cannot be forgotten.</target>
+                <target>A provider an AI uses cannot be forgotten.</target>
                 <note>Flash when a stored key is used by a role</note>
             </trans-unit>
         </body>

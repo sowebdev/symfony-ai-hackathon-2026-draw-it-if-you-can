@@ -938,9 +938,9 @@
                 <target>Un'altra IA per indovinare?</target>
                 <note>Link that starts the questions of the guesser</note>
             </trans-unit>
-            <trans-unit id="models.saved_keys" resname="models.saved_keys">
-                <source>models.saved_keys</source>
-                <target>Chiavi salvate (%count%)</target>
+            <trans-unit id="models.saved_providers" resname="models.saved_providers">
+                <source>models.saved_providers</source>
+                <target>Fornitori salvati (%count%)</target>
                 <note>Folded list of the stored keys</note>
             </trans-unit>
             <trans-unit id="models.used_by_drawer" resname="models.used_by_drawer">
@@ -1030,12 +1030,12 @@
             </trans-unit>
             <trans-unit id="models.forgotten" resname="models.forgotten">
                 <source>models.forgotten</source>
-                <target>La chiave è dimenticata.</target>
+                <target>Il fornitore è dimenticato.</target>
                 <note>Flash after a stored key is forgotten</note>
             </trans-unit>
             <trans-unit id="models.forget_refused" resname="models.forget_refused">
                 <source>models.forget_refused</source>
-                <target>Una chiave usata da un’IA non può essere dimenticata.</target>
+                <target>Un fornitore usato da un’IA non può essere dimenticato.</target>
                 <note>Flash when a stored key is used by a role</note>
             </trans-unit>
         </body>

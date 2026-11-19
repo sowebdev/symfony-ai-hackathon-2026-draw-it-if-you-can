@@ -938,9 +938,9 @@
                 <target>Eine andere KI zum Raten?</target>
                 <note>Link that starts the questions of the guesser</note>
             </trans-unit>
-            <trans-unit id="models.saved_keys" resname="models.saved_keys">
-                <source>models.saved_keys</source>
-                <target>Gespeicherte Schlüssel (%count%)</target>
+            <trans-unit id="models.saved_providers" resname="models.saved_providers">
+                <source>models.saved_providers</source>
+                <target>Gespeicherte Anbieter (%count%)</target>
                 <note>Folded list of the stored keys</note>
             </trans-unit>
             <trans-unit id="models.used_by_drawer" resname="models.used_by_drawer">
@@ -1030,12 +1030,12 @@
             </trans-unit>
             <trans-unit id="models.forgotten" resname="models.forgotten">
                 <source>models.forgotten</source>
-                <target>Der Schlüssel ist vergessen.</target>
+                <target>Der Anbieter ist vergessen.</target>
                 <note>Flash after a stored key is forgotten</note>
             </trans-unit>
             <trans-unit id="models.forget_refused" resname="models.forget_refused">
                 <source>models.forget_refused</source>
-                <target>Ein Schlüssel, den eine KI benutzt, kann nicht vergessen werden.</target>
+                <target>Ein Anbieter, den eine KI benutzt, kann nicht vergessen werden.</target>
                 <note>Flash when a stored key is used by a role</note>
             </trans-unit>
         </body>

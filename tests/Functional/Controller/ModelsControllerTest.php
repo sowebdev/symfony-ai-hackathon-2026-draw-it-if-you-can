@@ -230,7 +230,7 @@ final class ModelsControllerTest extends WebTestCase
         self::assertSame('/en/models/guesser', $crawler->filter('.role-line.follows a')->attr('href'));
         self::assertSelectorTextContains('.role-line.follows a', 'Another AI to guess?');
         self::assertSelectorExists('button:contains("Check and play")');
-        self::assertSelectorTextContains('details.saved-keys summary', 'Saved keys (1)');
+        self::assertSelectorTextContains('details.saved-keys summary', 'Saved providers (1)');
         self::assertCount(0, $crawler->filter('details.saved-keys[open]'), 'Folded');
         $this->noKeyInAnyPage();
 
@@ -245,7 +245,7 @@ final class ModelsControllerTest extends WebTestCase
         self::assertSelectorTextContains('.role-line:nth-child(1)', 'Il dessine · claude-haiku-5-5 chez Anthropic · changer');
         self::assertSelectorTextContains('.role-line:nth-child(2)', 'Il devine · qwen3.8-27b-vision sur ton serveur · changer');
         self::assertSelectorTextContains('h1', 'Les IA du jeu');
-        self::assertSelectorTextContains('details.saved-keys summary', 'Clés enregistrées (2)');
+        self::assertSelectorTextContains('details.saved-keys summary', 'Fournisseurs enregistrés (2)');
     }
 
     public function testTheGuesserOnAnotherProviderThanTheDrawer(): void
@@ -480,7 +480,7 @@ final class ModelsControllerTest extends WebTestCase
 
         $crawler = $this->get($client, '/en/models');
 
-        self::assertSelectorTextContains('details.saved-keys summary', 'Saved keys (2)');
+        self::assertSelectorTextContains('details.saved-keys summary', 'Saved providers (2)');
         self::assertCount(2, $crawler->filter('.saved-keys li'));
         self::assertSelectorTextContains('.saved-keys li:nth-child(1)', '…3f9a');
         self::assertSelectorTextContains('.saved-keys li:nth-child(1)', 'Used to draw');
@@ -500,7 +500,7 @@ final class ModelsControllerTest extends WebTestCase
         self::assertResponseRedirects('/en/models');
         self::assertCount(2, $this->settings()->accounts());
         $crawler = $client->followRedirect();
-        self::assertSelectorTextContains('.error', 'A key an AI uses cannot be forgotten.');
+        self::assertSelectorTextContains('.error', 'A provider an AI uses cannot be forgotten.');
 
         // The free one is forgotten.
         $form = $crawler->filter('.saved-keys li:nth-child(2) form')->form();
@@ -509,7 +509,7 @@ final class ModelsControllerTest extends WebTestCase
         self::assertCount(1, $this->settings()->accounts());
         self::assertSame(Provider::Anthropic, $this->settings()->accounts()[0]->provider);
         $client->followRedirect();
-        self::assertSelectorTextContains('.notice', 'The key is forgotten.');
+        self::assertSelectorTextContains('.notice', 'The provider is forgotten.');
         self::assertSelectorNotExists('.saved-keys li:nth-child(2)');
     }
 

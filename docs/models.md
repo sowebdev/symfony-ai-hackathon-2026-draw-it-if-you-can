@@ -23,7 +23,7 @@ While the questions of a role run, the other role already chosen is shown on top
 
 **The check** is on the spot, no separate page. "Check and play" tries each role (the guesser names a circle drawn in an image; the drawer also draws one stroke with its tool; a guesser that follows the drawer is not tried twice) and, when all pass, saves the setting and goes home. On a failure the summary shows ✓ or ✗ on each line, the cause and the advice under the line that failed, "change" and "Try again"; the role that passed stays visible and is not tried again. Nothing is saved until every role passes. The loading screen shows during the wait.
 
-**Stored keys.** Folded at the bottom of the summary, "Saved keys (n)" lists the accounts (provider and `…3f9a`, or the address) with "Forget". An account stays when no role uses it any more, so that you can switch back without typing the key again; one that a role uses cannot be forgotten (the button is disabled, with « Il dessine avec »).
+**Stored providers.** Folded at the bottom of the summary, "Saved providers (n)" lists the accounts (provider and `…3f9a`, or the address) with "Forget". An account stays when no role uses it any more, so that you can switch back without typing the key again; one that a role uses cannot be forgotten (the button is disabled, with « Sert à dessiner »).
 
 Between the questions the API keys are kept in your session, sealed with `APP_ENCRYPTION_KEY`, and never go back to the browser; the draft is dropped once saved, or when you leave for the home page. The screen has no login: the game listens on 127.0.0.1 only and must not be exposed.
 
