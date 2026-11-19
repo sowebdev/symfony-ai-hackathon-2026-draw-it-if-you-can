@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'models.title'|trans }} · Draw It If You Can{% endblock %}
+
+{# Step 1: who answers. The API key is a password field: it is never sent back to the page. #}
+{% block body %}
+    <main class="models">
+        <a class="models-home" href="{{ path('home') }}">← {{ 'action.back_home'|trans }}</a>
+        {{ include('models/_steps.html.twig', {step: 1}) }}
+        <h1>{{ 'models.title'|trans }}</h1>
+        <p class="models-intro">{{ 'models.provider_intro'|trans }}</p>
+
+        {{ form_start(form, {attr: {class: 'models-form', novalidate: 'novalidate'}}) }}
+            <fieldset class="providers">
+                <legend>{{ 'models.provider'|trans }}</legend>
+                <div class="provider-cards">
+                    {% for choice in form.provider %}
+                        <label class="provider-card">
+                            {{ form_widget(choice) }}
+                            <strong>{{ choice.vars.label|trans }}</strong>
+                            <small>{{ (choice.vars.label ~ '_hint')|trans }}</small>
+                        </label>
+                    {% endfor %}
+                </div>
+                {{ form_errors(form.provider) }}
+            </fieldset>
+
+            <div class="field">
+                {{ form_label(form.apiKey) }}
+                {{ form_widget(form.apiKey) }}
+                {% if saved and saved.hasApiKey %}
+                    <small class="hint">{{ 'models.key_saved'|trans({'%provider%': ('provider.' ~ saved.provider.value)|trans, '%end%': saved.maskedApiKey}) }}</small>
+                {% else %}
+                    <small class="hint">{{ 'models.key_hint'|trans }}</small>
+                {% endif %}
+                {{ form_errors(form.apiKey) }}
+            </div>
+
+            <div class="field">
+                {{ form_label(form.address) }}
+                {{ form_widget(form.address) }}
+                <small class="hint">{{ 'models.address_hint'|trans }}</small>
+                {{ form_errors(form.address) }}
+            </div>
+
+            <div class="models-actions">
+                {{ form_widget(form.list) }}
+            </div>
+            {{ form_rest(form) }}
+        {{ form_end(form, {render_rest: false}) }}
+    </main>
+{% endblock %}

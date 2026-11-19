@@ -59,8 +59,8 @@ final readonly class ModelSettings
         }
 
         return Role::Drawer === $role
-            ? new RoleSetup(Provider::OwnServer, $this->drawerBaseUrl, $this->drawerApiKey, $this->drawerModel, $this->drawerDisableThinking)
-            : new RoleSetup(Provider::OwnServer, $this->guesserBaseUrl, $this->guesserApiKey, $this->guesserModel, $this->guesserDisableThinking);
+            ? new RoleSetup(Provider::Compatible, $this->drawerBaseUrl, $this->drawerApiKey, $this->drawerModel, $this->drawerDisableThinking)
+            : new RoleSetup(Provider::Compatible, $this->guesserBaseUrl, $this->guesserApiKey, $this->guesserModel, $this->guesserDisableThinking);
     }
 
     /**
@@ -112,9 +112,12 @@ final readonly class ModelSettings
         if ('' === $drawerModel || '' === $guesserModel) {
             throw new \InvalidArgumentException('Choose a model for each role.');
         }
-        if (null === $address && $provider->hasAddress() && null === $provider->defaultAddress()) {
+        if (null === $address && $provider->hasAddress()) {
             throw new \InvalidArgumentException(\sprintf('%s needs the address of the server.', $provider->label()));
         }
+
+        // Only the player's own switch is kept: for the others the game decides, from the catalog.
+        $reasoningOff = $reasoningOff && $provider->hasReasoningSwitch();
 
         $setting = $this->repository->current();
         $kept = null === $apiKey && $setting?->getProvider() === $provider ? $setting : null;
@@ -138,6 +141,28 @@ final readonly class ModelSettings
             $setting->seal($sealed, null === $sealed ? null : self::mask($newKey));
         }
         $this->entityManager->flush();
+    }
+
+    /**
+     * The API key already saved, to keep it when the player leaves the field empty. Only for the same
+     * provider and, where the address is a choice, the same address: a key is for one place, and a
+     * page that changed the address must not send the saved key somewhere else.
+     *
+     * @internal for the model screen: it holds the key in memory, never in a page
+     *
+     * @throws EncryptionException when the stored key cannot be opened
+     */
+    public function savedKeyFor(Provider $provider, ?string $address): ?string
+    {
+        $setting = $this->repository->current();
+        if (null === $setting || $setting->getProvider() !== $provider || !$setting->hasApiKey()) {
+            return null;
+        }
+        if ($provider->addressOr($setting->getAddress()) !== $provider->addressOr($address)) {
+            return null;
+        }
+
+        return $this->openKey($setting);
     }
 
     /**

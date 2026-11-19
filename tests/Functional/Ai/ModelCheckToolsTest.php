@@ -68,15 +68,15 @@ final class ModelCheckToolsTest extends KernelTestCase
         $problem = $check->check(Role::Drawer);
 
         self::assertNotNull($problem);
-        self::assertStringContainsString('did not call the draw_stroke tool', $problem);
-        self::assertStringContainsString('must be a model that calls tools', $problem);
+        self::assertSame('problem.no_stroke', $problem->id);
+        self::assertSame('advice.reasoning_choose', $problem->advice, 'The environment has its own switch on: another model');
     }
 
     public function testACallWithoutReadableCellsIsNotAStroke(): void
     {
         $check = $this->check(static fn (): StreamResult => self::call('{"part":"ring","cells":"a circle"}'));
 
-        self::assertStringContainsString('did not call the draw_stroke tool', (string) $check->check(Role::Drawer));
+        self::assertSame('problem.no_stroke', $check->check(Role::Drawer)?->id);
     }
 
     public function testTheGuesserIsCheckedOnImagesOnly(): void
@@ -98,7 +98,7 @@ final class ModelCheckToolsTest extends KernelTestCase
         });
         self::getContainer()->set(PlatformFactory::class, new ScriptedPlatforms($platform));
 
-        self::assertStringContainsString('reads images', (string) self::getContainer()->get(ModelCheck::class)->check(Role::Drawer));
+        self::assertContains(self::getContainer()->get(ModelCheck::class)->check(Role::Drawer)?->id, ['problem.no_image_answer', 'problem.not_a_circle']);
         self::assertSame(['image'], $asked);
     }
 }

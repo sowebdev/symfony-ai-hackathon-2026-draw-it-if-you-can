@@ -30,9 +30,17 @@ final readonly class ModelCheck
     }
 
     /**
-     * @return string|null What is wrong, or null if the role can play
+     * The same checks on other models: the setting of the model screen, not saved yet.
      */
-    public function check(Role $role): ?string
+    public function with(Models $models): self
+    {
+        return new self(new OneWordModel($models), $this->renderer, $models);
+    }
+
+    /**
+     * @return Problem|null What is wrong, or null if the role can play
+     */
+    public function check(Role $role): ?Problem
     {
         // Both roles read images: the guesser names the drawing, the drawer looks at its own to add
         // details. The drawer must also call a tool, or it cannot draw at all.
@@ -63,14 +71,25 @@ final readonly class ModelCheck
         }, range(0, 36));
     }
 
-    /** Said when a model gives nothing usable: the most likely cause after a missing skill. */
-    private const string REASONING_HINT = 'A model that reasons before answering may spend all its tokens on it: choose one that does not reason.';
+    /**
+     * Said when a model gives nothing usable, the most likely cause after a missing skill: it spent
+     * its tokens reasoning. Where there is a switch, which way to flip it.
+     */
+    private function reasoningAdvice(Role $role): string
+    {
+        $setup = $this->models->setup($role);
+        if (!$setup->provider->hasReasoningSwitch()) {
+            return 'advice.reasoning_choose';
+        }
+
+        return $setup->reasoningOff ? 'advice.reasoning_choose' : 'advice.reasoning_tick';
+    }
 
     /**
      * One stroke on a circle, asked the way the game asks for the drawing: streamed, with the
      * draw_stroke tool. The check stops at the first stroke it can read.
      */
-    private function checkCallsTools(): ?string
+    private function checkCallsTools(): ?Problem
     {
         $messages = new MessageBag(
             Message::forSystem(<<<PROMPT
@@ -100,10 +119,10 @@ final readonly class ModelCheck
             }
         }
 
-        return 'The model did not call the draw_stroke tool, or not with cells the game can read: the drawer must be a model that calls tools. '.self::REASONING_HINT;
+        return new Problem('problem.no_stroke', advice: $this->reasoningAdvice(Role::Drawer));
     }
 
-    private function checkSeesImages(Role $role): ?string
+    private function checkSeesImages(Role $role): ?Problem
     {
         $messages = new MessageBag(Message::ofUser(
             new Image($this->renderer->toPng([self::circle()]), 'image/png'),
@@ -112,9 +131,9 @@ final readonly class ModelCheck
         $answer = $this->model->ask($role, $messages);
 
         if (null === $answer) {
-            return 'The model gave no usable answer about an image: it must be a model that reads images. '.self::REASONING_HINT;
+            return new Problem('problem.no_image_answer', advice: $this->reasoningAdvice($role));
         }
 
-        return self::isCircle($answer) ? null : \sprintf('The model does not recognize a circle in an image (it answered "%s"): it must be a model that reads images.', $answer);
+        return self::isCircle($answer) ? null : new Problem('problem.not_a_circle', ['%answer%' => $answer]);
     }
 }

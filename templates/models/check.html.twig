@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'models.title'|trans }} · Draw It If You Can{% endblock %}
+
+{# Step 3: each role tried on a tiny task whose answer is known. Only when both pass can the setting be saved. #}
+{% block body %}
+    <main class="models">
+        <a class="models-home" href="{{ path('home') }}">← {{ 'action.back_home'|trans }}</a>
+        {{ include('models/_steps.html.twig', {step: 3}) }}
+        <h1>{{ 'models.check_title'|trans }}</h1>
+        <p class="models-intro">{{ 'models.check_intro'|trans }}</p>
+
+        {% for message in app.flashes('error') %}
+            <p class="error" role="alert">{{ message }}</p>
+        {% endfor %}
+
+        <ul class="check-results">
+            {% for result in results %}
+                <li class="{{ result.ok ? 'ok' : 'failed' }}">
+                    <strong>{{ ('role.' ~ result.role)|trans }}</strong>
+                    <code>{{ result.model }}</code>
+                    {% if result.ok %}
+                        <span class="verdict">{{ 'models.checked'|trans }}</span>
+                        {% if result.slow %}<p class="hint">{{ result.slow }}</p>{% endif %}
+                    {% else %}
+                        <p class="why">{{ result.problem }}</p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+
+        {% if passed %}
+            {{ form_start(save, {attr: {class: 'models-actions'}}) }}
+                <a href="{{ path('models_choose') }}">← {{ 'action.back'|trans }}</a>
+                {{ form_widget(save.save) }}
+            {{ form_end(save) }}
+        {% else %}
+            <p class="models-intro">{{ 'models.nothing_saved'|trans }}</p>
+            <div class="models-actions">
+                <a href="{{ path('models_choose') }}">← {{ 'action.back'|trans }}</a>
+                <a class="button" href="{{ path('models_check') }}">{{ 'action.check_again'|trans }}</a>
+            </div>
+        {% endif %}
+    </main>
+{% endblock %}

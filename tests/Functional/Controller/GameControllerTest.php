@@ -97,9 +97,9 @@ final class GameControllerTest extends WebTestCase
         self::scriptModel($client, ['Circle', 'Circle']);
 
         $client->request('GET', '/fr');
-        self::assertSelectorExists('.health[data-health-url-value="/health"]');
+        self::assertSelectorExists('.health[data-health-url-value="/fr/health"]');
 
-        $client->request('GET', '/health?fresh=1');
+        $client->request('GET', '/en/health?fresh=1');
         $report = json_decode((string) $client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
         self::assertTrue($report['ok']);
         self::assertSame(['drawer', 'guesser'], array_column($report['roles'], 'role'));
@@ -110,13 +110,14 @@ final class GameControllerTest extends WebTestCase
         $client = self::createClient();
         self::scriptModel($client, ['circle', 'square']);
 
-        $client->request('GET', '/health?fresh=1');
+        $client->request('GET', '/en/health?fresh=1');
         $report = json_decode((string) $client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
 
         self::assertFalse($report['ok']);
         self::assertTrue($report['roles'][0]['ok']);
         self::assertFalse($report['roles'][1]['ok']);
         self::assertStringContainsString('does not recognize a circle', $report['roles'][1]['problem']);
+        self::assertStringContainsString('(it answered “square”)', $report['roles'][1]['problem']);
     }
 
     public function testADrawerThatDoesNotSeeImagesIsReported(): void
@@ -125,7 +126,7 @@ final class GameControllerTest extends WebTestCase
         // A text-only drawer: it looks at its drawing to add details, so it must read images too.
         self::scriptModel($client, ['ready', 'circle']);
 
-        $client->request('GET', '/health?fresh=1');
+        $client->request('GET', '/en/health?fresh=1');
         $report = json_decode((string) $client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
 
         self::assertFalse($report['ok']);

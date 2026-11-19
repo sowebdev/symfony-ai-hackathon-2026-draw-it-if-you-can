@@ -15,22 +15,19 @@ PHPUNIT = $(EXEC) vendor/bin/phpunit
 help: ## List the commands
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z0-9_-]+:.*##/ {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-install: ## Build the image, install the dependencies and the database, then choose the models
+install: ## Build the image, install the dependencies and the database; the model is chosen on the page
 	@./docker/start.sh
 	@echo "Installing the dependencies..."
 	@$(EXEC) composer install --no-progress --quiet
 	@$(CONSOLE) importmap:install --quiet
 	@$(MAKE) --no-print-directory encryption-key
 	@$(CONSOLE) doctrine:migrations:migrate -n --quiet
-	@docker compose exec $(if $(NO_TTY),-T) php php bin/console app:setup $(if $(NO_TTY),-n) $(SETUP_ARGS)
-	@echo "Trying the model..."
-	@$(CONSOLE) app:ai:check || { echo; echo "The model cannot play yet: fix what is said above, then make check (or make setup)."; }
 	@echo
-	@echo "Ready: open http://127.0.0.1:$$(cat .app-port)"
+	@echo "Ready: open http://127.0.0.1:$$(cat .app-port) and choose your model"
 
 # The key that seals the API key kept in the database: made once, in .env.local, never replaced.
 encryption-key:
-	@$(EXEC) php -r '$$file = ".env.local"; $$content = is_file($$file) ? file_get_contents($$file) : ""; if (!preg_match("/^APP_ENCRYPTION_KEY=[\"\x27]?[^\"\x27\s]/m", $$content)) { file_put_contents($$file, ("" === $$content || str_ends_with($$content, "\n") ? "" : "\n")."APP_ENCRYPTION_KEY=".base64_encode(random_bytes(32))."\n", FILE_APPEND); echo "APP_ENCRYPTION_KEY written to .env.local: keep it, the API key of the database cannot be read without it.", PHP_EOL; }'
+	@$(CONSOLE) app:encryption-key
 
 setup: up ## Choose the models (an API key or your own server), save them in .env.local and try them
 	@docker compose exec $(if $(NO_TTY),-T) php php bin/console app:setup $(if $(NO_TTY),-n) $(SETUP_ARGS)

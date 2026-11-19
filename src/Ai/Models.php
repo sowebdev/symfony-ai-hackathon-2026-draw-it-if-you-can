@@ -4,7 +4,6 @@ namespace App\Ai;
 
 use Symfony\AI\Agent\Agent;
 use Symfony\AI\Agent\Toolbox\Toolbox;
-use Symfony\AI\Platform\Capability;
 use Symfony\AI\Platform\Message\MessageBag;
 use Symfony\AI\Platform\PlatformInterface;
 use Symfony\AI\Platform\Result\DeferredResult;
@@ -16,10 +15,30 @@ use Symfony\AI\Platform\Result\DeferredResult;
  */
 final readonly class Models
 {
+    /**
+     * @param array<string, RoleSetup> $setups A setting that is not saved yet, by role: what the model screen checks
+     */
     public function __construct(
         private ModelSettings $settings,
         private PlatformFactory $platforms,
+        private array $setups = [],
     ) {
+    }
+
+    /**
+     * The same models, on a setting that is not saved: to check it before saving it.
+     */
+    public function with(RoleSetup $drawer, RoleSetup $guesser): self
+    {
+        return new self($this->settings, $this->platforms, [Role::Drawer->value => $drawer, Role::Guesser->value => $guesser]);
+    }
+
+    /**
+     * Who answers for the role, and with which model and switch.
+     */
+    public function setup(Role $role): RoleSetup
+    {
+        return $this->setups[$role->value] ?? $this->settings->forRole($role);
     }
 
     /**
@@ -28,7 +47,7 @@ final readonly class Models
      */
     public function invoke(Role $role, MessageBag $messages, array $options = [], ?int $maxTokens = null): DeferredResult
     {
-        $setup = $this->settings->forRole($role);
+        $setup = $this->setup($role);
 
         return $this->platform($setup)->invoke($this->modelName($role, $setup), $messages, $this->optionsOf($setup, $options, $maxTokens));
     }
@@ -38,14 +57,14 @@ final readonly class Models
      */
     public function agent(Role $role, object $tool, int $maxToolCalls): Agent
     {
-        $setup = $this->settings->forRole($role);
+        $setup = $this->setup($role);
 
         return new Agent($this->platform($setup), $this->modelName($role, $setup), toolbox: new Toolbox([$tool]), maxToolCalls: $maxToolCalls);
     }
 
     /**
-     * The call options, with those the provider takes: the limit of the answer, and the switch of
-     * reasoning where it is understood.
+     * The call options, with those the provider takes: the limit of the answer, and what keeps the
+     * model from reasoning for long (Provider::reasoningOptions()).
      *
      * @param array<string, mixed> $options
      *
@@ -53,7 +72,7 @@ final readonly class Models
      */
     public function options(Role $role, array $options = [], ?int $maxTokens = null): array
     {
-        return $this->optionsOf($this->settings->forRole($role), $options, $maxTokens);
+        return $this->optionsOf($this->setup($role), $options, $maxTokens);
     }
 
     /**
@@ -61,7 +80,7 @@ final readonly class Models
      */
     public function describe(Role $role): string
     {
-        return $this->settings->forRole($role)->describe();
+        return $this->setup($role)->describe();
     }
 
     /**
@@ -69,7 +88,7 @@ final readonly class Models
      */
     public function fingerprint(Role $role): string
     {
-        return $this->settings->forRole($role)->fingerprint();
+        return $this->setup($role)->fingerprint();
     }
 
     /**
@@ -82,10 +101,7 @@ final readonly class Models
         if (null !== $maxTokens) {
             $options += $setup->provider->limit($maxTokens);
         }
-        if ($setup->reasoningOff) {
-            $thinks = $setup->provider->knows($setup->model)?->supports(Capability::THINKING) ?? false;
-            $options += $setup->provider->reasoningOff($thinks);
-        }
+        $options += $setup->provider->reasoningOptions($setup->model, $setup->reasoningOff);
 
         return $options;
     }

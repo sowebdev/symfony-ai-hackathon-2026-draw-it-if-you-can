@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Ai;
 
+use App\Ai\ModelList;
 use App\Ai\ModelLister;
 use App\Ai\Provider;
 use App\Ai\Role;
@@ -50,7 +51,17 @@ final class ModelListerTest extends TestCase
         return new MockResponse(json_encode($body, \JSON_THROW_ON_ERROR), ['http_code' => $status, 'response_headers' => ['content-type' => 'application/json']]);
     }
 
-    public function testAnthropicPagesAndIsCrossedWithTheCatalog(): void
+    /**
+     * @param list<\App\Ai\ModelChoice> $choices
+     *
+     * @return list<string>
+     */
+    private static function names(array $choices): array
+    {
+        return array_map(static fn (\App\Ai\ModelChoice $choice): string => $choice->name, $choices);
+    }
+
+    public function testAnthropicPagesAndOffersOnlyWhatTheCatalogSaysCanPlay(): void
     {
         $lister = $this->lister(static fn (string $method, string $url): MockResponse => str_contains($url, 'after_id=claude-3-opus-20240229')
             ? self::json(['data' => [['id' => 'claude-haiku-5-5'], ['id' => 'claude-brand-new-9']], 'has_more' => false, 'last_id' => 'claude-brand-new-9'])
@@ -59,9 +70,12 @@ final class ModelListerTest extends TestCase
         $list = $lister->list(Provider::Anthropic, null, 'sk-ant-secret');
 
         self::assertTrue($list->isRead());
-        self::assertSame(['claude-sonnet-5-5', 'claude-3-opus-20240229', 'claude-haiku-5-5'], $list->guesser);
-        self::assertSame(['claude-sonnet-5-5', 'claude-3-opus-20240229', 'claude-haiku-5-5'], $list->drawer);
-        self::assertSame(['claude-brand-new-9'], $list->others, 'A model the catalog does not know stays usable, untested');
+        // Sorted by name; a model the catalog does not know is not listed: its name is typed.
+        self::assertSame(['claude-3-opus-20240229', 'claude-haiku-5-5', 'claude-sonnet-5-5'], self::names($list->for(Role::Guesser)));
+        self::assertSame(['claude-3-opus-20240229', 'claude-haiku-5-5', 'claude-sonnet-5-5'], self::names($list->for(Role::Drawer)));
+        self::assertNotContains('claude-brand-new-9', self::names($list->choices));
+        self::assertTrue($list->choices[0]->vision);
+        self::assertTrue($list->choices[0]->tools);
 
         self::assertCount(2, $this->requests);
         [$method, $url, $headers] = $this->requests[0];
@@ -77,15 +91,16 @@ final class ModelListerTest extends TestCase
         $lister = $this->lister(static fn (): MockResponse => self::json(['object' => 'list', 'data' => [
             ['id' => 'gpt-4o'],        // reads images, calls tools
             ['id' => 'gpt-3.5-turbo'], // calls tools, no images: neither role
+            ['id' => 'text-embedding-3-small'],
+            ['id' => 'whisper-1'],
             ['id' => 'gpt-5-snapshot-not-in-the-catalog'],
         ]]));
 
         $list = $lister->list(Provider::OpenAi, null, 'sk-openai');
 
-        self::assertSame(['gpt-4o'], $list->guesser);
-        self::assertSame(['gpt-4o'], $list->drawer);
-        self::assertSame(['gpt-5-snapshot-not-in-the-catalog'], $list->others);
-        self::assertSame(['gpt-4o'], $list->knownFor(Role::Drawer));
+        self::assertSame(['gpt-4o'], self::names($list->for(Role::Guesser)));
+        self::assertSame(['gpt-4o'], self::names($list->for(Role::Drawer)));
+        self::assertSame(['gpt-4o'], self::names($list->choices), 'Embeddings, audio, a model without images and one the catalog does not know are not listed');
         self::assertSame('https://api.openai.com/v1/models', $this->requests[0][1]);
         self::assertSame('Bearer sk-openai', $this->requests[0][2]['authorization']);
     }
@@ -101,38 +116,90 @@ final class ModelListerTest extends TestCase
         }));
         self::assertNotSame([], $guessOnly, 'The catalog has a model that reads images and calls no tool');
 
-        $list = ModelLister::cross(Provider::OpenAi, [$guessOnly[0]]);
+        $list = new ModelList(ModelLister::choices(Provider::OpenAi, [['id' => $guessOnly[0]]]));
 
-        self::assertSame([$guessOnly[0]], $list->guesser);
-        self::assertSame([], $list->drawer);
-        self::assertSame([], $list->others);
+        self::assertSame([$guessOnly[0]], self::names($list->for(Role::Guesser)));
+        self::assertSame([], $list->for(Role::Drawer));
     }
 
-    public function testAGenericProviderHasNoCatalog(): void
+    public function testMistralOwnCapabilitiesDecideWhenTheyAreThere(): void
     {
-        $lister = $this->lister(static fn (): MockResponse => self::json(['data' => [['id' => 'mistral-small-latest'], ['id' => 'pixtral-large-latest']]]));
+        $lister = $this->lister(static fn (): MockResponse => self::json(['data' => [
+            ['id' => 'mistral-small-latest', 'capabilities' => ['completion_chat' => true, 'function_calling' => true, 'vision' => true]],
+            ['id' => 'ministral-8b-latest', 'capabilities' => ['completion_chat' => true, 'function_calling' => true, 'vision' => false]],
+            ['id' => 'mistral-embed', 'capabilities' => ['completion_chat' => false, 'function_calling' => false, 'vision' => false]],
+            // The answer says it sees images: the catalog of the bridge, which does not say so, is not asked.
+            ['id' => 'codestral-latest', 'capabilities' => ['completion_chat' => true, 'function_calling' => false, 'vision' => true]],
+            // No capabilities in the answer: the catalog of the bridge decides.
+            ['id' => 'pixtral-large-latest'],
+            ['id' => 'mistral-nemo'],
+            ['id' => 'a-model-nobody-knows'],
+        ]]));
 
         $list = $lister->list(Provider::Mistral, null, 'sk-mistral');
 
-        self::assertSame([], $list->guesser);
-        self::assertSame([], $list->drawer);
-        self::assertSame(['mistral-small-latest', 'pixtral-large-latest'], $list->others);
+        self::assertSame(['codestral-latest', 'mistral-small-latest', 'pixtral-large-latest'], self::names($list->for(Role::Guesser)));
+        self::assertSame(['mistral-small-latest', 'pixtral-large-latest'], self::names($list->for(Role::Drawer)));
+        self::assertNotContains('mistral-embed', self::names($list->choices));
+        self::assertNotContains('a-model-nobody-knows', self::names($list->choices));
         self::assertSame('https://api.mistral.ai/v1/models', $this->requests[0][1]);
         self::assertSame('Bearer sk-mistral', $this->requests[0][2]['authorization']);
     }
 
-    public function testOllamaAndAServerOfYourOwnAreAskedAtTheirAddressWithoutKey(): void
+    public function testAnotherServerWithoutCapabilitiesIsListedAsItIsSortedByName(): void
     {
-        $lister = $this->lister(static fn (): MockResponse => self::json(['object' => 'list', 'data' => [['id' => 'qwen3.8:27b'], ['id' => 'lfm3-vl:2b']]]));
+        $lister = $this->lister(static fn (): MockResponse => self::json(['object' => 'list', 'data' => [['id' => 'qwen3.8:27b'], ['id' => 'Lfm3-vl:2b'], ['id' => 'nomic-embed-text']]]));
 
-        $ollama = $lister->list(Provider::Ollama, null, null);
-        $own = $lister->list(Provider::OwnServer, 'http://gate:8001/', null);
+        $list = $lister->list(Provider::Compatible, 'http://gate:8001/', null);
 
-        self::assertSame(['qwen3.8:27b', 'lfm3-vl:2b'], $ollama->others);
-        self::assertSame(['qwen3.8:27b', 'lfm3-vl:2b'], $own->others);
-        self::assertSame('http://host.docker.internal:11434/v1/models', $this->requests[0][1]);
-        self::assertSame('http://gate:8001/v1/models', $this->requests[1][1]);
+        self::assertSame(['Lfm3-vl:2b', 'nomic-embed-text', 'qwen3.8:27b'], self::names($list->for(Role::Drawer)));
+        self::assertFalse($list->hasCapabilities());
+        self::assertNull($list->choices[0]->vision, 'Capabilities unknown: the check will tell');
+        self::assertSame('http://gate:8001/v1/models', $this->requests[0][1]);
         self::assertArrayNotHasKey('authorization', $this->requests[0][2]);
+    }
+
+    public function testAnApiKeyIsSentToAnotherServerWhenThereIsOne(): void
+    {
+        $lister = $this->lister(static fn (): MockResponse => self::json(['data' => [['id' => 'qwen']]]));
+
+        $lister->list(Provider::Compatible, 'https://openrouter.ai/api', 'sk-or-secret');
+
+        self::assertSame('https://openrouter.ai/api/v1/models', $this->requests[0][1]);
+        self::assertSame('Bearer sk-or-secret', $this->requests[0][2]['authorization']);
+    }
+
+    public function testOpenRouterSaysWhatItsModelsCanDoAndTheListIsFilteredOnIt(): void
+    {
+        $lister = $this->lister(static fn (): MockResponse => self::json(['data' => [
+            ['id' => 'anthropic/claude-haiku', 'architecture' => ['input_modalities' => ['text', 'image'], 'output_modalities' => ['text']], 'supported_parameters' => ['tools', 'max_tokens']],
+            ['id' => 'meta/text-only', 'architecture' => ['input_modalities' => ['text'], 'output_modalities' => ['text']], 'supported_parameters' => ['tools']],
+            ['id' => 'acme/sees-no-tools', 'architecture' => ['input_modalities' => ['text', 'image'], 'output_modalities' => ['text']], 'supported_parameters' => ['max_tokens']],
+            ['id' => 'openai/embedding', 'architecture' => ['input_modalities' => ['text'], 'output_modalities' => ['embeddings']], 'supported_parameters' => []],
+            ['id' => 'acme/image-maker', 'architecture' => ['input_modalities' => ['text', 'image'], 'output_modalities' => ['image']], 'supported_parameters' => []],
+            ['id' => 'acme/says-nothing'],
+        ]]));
+
+        $list = $lister->list(Provider::Compatible, 'https://openrouter.ai/api', 'sk-or');
+
+        self::assertTrue($list->hasCapabilities());
+        self::assertSame(['acme/says-nothing', 'acme/sees-no-tools', 'anthropic/claude-haiku'], self::names($list->for(Role::Guesser)));
+        self::assertSame(['acme/says-nothing', 'anthropic/claude-haiku'], self::names($list->for(Role::Drawer)));
+        self::assertNotContains('meta/text-only', self::names($list->for(Role::Guesser)));
+        self::assertNotContains('acme/image-maker', self::names($list->choices));
+        self::assertNotContains('openai/embedding', self::names($list->choices));
+    }
+
+    public function testAHugeListIsSortedAndComplete(): void
+    {
+        $entries = array_map(static fn (int $i): array => ['id' => \sprintf('vendor/model-%03d', 400 - $i)], range(1, 400));
+        $lister = $this->lister(static fn (): MockResponse => self::json(['data' => $entries]));
+
+        $names = self::names($lister->list(Provider::Compatible, 'https://openrouter.ai/api', 'sk')->for(Role::Guesser));
+
+        self::assertCount(400, $names);
+        self::assertSame('vendor/model-000', $names[0]);
+        self::assertSame('vendor/model-399', $names[399]);
     }
 
     public function testARefusedKeyIsSaidWithoutTheKey(): void
@@ -142,18 +209,20 @@ final class ModelListerTest extends TestCase
         $list = $lister->list(Provider::Anthropic, null, 'sk-ant-secret');
 
         self::assertFalse($list->isRead());
-        self::assertStringContainsString('refused the API key (HTTP 401)', (string) $list->problem);
-        self::assertStringNotContainsString('sk-ant-secret', (string) $list->problem);
-        self::assertSame([], $list->others);
+        self::assertSame('list.refused_key', $list->problem?->id);
+        self::assertSame(['%provider%' => 'Anthropic', '%status%' => '401'], $list->problem->parameters);
+        self::assertStringNotContainsString('sk-ant-secret', serialize($list->problem));
+        self::assertSame([], $list->choices);
     }
 
     public function testAServerThatDoesNotAnswerIsSaid(): void
     {
         $lister = $this->lister(static fn (): MockResponse => throw new TransportException('Failed to connect'));
 
-        $list = $lister->list(Provider::OwnServer, 'http://gate:8001', null);
+        $list = $lister->list(Provider::Compatible, 'http://gate:8001', null);
 
-        self::assertSame('Nothing answers at http://gate:8001: is the address right, is the server started?', $list->problem);
+        self::assertSame('list.no_answer', $list->problem?->id);
+        self::assertSame(['%where%' => 'http://gate:8001'], $list->problem->parameters);
     }
 
     public function testASlowServerIsSaid(): void
@@ -161,7 +230,10 @@ final class ModelListerTest extends TestCase
         // The mock cannot be slow: its timeout is an exception of the same family.
         $lister = $this->lister(static fn (): MockResponse => throw new TimeoutException('Idle timeout reached'));
 
-        self::assertSame('Ollama did not answer within 3 s.', $lister->list(Provider::Ollama, null, null)->problem);
+        $problem = $lister->list(Provider::Compatible, Provider::SUGGESTED_ADDRESS, null)->problem;
+
+        self::assertSame('list.timeout', $problem?->id);
+        self::assertSame('3', $problem->parameters['%seconds%']);
     }
 
     public function testTheRequestsAreGivenTheirTimeouts(): void
@@ -173,7 +245,7 @@ final class ModelListerTest extends TestCase
             return self::json(['data' => []]);
         });
 
-        (new ModelLister($http, new ArrayAdapter()))->list(Provider::OwnServer, 'http://gate:8001', null);
+        (new ModelLister($http, new ArrayAdapter()))->list(Provider::Compatible, 'http://gate:8001', null);
 
         self::assertEquals(3, $seen['timeout']);
         self::assertGreaterThan(5.0, $seen['max_duration']);
@@ -184,15 +256,15 @@ final class ModelListerTest extends TestCase
     {
         $lister = $this->lister(static fn (): MockResponse => new MockResponse('<html>not json</html>'));
 
-        self::assertSame('Mistral did not answer with a list of models.', $lister->list(Provider::Mistral, null, 'sk')->problem);
+        self::assertSame('list.not_a_list', $lister->list(Provider::Mistral, null, 'sk')->problem?->id);
     }
 
     public function testAProviderThatNeedsAKeyOrAnAddressSaysSoWithoutCallingIt(): void
     {
         $lister = $this->lister(static fn (): MockResponse => self::json(['data' => []]));
 
-        self::assertStringContainsString('needs an API key', (string) $lister->list(Provider::OpenAi, null, '')->problem);
-        self::assertStringContainsString('needs the address', (string) $lister->list(Provider::OwnServer, null, null)->problem);
+        self::assertSame('list.needs_key', $lister->list(Provider::OpenAi, null, '')->problem?->id);
+        self::assertSame('list.needs_address', $lister->list(Provider::Compatible, null, null)->problem?->id);
         self::assertSame([], $this->requests);
     }
 
@@ -201,14 +273,13 @@ final class ModelListerTest extends TestCase
         self::assertSame(3600, Provider::Anthropic->listTtl());
         self::assertSame(3600, Provider::OpenAi->listTtl());
         self::assertSame(3600, Provider::Mistral->listTtl());
-        self::assertSame(30, Provider::Ollama->listTtl());
-        self::assertSame(30, Provider::OwnServer->listTtl());
+        self::assertSame(30, Provider::Compatible->listTtl());
     }
 
     public function testTheListIsCachedPerKeyAndTheCacheNeverHoldsTheKey(): void
     {
         $cache = new ArrayAdapter();
-        $lister = $this->lister(static fn (): MockResponse => self::json(['data' => [['id' => 'mistral-small-latest']]]), $cache);
+        $lister = $this->lister(static fn (): MockResponse => self::json(['data' => [['id' => 'mistral-small-latest', 'capabilities' => ['vision' => true, 'function_calling' => true]]]]), $cache);
 
         $lister->list(Provider::Mistral, null, 'sk-mistral-secret');
         $lister->list(Provider::Mistral, null, 'sk-mistral-secret');
@@ -233,7 +304,9 @@ final class ModelListerTest extends TestCase
             return 1 === ++$calls ? self::json([], 500) : self::json(['data' => [['id' => 'qwen']]]);
         });
 
-        self::assertStringContainsString('HTTP 500', (string) $lister->list(Provider::Ollama, null, null)->problem);
-        self::assertSame(['qwen'], $lister->list(Provider::Ollama, null, null)->others);
+        $first = $lister->list(Provider::Compatible, Provider::SUGGESTED_ADDRESS, null)->problem;
+        self::assertSame('list.http_error', $first?->id);
+        self::assertSame('500', $first->parameters['%status%']);
+        self::assertSame(['qwen'], self::names($lister->list(Provider::Compatible, Provider::SUGGESTED_ADDRESS, null)->choices));
     }
 }

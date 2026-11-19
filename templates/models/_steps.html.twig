@@ -1,0 +1,6 @@
+{# Where the player is on the model screen: three steps, the current one marked. #}
+<ol class="model-steps" aria-label="{{ 'models.steps'|trans }}">
+    {% for number, name in {1: 'models.step_provider', 2: 'models.step_models', 3: 'models.step_check'} %}
+        <li{% if number == step %} aria-current="step"{% endif %}{% if number < step %} class="done"{% endif %}><span>{{ number }}</span> {{ name|trans }}</li>
+    {% endfor %}
+</ol>

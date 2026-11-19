@@ -5,6 +5,8 @@ namespace App\Ai;
 use Symfony\AI\Platform\Exception\BadRequestException;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\HttpClient\Exception\TimeoutExceptionInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Whether each role can play, for the home page: the checks of make check, kept a few minutes so
@@ -23,6 +25,7 @@ final readonly class ModelHealth
         private Models $models,
         private ModelCheck $check,
         private CacheInterface $cache,
+        private TranslatorInterface $translator,
     ) {
     }
 
@@ -38,49 +41,64 @@ final readonly class ModelHealth
             if ($fresh) {
                 $this->cache->delete($key);
             }
-            $problem = $this->cache->get($key, function (ItemInterface $item) use ($role): string {
+            // Kept as an id and its parameters, not as a sentence: the language is the one of whoever looks.
+            $problem = $this->cache->get($key, function (ItemInterface $item) use ($role): ?array {
                 try {
                     $problem = $this->check->check($role);
                 } catch (\Throwable $exception) {
-                    $problem = self::explain($exception);
+                    $setup = $this->models->setup($role);
+                    $problem = self::explain($exception, $setup->provider, $setup->reasoningOff);
                 }
                 $item->expiresAfter(null === $problem ? self::HEALTHY_TTL_S : self::SICK_TTL_S);
 
-                return $problem ?? '';
+                return $problem?->toArray();
             });
-            $report[] = ['role' => $role->value, 'model' => $model, 'ok' => '' === $problem, 'problem' => '' === $problem ? null : $problem];
+            $report[] = ['role' => $role->value, 'model' => $model, 'ok' => null === $problem, 'problem' => null === $problem ? null : Problem::fromArray($problem)->trans($this->translator)];
         }
 
         return $report;
     }
 
     /**
-     * What a failed call means for the player, when the cause is a common one.
+     * What a failed call means for the player, when the cause is a common one. Where the provider has
+     * the reasoning switch, the advice says which way to flip it.
      */
-    public static function explain(\Throwable $exception): string
+    public static function explain(\Throwable $exception, ?Provider $provider = null, bool $switchOff = false): Problem
     {
         $message = $exception->getMessage();
+        $hasSwitch = $provider?->hasReasoningSwitch() ?? false;
         if (str_contains($message, 'Failed to connect') || str_contains($message, 'Could not resolve host') || str_contains($message, 'Connection refused')) {
-            return 'Nothing answers at this address: check it in .env.local (make setup), or start your model server.';
+            return new Problem('problem.no_server');
         }
         if (preg_match('/\b40[13]\b/', $message) || false !== stripos($message, 'unauthorized')) {
-            return 'The server refused the API key: check AI_<ROLE>_API_KEY. '.$message;
+            return new Problem('problem.refused_key', ['%detail%' => $message]);
         }
         if (preg_match('/model ["\']?([^"\'\s]+)["\']? not found/i', $message, $missing)) {
-            return \sprintf('The server does not have this model: download it first (with Ollama: ollama pull %s), or set another one.', $missing[1]);
+            return new Problem('problem.model_missing', ['%model%' => $missing[1]]);
         }
-        // The generic bridge of Symfony AI reads a text answer only; a reasoning model of Mistral
-        // answers with blocks, its reasoning then its text.
+        // A very slow answer: no byte for as long as the client waits, or a model that loads or thinks.
+        for ($previous = $exception; null !== $previous; $previous = $previous->getPrevious()) {
+            if ($previous instanceof TimeoutExceptionInterface) {
+                return new Problem('problem.slow', advice: $hasSwitch ? ($switchOff ? 'advice.reasoning_choose' : 'advice.reasoning_tick') : 'advice.reasoning_choose');
+            }
+        }
+        // The Generic bridge reads a text answer only: a model that reasons may answer with blocks,
+        // its reasoning then its text (the bridge of Mistral reads them).
         if ($exception instanceof \TypeError && str_contains($message, 'array given')) {
-            return 'This model answers with reasoning blocks, which Symfony AI cannot read yet: choose a model that does not reason (e.g. mistral-medium-3.5 rather than mistral-large-4).';
+            return new Problem('problem.reasoning_blocks', advice: $hasSwitch && !$switchOff ? 'advice.reasoning_tick' : 'advice.reasoning_choose');
         }
-        // The generic bridge looks for the reason where OpenAI puts it; Mistral puts it elsewhere.
+        // The Generic bridge looks for the reason where OpenAI puts it; others put it elsewhere.
         if ($exception instanceof BadRequestException) {
+            $refusedOption = 'Bad Request' === $message || (bool) preg_match('/reasoning|thinking|chat_template|unknown (?:parameter|field)|extra inputs|unrecognized request argument/i', $message);
+            if ($hasSwitch && $switchOff && $refusedOption) {
+                return new Problem('Bad Request' === $message ? 'problem.refused_without_reason' : 'problem.refused', ['%detail%' => $message], 'advice.reasoning_untick');
+            }
+
             return 'Bad Request' === $message
-                ? 'The server refused the request without a reason the game can read. Models that always reason refuse options of the game: choose one that does not reason.'
-                : 'The server refused the request: '.$message;
+                ? new Problem('problem.refused_without_reason', advice: 'advice.reasoning_choose')
+                : new Problem('problem.refused', ['%detail%' => $message]);
         }
 
-        return 'The call failed: '.$message;
+        return new Problem('problem.call_failed', ['%detail%' => $message]);
     }
 }

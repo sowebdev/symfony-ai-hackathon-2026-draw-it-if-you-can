@@ -3,27 +3,24 @@
 namespace App\Ai;
 
 /**
- * The models a provider offers, sorted by what the catalog of its bridge says each can do. A model
- * the catalog does not know, and every model of a Generic provider, is "others, untested": it may
- * well play, ModelCheck finds out.
+ * The models a provider offers that can play: for a provider with a catalog, those the catalog (or
+ * its own answer) says can; for a server without capabilities, all it lists, sorted by name. Embedding,
+ * audio and image models are not here, nor are models a catalog does not know: the player types
+ * their name.
  */
 final readonly class ModelList
 {
     /**
-     * @param list<string> $guesser Known to read images
-     * @param list<string> $drawer  Known to read images and to call tools
-     * @param list<string> $others  Not in the catalog: untested
-     * @param string|null  $problem Why the list could not be read; the caller falls back to a model typed by hand
+     * @param list<ModelChoice> $choices
+     * @param Problem|null      $problem Why the list could not be read; the caller falls back to a model typed by hand
      */
     public function __construct(
-        public array $guesser = [],
-        public array $drawer = [],
-        public array $others = [],
-        public ?string $problem = null,
+        public array $choices = [],
+        public ?Problem $problem = null,
     ) {
     }
 
-    public static function failed(string $problem): self
+    public static function failed(Problem $problem): self
     {
         return new self(problem: $problem);
     }
@@ -34,10 +31,24 @@ final readonly class ModelList
     }
 
     /**
-     * @return list<string> The models known to play the role
+     * @return list<ModelChoice> The models that can play the role, as far as is known, sorted by name
      */
-    public function knownFor(Role $role): array
+    public function for(Role $role): array
     {
-        return Role::Drawer === $role ? $this->drawer : $this->guesser;
+        return array_values(array_filter($this->choices, static fn (ModelChoice $choice): bool => $choice->canPlay($role)));
+    }
+
+    /**
+     * Whether any model of the list says what it can do: if none does, the labels say so once.
+     */
+    public function hasCapabilities(): bool
+    {
+        foreach ($this->choices as $choice) {
+            if ($choice->isKnown()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -53,12 +53,12 @@ final class ModelSettingsTest extends KernelTestCase
         self::assertNull($this->settings()->view());
 
         $setup = $this->settings()->forRole(Role::Drawer);
-        self::assertSame(Provider::OwnServer, $setup->provider, 'The AI_* variables speak the API of OpenAI, on the Generic bridge');
+        self::assertSame(Provider::Compatible, $setup->provider, 'The AI_* variables speak the API of OpenAI, on the Generic bridge');
         self::assertSame(self::getContainer()->getParameter('kernel.environment'), 'test');
         self::assertSame($_SERVER['AI_DRAWER_BASE_URL'] ?? $_ENV['AI_DRAWER_BASE_URL'] ?? 'http://host.docker.internal:11434', $setup->address);
 
         $this->ask($this->models());
-        self::assertSame(Provider::OwnServer, $this->platforms->created[0][0]);
+        self::assertSame(Provider::Compatible, $this->platforms->created[0][0]);
         // What the options were before the setting existed: the limit, and the reasoning switch of the variable.
         self::assertSame(123, $this->platforms->invoked[0][1]['max_output_tokens']);
         self::assertSame('none', $this->platforms->invoked[0][1]['reasoning_effort']);
@@ -85,18 +85,29 @@ final class ModelSettingsTest extends KernelTestCase
     {
         $this->settings()->save(Provider::Mistral, null, 'mistral-medium-3.5', 'mistral-small-latest', true, 'sk-mistral');
         $this->ask($this->models());
-        self::assertSame(['max_output_tokens' => 123, 'chat_template_kwargs' => ['enable_thinking' => false], 'reasoning_effort' => 'none'], $this->platforms->invoked[0][1]);
+        self::assertSame(['max_output_tokens' => 123], $this->platforms->invoked[0][1], 'Mistral: the game sends nothing for reasoning, a switch or not');
 
-        $this->settings()->save(Provider::Mistral, null, 'mistral-medium-3.5', 'mistral-small-latest', false);
+        // Another OpenAI-compatible service: the player's switch decides.
+        $this->settings()->save(Provider::Compatible, 'http://gate:8001', 'qwen3', 'qwen3', true);
         $this->ask($this->models());
-        self::assertSame(['max_output_tokens' => 123], $this->platforms->invoked[1][1], 'Reasoning is left alone when the setting says so');
+        self::assertSame(['max_output_tokens' => 123, 'chat_template_kwargs' => ['enable_thinking' => false], 'reasoning_effort' => 'none'], $this->platforms->invoked[1][1]);
+        $this->settings()->save(Provider::Compatible, 'http://gate:8001', 'qwen3', 'qwen3', false);
+        $this->ask($this->models());
+        self::assertSame(['max_output_tokens' => 123], $this->platforms->invoked[2][1], 'Reasoning is left alone when the switch is off');
+        self::assertFalse($this->settings()->view()?->reasoningOff);
 
         // gpt-5.1 thinks (the catalog says so), gpt-4o does not.
         $this->settings()->save(Provider::OpenAi, null, 'gpt-5.1', 'gpt-4o', true, 'sk-openai');
         $this->ask($this->models(), Role::Drawer);
         $this->ask($this->models(), Role::Guesser);
-        self::assertSame(['max_output_tokens' => 123, 'reasoning' => ['effort' => 'low']], $this->platforms->invoked[2][1]);
-        self::assertSame(['max_output_tokens' => 123], $this->platforms->invoked[3][1]);
+        self::assertSame(['max_output_tokens' => 123, 'reasoning' => ['effort' => 'low']], $this->platforms->invoked[3][1]);
+        self::assertSame(['max_output_tokens' => 123], $this->platforms->invoked[4][1]);
+        self::assertFalse($this->settings()->view()?->reasoningOff, 'The switch of a provider that has none is not kept');
+
+        // A model typed by name, not in the catalog: no reasoning option.
+        $this->settings()->save(Provider::OpenAi, null, 'gpt-9-not-yet-released', 'gpt-9-not-yet-released', false);
+        $this->ask($this->models());
+        self::assertSame(['max_output_tokens' => 123], $this->platforms->invoked[5][1]);
     }
 
     public function testTheKeyIsSealedInTheDatabaseAndTheScreenGetsItsEndOnly(): void
@@ -142,7 +153,7 @@ final class ModelSettingsTest extends KernelTestCase
         self::assertFalse($this->settings()->isStored());
 
         // A server of one's own needs no key: it can be saved without one, and without APP_ENCRYPTION_KEY.
-        $settings->save(Provider::OwnServer, 'http://gate:8001', 'qwen', 'qwen', true);
+        $settings->save(Provider::Compatible, 'http://gate:8001', 'qwen', 'qwen', true);
         self::assertTrue($this->settings()->isStored());
     }
 
@@ -176,18 +187,19 @@ final class ModelSettingsTest extends KernelTestCase
             self::assertSame('OpenAI needs an API key.', $exception->getMessage());
         }
 
-        $this->settings()->save(Provider::Ollama, null, 'qwen3', 'qwen3', true);
+        $this->settings()->save(Provider::Compatible, 'http://host.docker.internal:11434', 'qwen3', 'qwen3', true);
         $setup = $this->settings()->forRole(Role::Drawer);
         self::assertNull($setup->apiKey(), 'A key is for one provider: it does not follow to another');
         self::assertNull($this->settings()->view()?->maskedApiKey);
         self::assertSame('http://host.docker.internal:11434', $setup->provider->addressOr($setup->address));
+        self::assertTrue($setup->reasoningOff);
     }
 
     public function testAnIncompleteSettingIsRefused(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('needs the address');
-        $this->settings()->save(Provider::OwnServer, '  ', 'qwen', 'qwen', false);
+        $this->settings()->save(Provider::Compatible, '  ', 'qwen', 'qwen', false);
     }
 
     public function testRemovingTheSettingGivesTheEnvironmentBack(): void
@@ -198,7 +210,7 @@ final class ModelSettingsTest extends KernelTestCase
         $this->settings()->remove();
 
         self::assertFalse($this->settings()->isStored());
-        self::assertSame(Provider::OwnServer, $this->settings()->forRole(Role::Guesser)->provider);
+        self::assertSame(Provider::Compatible, $this->settings()->forRole(Role::Guesser)->provider);
     }
 
     public function testTheMessagesThatDescribeTheModelNeverHoldTheKey(): void

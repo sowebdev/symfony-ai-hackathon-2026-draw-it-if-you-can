@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'models.title'|trans }} · Draw It If You Can{% endblock %}
+
+{# Step 2: a model for each role, from the list of the provider, or typed. #}
+{% block body %}
+    <main class="models">
+        <a class="models-home" href="{{ path('home') }}">← {{ 'action.back_home'|trans }}</a>
+        {{ include('models/_steps.html.twig', {step: 2}) }}
+        <h1>{{ 'models.choose_title'|trans }}</h1>
+        <p class="models-intro">{{ 'models.using'|trans({'%provider%': ('provider.' ~ draft.provider.value)|trans}) }}{% if draft.provider.hasAddress %} <code>{{ draft.address }}</code>{% endif %}</p>
+
+        {% if problem %}
+            <div class="models-problem" role="alert">
+                <p><strong>{{ 'models.list_unreadable'|trans }}</strong> {{ problem }}</p>
+                <p>{{ 'models.type_instead'|trans }} <a href="{{ path('models_choose', {fresh: 1}) }}">{{ 'action.try_again'|trans }}</a></p>
+            </div>
+        {% endif %}
+
+        {{ form_start(form, {attr: {class: 'models-form', novalidate: 'novalidate'}}) }}
+            {% for role in ['guesser', 'drawer'] %}
+                {% set listField = form[role ~ 'Choice'] is defined ? form[role ~ 'Choice'] : null %}
+                {% set typed = form[role ~ 'Name'] %}
+                {% set count = counts[role] %}
+                <fieldset class="role-models">
+                    <legend>{{ ('role.' ~ role)|trans }}</legend>
+                    <p class="hint">{{ ('models.needs_' ~ role)|trans }}</p>
+
+                    {% if listField and count <= long_list %}
+                        <div class="field">
+                            {{ form_label(listField) }}
+                            {{ form_widget(listField) }}
+                            {{ form_errors(listField) }}
+                        </div>
+                    {% endif %}
+
+                    <div class="field">
+                        {{ form_label(typed, listField ? 'models.type_name' : 'models.model_name') }}
+                        {{ form_widget(typed) }}
+                        {{ form_errors(typed) }}
+                    </div>
+
+                    {% if listField and count > long_list %}
+                        {# Hundreds of models are not a page: the list is folded, the text field comes first. #}
+                        <details class="long-list"{% if listField.vars.data %} open{% endif %}>
+                            <summary>{{ 'models.pick_from'|trans({'%count%': count}) }}</summary>
+                            {{ form_widget(listField) }}
+                            {{ form_errors(listField) }}
+                        </details>
+                    {% endif %}
+
+                    {% if listField and not capabilities_known %}
+                        <p class="hint">{{ 'models.capabilities_unknown'|trans }}</p>
+                    {% elseif not listField %}
+                        <p class="hint">{{ 'models.typed_unknown'|trans }}</p>
+                    {% endif %}
+                </fieldset>
+            {% endfor %}
+
+            {% if form.reasoningOff is defined %}
+                <div class="field switch">
+                    <label class="switch-label">
+                        {{ form_widget(form.reasoningOff) }}
+                        <span>{{ 'models.reasoning_off'|trans }}</span>
+                    </label>
+                    <small class="hint">{{ 'models.reasoning_hint'|trans }}</small>
+                    {{ form_errors(form.reasoningOff) }}
+                </div>
+            {% endif %}
+
+            <div class="models-actions">
+                <a href="{{ path('models_provider', {back: 1}) }}">← {{ 'action.back'|trans }}</a>
+                {{ form_widget(form.check) }}
+            </div>
+            {{ form_rest(form) }}
+        {{ form_end(form, {render_rest: false}) }}
+    </main>
+{% endblock %}

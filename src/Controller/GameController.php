@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Ai\DraftStore;
 use App\Ai\ModelHealth;
 use App\Entity\Game;
 use App\Game\Dealer;
@@ -49,15 +50,20 @@ final class GameController extends AbstractController
     }
 
     #[Route('/{_locale}', name: 'home', requirements: ['_locale' => new EnumRequirement(Language::class)], methods: ['GET'])]
-    public function home(): Response
+    public function home(Request $request, DraftStore $drafts): Response
     {
+        // Back on the home page, the model screen is abandoned: its draft, with the sealed key, is dropped.
+        if ($request->hasPreviousSession()) {
+            $drafts->clear();
+        }
+
         return $this->renderHome();
     }
 
     /**
      * Whether each role can play, for the home page: the checks of make check, kept a few minutes.
      */
-    #[Route('/health', name: 'health', methods: ['GET'])]
+    #[Route('/{_locale}/health', name: 'health', requirements: ['_locale' => new EnumRequirement(Language::class)], methods: ['GET'])]
     public function health(Request $request, ModelHealth $health): JsonResponse
     {
         $report = $health->report($request->query->getBoolean('fresh'));

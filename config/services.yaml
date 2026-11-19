@@ -43,6 +43,11 @@ services:
     # please note that last definitions always *replace* previous ones
 
 when@test:
+    services:
+        # Public in the tests, which replace its HTTP client: the lists of models are recorded answers.
+        App\Ai\ModelLister:
+            public: true
+
     parameters:
         game.guess_pause_ms: 0
         game.guess_stream_max_s: 1

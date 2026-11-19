@@ -3,5 +3,8 @@ parameters:
     paths:
         - src
         - tests
+    # The migrations are not analysed, but the test of one of them must find its class.
+    scanDirectories:
+        - migrations
     symfony:
         containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml

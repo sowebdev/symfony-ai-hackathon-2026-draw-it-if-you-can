@@ -5,6 +5,7 @@ namespace App\Tests\Unit\Ai;
 use App\Ai\Provider;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Symfony\AI\Platform\Capability;
 use Symfony\AI\Platform\Message\Message;
 use Symfony\AI\Platform\Message\MessageBag;
 use Symfony\AI\Platform\PlatformOptions;
@@ -15,20 +16,51 @@ final class ProviderTest extends TestCase
 {
     public function testWhatEachProviderIsAndNeeds(): void
     {
-        self::assertNull(Provider::Anthropic->defaultAddress());
-        self::assertNull(Provider::OpenAi->defaultAddress());
-        self::assertSame('https://api.mistral.ai', Provider::Mistral->defaultAddress());
-        self::assertSame('http://host.docker.internal:11434', Provider::Ollama->defaultAddress());
-        self::assertNull(Provider::OwnServer->defaultAddress());
+        // Four providers: Ollama is an address of the last one, not a provider of its own.
+        // Four providers: Ollama is an address of the last one.
+        foreach (['ollama', 'own_server'] as $old) {
+            self::assertNotContains($old, array_map(static fn (Provider $p): string => $p->value, Provider::cases()));
+        }
+        self::assertNull(Provider::Anthropic->suggestedAddress());
+        self::assertSame('http://host.docker.internal:11434', Provider::Compatible->suggestedAddress());
 
-        self::assertSame([true, true, true, false, false], array_map(static fn (Provider $p): bool => $p->needsKey(), Provider::cases()));
-        // Anthropic and OpenAI are always at the same place; the others have an address to set.
-        self::assertSame([false, false, true, true, true], array_map(static fn (Provider $p): bool => $p->hasAddress(), Provider::cases()));
-        // Only the two dedicated bridges; Ollama stays on the Generic one (ADR 0004).
-        self::assertSame([false, false, true, true, true], array_map(static fn (Provider $p): bool => $p->isGeneric(), Provider::cases()));
+        self::assertSame([true, true, true, false], array_map(static fn (Provider $p): bool => $p->needsKey(), Provider::cases()));
+        // The three clouds are always at the same place; the last one has an address to set.
+        self::assertSame([false, false, false, true], array_map(static fn (Provider $p): bool => $p->hasAddress(), Provider::cases()));
+        self::assertSame([false, false, false, true], array_map(static fn (Provider $p): bool => $p->isGeneric(), Provider::cases()));
+        self::assertSame('https://api.mistral.ai', Provider::Mistral->addressOr('http://ignored'));
+        self::assertSame('http://gate:8001', Provider::Compatible->addressOr('http://gate:8001/'));
+        // Only where the game cannot know does the player see the reasoning switch.
+        self::assertSame([false, false, false, true], array_map(static fn (Provider $p): bool => $p->hasReasoningSwitch(), Provider::cases()));
         foreach (Provider::cases() as $provider) {
             self::assertNotSame('', $provider->label());
         }
+    }
+
+    /**
+     * @return iterable<string, array{string, bool}>
+     */
+    public static function addresses(): iterable
+    {
+        yield 'localhost' => ['http://localhost:11434', true];
+        yield 'loopback' => ['http://127.0.0.1:8080', true];
+        yield 'docker host' => ['http://host.docker.internal:11434', true];
+        yield 'private 192.168' => ['http://192.168.1.10:1234', true];
+        yield 'private 10' => ['http://10.0.0.5', true];
+        yield 'private 172.16' => ['http://172.16.3.4:8000', true];
+        yield 'a name of the network' => ['http://gate:8001', true];
+        yield 'a .local name' => ['http://studio.local:1234', true];
+        yield 'OpenRouter' => ['https://openrouter.ai/api', false];
+        yield 'Groq' => ['https://api.groq.com/openai', false];
+        yield 'a public address' => ['http://8.8.8.8', false];
+        yield 'no address' => ['', false];
+    }
+
+    #[DataProvider('addresses')]
+    public function testTheReasoningSwitchStartsOnForALocalAddressOnly(string $address, bool $local): void
+    {
+        self::assertSame($local, Provider::Compatible->reasoningOffByDefault($address));
+        self::assertFalse(Provider::Anthropic->reasoningOffByDefault($address), 'No switch, nothing to start');
     }
 
     public function testTheLimitIsTheCanonicalOptionOfEveryBridge(): void
@@ -39,33 +71,69 @@ final class ProviderTest extends TestCase
     }
 
     /**
-     * @return iterable<string, array{Provider, bool, array<string, mixed>}>
+     * The first model of a catalog that thinks, and the first that does not.
+     *
+     * @return array{string, string}
      */
-    public static function reasoningOptions(): iterable
+    private static function thinkingAndNot(Provider $provider): array
     {
-        $generic = ['chat_template_kwargs' => ['enable_thinking' => false], 'reasoning_effort' => 'none'];
-        yield 'Mistral keeps what the game sent so far' => [Provider::Mistral, false, $generic];
-        yield 'Ollama keeps it' => [Provider::Ollama, true, $generic];
-        yield 'an own server keeps it' => [Provider::OwnServer, false, $generic];
-        yield 'Anthropic sends nothing: its API would answer 400' => [Provider::Anthropic, true, []];
-        yield 'OpenAI sends nothing for a model that does not think' => [Provider::OpenAi, false, []];
-        yield 'OpenAI asks the least effort of a model that thinks' => [Provider::OpenAi, true, ['reasoning' => ['effort' => 'low']]];
+        $thinks = $plain = null;
+        foreach ($provider->bridgeCatalog()?->getModels() ?? [] as $name => $model) {
+            if (\in_array(Capability::THINKING, $model['capabilities'], true)) {
+                $thinks ??= $name;
+            } else {
+                $plain ??= $name;
+            }
+        }
+        self::assertNotNull($thinks);
+        self::assertNotNull($plain);
+
+        return [$thinks, $plain];
     }
 
     /**
-     * @param array<string, mixed> $expected
+     * The options that keep a model from reasoning, for each provider, a model that thinks and one that
+     * does not, a model typed by name, and the switch on and off (it counts for the Generic case only).
      */
-    #[DataProvider('reasoningOptions')]
-    public function testTurningReasoningOff(Provider $provider, bool $thinks, array $expected): void
+    public function testWhatKeepsAModelFromReasoning(): void
     {
-        self::assertSame($expected, $provider->reasoningOff($thinks));
+        $generic = ['chat_template_kwargs' => ['enable_thinking' => false], 'reasoning_effort' => 'none'];
+
+        // Another OpenAI-compatible service: the game cannot know, the switch decides.
+        self::assertSame($generic, Provider::Compatible->reasoningOptions('qwen3:8b', true));
+        self::assertSame([], Provider::Compatible->reasoningOptions('qwen3:8b', false), 'A cloud API may refuse the option: nothing when the switch is off');
+
+        // Anthropic: thinking is off until asked, and its API would answer 400 to reasoning_effort.
+        [$thinks, $plain] = self::thinkingAndNot(Provider::Anthropic);
+        foreach ([true, false] as $switch) {
+            self::assertSame([], Provider::Anthropic->reasoningOptions($thinks, $switch));
+            self::assertSame([], Provider::Anthropic->reasoningOptions($plain, $switch));
+            self::assertSame([], Provider::Anthropic->reasoningOptions('claude-not-yet-released', $switch));
+        }
+
+        // OpenAI: the least effort for a model the catalog says thinks, nothing for the others, whatever the switch.
+        [$thinks, $plain] = self::thinkingAndNot(Provider::OpenAi);
+        foreach ([true, false] as $switch) {
+            self::assertSame(['reasoning' => ['effort' => 'low']], Provider::OpenAi->reasoningOptions($thinks, $switch));
+            self::assertSame([], Provider::OpenAi->reasoningOptions($plain, $switch));
+            self::assertSame([], Provider::OpenAi->reasoningOptions('gpt-9-not-yet-released', $switch));
+        }
+
+        // Mistral: nothing is sent when unsure, a model that thinks or not.
+        [$thinks, $plain] = self::thinkingAndNot(Provider::Mistral);
+        foreach ([true, false] as $switch) {
+            self::assertSame([], Provider::Mistral->reasoningOptions($thinks, $switch));
+            self::assertSame([], Provider::Mistral->reasoningOptions($plain, $switch));
+            self::assertSame([], Provider::Mistral->reasoningOptions('mistral-not-yet-released', $switch));
+        }
     }
 
     public function testTheCatalogKnowsWhatABridgeKnows(): void
     {
-        self::assertNull(Provider::Mistral->bridgeCatalog());
-        self::assertNull(Provider::Ollama->knows('qwen3'));
-        self::assertTrue(Provider::Anthropic->knows('claude-haiku-5-5')?->supports(\Symfony\AI\Platform\Capability::TOOL_CALLING));
+        self::assertNull(Provider::Compatible->bridgeCatalog(), 'The Generic bridge knows no model');
+        self::assertNull(Provider::Compatible->knows('qwen3'));
+        self::assertTrue(Provider::Mistral->knows('mistral-small-latest')?->supports(Capability::INPUT_IMAGE));
+        self::assertTrue(Provider::Anthropic->knows('claude-haiku-5-5')?->supports(Capability::TOOL_CALLING));
         self::assertNull(Provider::Anthropic->knows('claude-not-yet-released'));
     }
 
@@ -93,16 +161,25 @@ final class ProviderTest extends TestCase
             ['max_output_tokens' => 50], ['authorization: Bearer sk-test'], ['max_tokens', 'reasoning_effort', 'chat_template_kwargs'],
             '{"id":"resp_1","object":"response","status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"ok"}]}],"usage":{"input_tokens":1,"output_tokens":1,"total_tokens":2}}',
         ];
-        yield 'Mistral' => [
+        yield 'Mistral, on its own bridge: the limit as max_tokens, no reasoning option' => [
             Provider::Mistral, null, 'mistral-small-latest', 'POST https://api.mistral.ai/v1/chat/completions',
-            ['max_tokens' => 50, 'reasoning_effort' => 'none'], ['authorization: Bearer sk-test'], ['max_output_tokens'], $generic,
+            ['max_tokens' => 50], ['authorization: Bearer sk-test'], ['max_output_tokens', 'reasoning_effort', 'chat_template_kwargs'], $generic,
         ];
-        yield 'Ollama' => [
-            Provider::Ollama, null, 'qwen3:8b', 'POST http://host.docker.internal:11434/v1/chat/completions',
+        yield 'Mistral, a model the catalog does not know' => [
+            Provider::Mistral, null, 'mistral-not-yet-released', 'POST https://api.mistral.ai/v1/chat/completions',
+            ['max_tokens' => 50, 'model' => 'mistral-not-yet-released'], ['authorization: Bearer sk-test'], ['reasoning_effort'], $generic,
+        ];
+        yield 'Mistral, a model that answers in blocks, its reasoning then its text' => [
+            Provider::Mistral, null, 'mistral-medium-2604', 'POST https://api.mistral.ai/v1/chat/completions',
+            ['max_tokens' => 50], ['authorization: Bearer sk-test'], ['reasoning_effort'],
+            '{"choices":[{"message":{"role":"assistant","content":[{"type":"thinking","thinking":[{"type":"text","text":"hm"}]},{"type":"text","text":"ok"}]},"finish_reason":"stop"}]}',
+        ];
+        yield 'Ollama, which is an address on the Generic bridge' => [
+            Provider::Compatible, 'http://host.docker.internal:11434', 'qwen3:8b', 'POST http://host.docker.internal:11434/v1/chat/completions',
             ['max_tokens' => 50, 'reasoning_effort' => 'none', 'chat_template_kwargs' => ['enable_thinking' => false]], [], ['max_output_tokens'], $generic,
         ];
-        yield 'an own server, with a slash at the end of its address' => [
-            Provider::OwnServer, 'http://gate:8001/', 'qwen', 'POST http://gate:8001/v1/chat/completions',
+        yield 'OpenRouter, with a slash at the end of its address' => [
+            Provider::Compatible, 'https://openrouter.ai/api/', 'qwen', 'POST https://openrouter.ai/api/v1/chat/completions',
             ['max_tokens' => 50, 'reasoning_effort' => 'none'], ['authorization: Bearer sk-test'], ['max_output_tokens'], $generic,
         ];
     }
@@ -122,8 +199,7 @@ final class ProviderTest extends TestCase
 
             return new MockResponse($answer, ['response_headers' => ['content-type' => 'application/json']]);
         });
-        // OpenAI would get its reasoning option from a model that thinks only: not asked here.
-        $options = $provider->limit(50) + $provider->reasoningOff(false);
+        $options = $provider->limit(50) + $provider->reasoningOptions($model, true);
 
         $platform = $provider->platform($address, 'sk-test', $http);
         $text = $platform->invoke($model, new MessageBag(Message::ofUser('Say ok')), $options)->asText();

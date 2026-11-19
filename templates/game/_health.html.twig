@@ -11,6 +11,7 @@
     <ul data-health-target="list"></ul>
     <div class="health-help" data-health-target="help" hidden>
         <p>{{ 'help.models'|trans }}</p>
+        <a class="button" href="{{ path('models_provider') }}">{{ 'action.choose_model'|trans }}</a>
         <button type="button" class="link" data-action="health#retry">{{ 'action.check_again'|trans }}</button>
     </div>
 </section>

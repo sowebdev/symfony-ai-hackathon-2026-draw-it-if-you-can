@@ -1,5 +1,7 @@
 framework:
     validation:
+        # The messages of the model screen are in the translations of the game.
+        translation_domain: messages
         # Enables validator auto-mapping support.
         # For instance, basic validation constraints will be inferred from Doctrine's metadata.
         #auto_mapping:

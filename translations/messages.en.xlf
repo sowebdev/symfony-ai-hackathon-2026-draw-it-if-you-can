@@ -340,7 +340,7 @@
             </trans-unit>
             <trans-unit id="help.models" resname="help.models">
                 <source>help.models</source>
-                <target>A model does not answer as it should. Set AI_DRAWER_* and AI_GUESSER_* in .env.local (see the README), then try again. "make check" says the same in a terminal.</target>
+                <target>A model does not answer as it should. Choose another one, or check the address and the key, on the model screen. “make check” says the same in a terminal.</target>
                 <note>Home page, when a model fails its check</note>
             </trans-unit>
             <trans-unit id="action.check_again" resname="action.check_again">
@@ -572,6 +572,421 @@
                 <source>label.copilot_named</source>
                 <target>%name%, your copilot</target>
                 <note>In the bar of a round with a copilot</note>
+            </trans-unit>
+            <trans-unit id="action.back" resname="action.back">
+                <source>action.back</source>
+                <target>Back</target>
+                <note>Link back to the previous step of the model screen</note>
+            </trans-unit>
+            <trans-unit id="action.back_home" resname="action.back_home">
+                <source>action.back_home</source>
+                <target>Home</target>
+                <note>Link from the model screen to the home page</note>
+            </trans-unit>
+            <trans-unit id="action.try_again" resname="action.try_again">
+                <source>action.try_again</source>
+                <target>Try again</target>
+                <note>Link: asks the provider for its list of models again</note>
+            </trans-unit>
+            <trans-unit id="action.choose_model" resname="action.choose_model">
+                <source>action.choose_model</source>
+                <target>Choose the model</target>
+                <note>Button of the health card of the home page, when no model answers: opens the model screen</note>
+            </trans-unit>
+            <trans-unit id="action.change_model" resname="action.change_model">
+                <source>action.change_model</source>
+                <target>Change the model</target>
+                <note>Permanent link at the bottom of the home page</note>
+            </trans-unit>
+            <trans-unit id="action.list_models" resname="action.list_models">
+                <source>action.list_models</source>
+                <target>List the models</target>
+                <note>Button of step 1 of the model screen</note>
+            </trans-unit>
+            <trans-unit id="action.check_models" resname="action.check_models">
+                <source>action.check_models</source>
+                <target>Check the models</target>
+                <note>Button of step 2 of the model screen</note>
+            </trans-unit>
+            <trans-unit id="action.save_and_play" resname="action.save_and_play">
+                <source>action.save_and_play</source>
+                <target>Save and play</target>
+                <note>Button of step 3 of the model screen, shown when both models passed</note>
+            </trans-unit>
+            <trans-unit id="models.title" resname="models.title">
+                <source>models.title</source>
+                <target>Choose the model</target>
+                <note>Title of the model screen, step 1</note>
+            </trans-unit>
+            <trans-unit id="models.steps" resname="models.steps">
+                <source>models.steps</source>
+                <target>Steps</target>
+                <note>Name of the list of steps of the model screen, for screen readers</note>
+            </trans-unit>
+            <trans-unit id="models.step_provider" resname="models.step_provider">
+                <source>models.step_provider</source>
+                <target>Provider</target>
+                <note>Step 1 of the model screen</note>
+            </trans-unit>
+            <trans-unit id="models.step_models" resname="models.step_models">
+                <source>models.step_models</source>
+                <target>Models</target>
+                <note>Step 2 of the model screen</note>
+            </trans-unit>
+            <trans-unit id="models.step_check" resname="models.step_check">
+                <source>models.step_check</source>
+                <target>Check</target>
+                <note>Step 3 of the model screen</note>
+            </trans-unit>
+            <trans-unit id="models.provider_intro" resname="models.provider_intro">
+                <source>models.provider_intro</source>
+                <target>The AI draws and guesses with a model. Pick who runs it and give your API key: the game lists the models that can play.</target>
+                <note>Under the title of step 1</note>
+            </trans-unit>
+            <trans-unit id="models.provider" resname="models.provider">
+                <source>models.provider</source>
+                <target>Provider</target>
+                <note>Legend of the provider cards</note>
+            </trans-unit>
+            <trans-unit id="models.api_key" resname="models.api_key">
+                <source>models.api_key</source>
+                <target>API key</target>
+                <note>Label of the API key field</note>
+            </trans-unit>
+            <trans-unit id="models.key_hint" resname="models.key_hint">
+                <source>models.key_hint</source>
+                <target>Kept encrypted in the game’s database and never shown again. Leave it empty for a server of your own that asks for none.</target>
+                <note>Under the API key field, when no key is saved</note>
+            </trans-unit>
+            <trans-unit id="models.key_saved" resname="models.key_saved">
+                <source>models.key_saved</source>
+                <target>A key for %provider% is saved (%end%). Leave this empty to keep it.</target>
+                <note>Under the API key field, when a key is saved; %provider% is the provider of the saved setting, %end% the end of its key (…3f9a)</note>
+            </trans-unit>
+            <trans-unit id="models.address" resname="models.address">
+                <source>models.address</source>
+                <target>Address, for another OpenAI-compatible service</target>
+                <note>Label of the address field</note>
+            </trans-unit>
+            <trans-unit id="models.address_hint" resname="models.address_hint">
+                <source>models.address_hint</source>
+                <target>The other providers have their own address. From inside Docker, your machine is host.docker.internal: this is the address of Ollama.</target>
+                <note>Under the address field</note>
+            </trans-unit>
+            <trans-unit id="provider.anthropic" resname="provider.anthropic">
+                <source>provider.anthropic</source>
+                <target>Anthropic</target>
+                <note>Card of step 1</note>
+            </trans-unit>
+            <trans-unit id="provider.anthropic_hint" resname="provider.anthropic_hint">
+                <source>provider.anthropic_hint</source>
+                <target>Claude models, with your Anthropic API key.</target>
+                <note>Card of step 1</note>
+            </trans-unit>
+            <trans-unit id="provider.openai" resname="provider.openai">
+                <source>provider.openai</source>
+                <target>OpenAI</target>
+                <note>Card of step 1</note>
+            </trans-unit>
+            <trans-unit id="provider.openai_hint" resname="provider.openai_hint">
+                <source>provider.openai_hint</source>
+                <target>GPT models, with your OpenAI API key.</target>
+                <note>Card of step 1</note>
+            </trans-unit>
+            <trans-unit id="provider.mistral" resname="provider.mistral">
+                <source>provider.mistral</source>
+                <target>Mistral</target>
+                <note>Card of step 1</note>
+            </trans-unit>
+            <trans-unit id="provider.mistral_hint" resname="provider.mistral_hint">
+                <source>provider.mistral_hint</source>
+                <target>Mistral models, with your Mistral API key.</target>
+                <note>Card of step 1</note>
+            </trans-unit>
+            <trans-unit id="provider.openai_compatible" resname="provider.openai_compatible">
+                <source>provider.openai_compatible</source>
+                <target>Another OpenAI-compatible service (Ollama, LM Studio, OpenRouter…)</target>
+                <note>Card of step 1: a service that speaks the API of OpenAI, local or on the internet</note>
+            </trans-unit>
+            <trans-unit id="provider.openai_compatible_hint" resname="provider.openai_compatible_hint">
+                <source>provider.openai_compatible_hint</source>
+                <target>On your machine (Ollama, LM Studio, llama.cpp) or on the internet (OpenRouter, Groq, Hugging Face): an address, and a key if it asks for one.</target>
+                <note>Card of step 1</note>
+            </trans-unit>
+            <trans-unit id="error.choose_provider" resname="error.choose_provider">
+                <source>error.choose_provider</source>
+                <target>Choose a provider.</target>
+                <note>Step 1 of the model screen</note>
+            </trans-unit>
+            <trans-unit id="error.address_needed" resname="error.address_needed">
+                <source>error.address_needed</source>
+                <target>This service needs an address.</target>
+                <note>Step 1 of the model screen</note>
+            </trans-unit>
+            <trans-unit id="error.address_invalid" resname="error.address_invalid">
+                <source>error.address_invalid</source>
+                <target>An address starts with http:// or https://.</target>
+                <note>Step 1 of the model screen</note>
+            </trans-unit>
+            <trans-unit id="error.too_long" resname="error.too_long">
+                <source>error.too_long</source>
+                <target>This is too long.</target>
+                <note>Model screen</note>
+            </trans-unit>
+            <trans-unit id="error.key_needed" resname="error.key_needed">
+                <source>error.key_needed</source>
+                <target>%provider% needs an API key.</target>
+                <note>Step 1: %provider% is the name of the provider</note>
+            </trans-unit>
+            <trans-unit id="error.encryption" resname="error.encryption">
+                <source>error.encryption</source>
+                <target>The API key cannot be kept: %detail%</target>
+                <note>Step 1 and 3: the key cannot be sealed; %detail% is the reason, in English</note>
+            </trans-unit>
+            <trans-unit id="error.model_needed" resname="error.model_needed">
+                <source>error.model_needed</source>
+                <target>Choose a model in the list, or type its name.</target>
+                <note>Step 2 of the model screen</note>
+            </trans-unit>
+            <trans-unit id="error.model_invalid" resname="error.model_invalid">
+                <source>error.model_invalid</source>
+                <target>This model is not in the list: type its name instead.</target>
+                <note>Step 2 of the model screen</note>
+            </trans-unit>
+            <trans-unit id="models.choose_title" resname="models.choose_title">
+                <source>models.choose_title</source>
+                <target>Choose the models</target>
+                <note>Title of step 2</note>
+            </trans-unit>
+            <trans-unit id="models.using" resname="models.using">
+                <source>models.using</source>
+                <target>Provider: %provider%</target>
+                <note>Step 2: %provider% is the provider chosen in step 1</note>
+            </trans-unit>
+            <trans-unit id="models.list_unreadable" resname="models.list_unreadable">
+                <source>models.list_unreadable</source>
+                <target>The list of models cannot be read.</target>
+                <note>Step 2, when the list of models cannot be read</note>
+            </trans-unit>
+            <trans-unit id="models.type_instead" resname="models.type_instead">
+                <source>models.type_instead</source>
+                <target>Type the name of each model instead.</target>
+                <note>Step 2, when the list of models cannot be read</note>
+            </trans-unit>
+            <trans-unit id="models.list_guesser" resname="models.list_guesser">
+                <source>models.list_guesser</source>
+                <target>From the list: models that read images</target>
+                <note>Label of the list of the guesser</note>
+            </trans-unit>
+            <trans-unit id="models.list_drawer" resname="models.list_drawer">
+                <source>models.list_drawer</source>
+                <target>From the list: models that read images and call tools</target>
+                <note>Label of the list of the drawer</note>
+            </trans-unit>
+            <trans-unit id="models.pick" resname="models.pick">
+                <source>models.pick</source>
+                <target>— choose a model —</target>
+                <note>First option of a list of models</note>
+            </trans-unit>
+            <trans-unit id="models.type_name" resname="models.type_name">
+                <source>models.type_name</source>
+                <target>…or type a model name</target>
+                <note>Label of the field where a model name is typed, when there is a list</note>
+            </trans-unit>
+            <trans-unit id="models.model_name" resname="models.model_name">
+                <source>models.model_name</source>
+                <target>Model name</target>
+                <note>Label of the field where a model name is typed, when there is no list</note>
+            </trans-unit>
+            <trans-unit id="models.needs_guesser" resname="models.needs_guesser">
+                <source>models.needs_guesser</source>
+                <target>It picks the word and guesses your drawing: it must read images.</target>
+                <note>Under the legend of the guesser, step 2</note>
+            </trans-unit>
+            <trans-unit id="models.needs_drawer" resname="models.needs_drawer">
+                <source>models.needs_drawer</source>
+                <target>It draws with a tool and looks at its drawing: it must read images and call tools.</target>
+                <note>Under the legend of the drawer, step 2</note>
+            </trans-unit>
+            <trans-unit id="models.reads_images" resname="models.reads_images">
+                <source>models.reads_images</source>
+                <target>reads images</target>
+                <note>Capability stated by a catalog, after a model name</note>
+            </trans-unit>
+            <trans-unit id="models.calls_tools" resname="models.calls_tools">
+                <source>models.calls_tools</source>
+                <target>calls tools</target>
+                <note>Capability stated by a catalog, after a model name</note>
+            </trans-unit>
+            <trans-unit id="models.pick_from" resname="models.pick_from">
+                <source>models.pick_from</source>
+                <target>Pick from the %count% models</target>
+                <note>Summary of a folded list of many models; %count% is their number</note>
+            </trans-unit>
+            <trans-unit id="models.capabilities_unknown" resname="models.capabilities_unknown">
+                <source>models.capabilities_unknown</source>
+                <target>This server does not say what its models can do: capabilities unknown, the check will tell.</target>
+                <note>Under a list whose server does not say what its models can do</note>
+            </trans-unit>
+            <trans-unit id="models.typed_unknown" resname="models.typed_unknown">
+                <source>models.typed_unknown</source>
+                <target>A model typed by name: capabilities unknown, the check will tell.</target>
+                <note>Under a field where a model name is typed, when there is no list</note>
+            </trans-unit>
+            <trans-unit id="models.reasoning_off" resname="models.reasoning_off">
+                <source>models.reasoning_off</source>
+                <target>Turn reasoning off, for a local model that thinks for too long</target>
+                <note>Switch of step 2, for another OpenAI-compatible service</note>
+            </trans-unit>
+            <trans-unit id="models.reasoning_hint" resname="models.reasoning_hint">
+                <source>models.reasoning_hint</source>
+                <target>Started on for an address on your machine or network, off otherwise: a cloud API may refuse this option. If the check fails, it says which way to flip the switch.</target>
+                <note>Under the switch of step 2</note>
+            </trans-unit>
+            <trans-unit id="models.check_title" resname="models.check_title">
+                <source>models.check_title</source>
+                <target>Checking the models</target>
+                <note>Title of step 3</note>
+            </trans-unit>
+            <trans-unit id="models.check_intro" resname="models.check_intro">
+                <source>models.check_intro</source>
+                <target>Each model is tried on a tiny task: the guesser names a circle drawn in an image, the drawer draws one stroke with its tool.</target>
+                <note>Under the title of step 3</note>
+            </trans-unit>
+            <trans-unit id="models.checked" resname="models.checked">
+                <source>models.checked</source>
+                <target>checked, on this machine</target>
+                <note>Step 3, after a model passed its check</note>
+            </trans-unit>
+            <trans-unit id="models.nothing_saved" resname="models.nothing_saved">
+                <source>models.nothing_saved</source>
+                <target>Nothing was saved. Go back to change a model, or check again.</target>
+                <note>Step 3, when a check failed</note>
+            </trans-unit>
+            <trans-unit id="check.slow" resname="check.slow">
+                <source>check.slow</source>
+                <target>It answered, but after %seconds% s: the game needs an answer every few seconds.</target>
+                <note>Step 3, a model passed but took long; %seconds% is the time</note>
+            </trans-unit>
+            <trans-unit id="advice.reasoning_choose" resname="advice.reasoning_choose">
+                <source>advice.reasoning_choose</source>
+                <target>A model that reasons before answering may spend all its time on it: choose one that does not reason.</target>
+                <note>After a problem that reasoning may cause</note>
+            </trans-unit>
+            <trans-unit id="advice.reasoning_tick" resname="advice.reasoning_tick">
+                <source>advice.reasoning_tick</source>
+                <target>Tick “Turn reasoning off” on the previous step: a model that thinks may spend all its time on it.</target>
+                <note>After a problem that reasoning may cause, with the switch off</note>
+            </trans-unit>
+            <trans-unit id="advice.reasoning_untick" resname="advice.reasoning_untick">
+                <source>advice.reasoning_untick</source>
+                <target>Untick “Turn reasoning off” on the previous step: this service seems to refuse the option that does it.</target>
+                <note>After a refused option, with the switch on</note>
+            </trans-unit>
+            <trans-unit id="problem.no_server" resname="problem.no_server">
+                <source>problem.no_server</source>
+                <target>Nothing answers at this address: check it on the model screen, or start your model server.</target>
+                <note>A model cannot be reached</note>
+            </trans-unit>
+            <trans-unit id="problem.refused_key" resname="problem.refused_key">
+                <source>problem.refused_key</source>
+                <target>The server refused the API key: check it on the model screen. %detail%</target>
+                <note>The server refused the API key; %detail% is what it said, in English</note>
+            </trans-unit>
+            <trans-unit id="problem.model_missing" resname="problem.model_missing">
+                <source>problem.model_missing</source>
+                <target>The server does not have the model %model%: download it first (with Ollama: ollama pull %model%), or choose another one.</target>
+                <note>The server does not have the model; %model% is its name</note>
+            </trans-unit>
+            <trans-unit id="problem.slow" resname="problem.slow">
+                <source>problem.slow</source>
+                <target>The model took too long to answer.</target>
+                <note>A model took too long to answer</note>
+            </trans-unit>
+            <trans-unit id="problem.reasoning_blocks" resname="problem.reasoning_blocks">
+                <source>problem.reasoning_blocks</source>
+                <target>This model answers with reasoning blocks, which the game cannot read.</target>
+                <note>A model answers with blocks the game cannot read</note>
+            </trans-unit>
+            <trans-unit id="problem.refused" resname="problem.refused">
+                <source>problem.refused</source>
+                <target>The server refused the request: %detail%</target>
+                <note>The server refused the request; %detail% is its reason, in English</note>
+            </trans-unit>
+            <trans-unit id="problem.refused_without_reason" resname="problem.refused_without_reason">
+                <source>problem.refused_without_reason</source>
+                <target>The server refused the request without a reason the game can read.</target>
+                <note>The server refused the request without a reason the game can read</note>
+            </trans-unit>
+            <trans-unit id="problem.call_failed" resname="problem.call_failed">
+                <source>problem.call_failed</source>
+                <target>The call failed: %detail%</target>
+                <note>A call to the model failed; %detail% is the error, in English</note>
+            </trans-unit>
+            <trans-unit id="problem.no_stroke" resname="problem.no_stroke">
+                <source>problem.no_stroke</source>
+                <target>The model did not call the draw_stroke tool, or not with cells the game can read: the drawer must be a model that calls tools.</target>
+                <note>The drawer did not call its tool</note>
+            </trans-unit>
+            <trans-unit id="problem.no_image_answer" resname="problem.no_image_answer">
+                <source>problem.no_image_answer</source>
+                <target>The model gave no usable answer about an image: it must be a model that reads images.</target>
+                <note>A model gave no usable answer about an image</note>
+            </trans-unit>
+            <trans-unit id="problem.not_a_circle" resname="problem.not_a_circle">
+                <source>problem.not_a_circle</source>
+                <target>The model does not recognize a circle in an image (it answered “%answer%”): it must be a model that reads images.</target>
+                <note>A model did not see the circle; %answer% is what it answered</note>
+            </trans-unit>
+            <trans-unit id="list.needs_address" resname="list.needs_address">
+                <source>list.needs_address</source>
+                <target>The address of the service is needed before its models can be listed.</target>
+                <note>The list of models cannot be read: no address</note>
+            </trans-unit>
+            <trans-unit id="list.needs_key" resname="list.needs_key">
+                <source>list.needs_key</source>
+                <target>%provider% needs an API key before its models can be listed.</target>
+                <note>The list of models cannot be read: no key; %provider% is the provider</note>
+            </trans-unit>
+            <trans-unit id="list.too_long" resname="list.too_long">
+                <source>list.too_long</source>
+                <target>%provider% took more than %seconds% s to list its models.</target>
+                <note>The list of models takes too long</note>
+            </trans-unit>
+            <trans-unit id="list.timeout" resname="list.timeout">
+                <source>list.timeout</source>
+                <target>%provider% did not answer within %seconds% s.</target>
+                <note>The list of models does not come</note>
+            </trans-unit>
+            <trans-unit id="list.refused_key" resname="list.refused_key">
+                <source>list.refused_key</source>
+                <target>%provider% refused the API key (HTTP %status%): check it.</target>
+                <note>The list of models is refused</note>
+            </trans-unit>
+            <trans-unit id="list.not_found" resname="list.not_found">
+                <source>list.not_found</source>
+                <target>%provider% does not list its models at this address (HTTP 404): is the address right?</target>
+                <note>The list of models is not found</note>
+            </trans-unit>
+            <trans-unit id="list.too_many" resname="list.too_many">
+                <source>list.too_many</source>
+                <target>%provider% says too many requests (HTTP 429): try again in a moment.</target>
+                <note>The list of models: too many requests</note>
+            </trans-unit>
+            <trans-unit id="list.http_error" resname="list.http_error">
+                <source>list.http_error</source>
+                <target>%provider% answered HTTP %status% when asked for its models.</target>
+                <note>The list of models: another HTTP error</note>
+            </trans-unit>
+            <trans-unit id="list.no_answer" resname="list.no_answer">
+                <source>list.no_answer</source>
+                <target>Nothing answers at %where%: is the address right, is the server started?</target>
+                <note>The list of models: nothing answers; %where% is the address or the provider</note>
+            </trans-unit>
+            <trans-unit id="list.not_a_list" resname="list.not_a_list">
+                <source>list.not_a_list</source>
+                <target>%provider% did not answer with a list of models.</target>
+                <note>The answer is not a list of models</note>
             </trans-unit>
         </body>
     </file>

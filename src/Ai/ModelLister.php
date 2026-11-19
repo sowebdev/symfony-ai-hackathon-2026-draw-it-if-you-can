@@ -12,8 +12,8 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
- * The models of a provider, from its GET /v1/models, crossed with the catalog of its bridge: for
- * each role, those the catalog says can play it, then the others, untested.
+ * The models of a provider, from its GET /v1/models, crossed with the catalog of its bridge, or with
+ * the capabilities the answer carries: only the models that can play are offered.
  */
 final readonly class ModelLister
 {
@@ -38,57 +38,120 @@ final readonly class ModelLister
     public function list(Provider $provider, ?string $address, #[\SensitiveParameter] ?string $apiKey, bool $fresh = false): ModelList
     {
         // The key is a hash in the key of the cache: a list is for a key, never the key itself.
-        $cacheKey = \sprintf('model_list.%s.%s', $provider->value, substr(hash('sha256', $provider->addressOr($address)."\0".$apiKey), 0, 32));
+        $cacheKey = \sprintf('model_list.v2.%s.%s', $provider->value, substr(hash('sha256', $provider->addressOr($address)."\0".$apiKey), 0, 32));
         if ($fresh) {
             $this->cache->delete($cacheKey);
         }
 
-        /** @var array{names: list<string>, problem: ?string} $found */
+        /** @var array{choices: list<array{name: string, vision: ?bool, tools: ?bool}>, problem: ?array{id: string, parameters: array<string, string>, advice: ?string}} $found */
         $found = $this->cache->get($cacheKey, function (ItemInterface $item) use ($provider, $address, $apiKey): array {
             $item->expiresAfter($provider->listTtl());
             try {
-                return ['names' => $this->fetch($provider, $address, $apiKey), 'problem' => null];
+                return ['choices' => array_map(static fn (ModelChoice $choice): array => $choice->toArray(), self::choices($provider, $this->fetch($provider, $address, $apiKey))), 'problem' => null];
             } catch (ModelListException $exception) {
                 // A failure is not kept: the next call asks again.
                 $item->expiresAfter(0);
 
-                return ['names' => [], 'problem' => $exception->getMessage()];
+                return ['choices' => [], 'problem' => $exception->problem->toArray()];
             }
         });
         if (null !== $found['problem']) {
-            return ModelList::failed($found['problem']);
+            return ModelList::failed(Problem::fromArray($found['problem']));
         }
-        $names = $found['names'];
 
-        return self::cross($provider, $names);
+        return new ModelList(array_map(ModelChoice::fromArray(...), $found['choices']));
     }
 
     /**
-     * @param list<string> $names
+     * What each entry of a GET /v1/models says it can do, as far as it says, sorted by name.
+     *
+     * - A provider with a catalog (Anthropic, OpenAI, Mistral): only the models that can play. The
+     *   answer of Mistral carries capabilities (vision, function calling): when present they decide,
+     *   else the catalog of the bridge; a model neither knows (embeddings, audio, images, a model
+     *   too new) is not listed.
+     * - The Generic case has no catalog: its entries are filtered when they carry capabilities in a
+     *   known shape (OpenRouter, the Hugging Face router: `architecture.input_modalities`,
+     *   `supported_parameters`), else listed as they are, capabilities unknown.
+     *
+     * @param list<array<string, mixed>> $entries
+     *
+     * @return list<ModelChoice>
      */
-    public static function cross(Provider $provider, array $names): ModelList
+    public static function choices(Provider $provider, array $entries): array
     {
         $known = $provider->bridgeCatalog()?->getModels();
-        $guesser = $drawer = $others = [];
-        foreach (array_unique($names) as $name) {
-            if (null === $known || !isset($known[$name])) {
-                $others[] = $name;
+        $choices = [];
+        foreach ($entries as $entry) {
+            $name = $entry['id'];
+            if (!\is_string($name) || '' === $name || isset($choices[$name])) {
                 continue;
             }
-            $capabilities = $known[$name]['capabilities'];
-            if (Capability::INPUT_IMAGE->equalsOneOf($capabilities)) {
-                $guesser[] = $name;
-                if (Capability::TOOL_CALLING->equalsOneOf($capabilities)) {
-                    $drawer[] = $name;
-                }
+            $choice = null === $known ? self::advertised($name, $entry) : (self::stated($name, $entry, $provider) ?? self::catalogued($name, $known));
+            if (null !== $choice && $choice->canPlay(Role::Guesser)) {
+                $choices[$name] = $choice;
             }
         }
+        uasort($choices, static fn (ModelChoice $a, ModelChoice $b): int => strnatcasecmp($a->name, $b->name));
 
-        return new ModelList($guesser, $drawer, $others);
+        return array_values($choices);
     }
 
     /**
-     * @return list<string>
+     * @param array<string, array{capabilities: list<Capability>}> $known
+     */
+    private static function catalogued(string $name, array $known): ?ModelChoice
+    {
+        if (!isset($known[$name])) {
+            return null;
+        }
+        $capabilities = $known[$name]['capabilities'];
+
+        return new ModelChoice($name, Capability::INPUT_IMAGE->equalsOneOf($capabilities), Capability::TOOL_CALLING->equalsOneOf($capabilities));
+    }
+
+    /**
+     * What Mistral says in its own answer: `capabilities: {vision: true, function_calling: true, ...}`.
+     *
+     * @param array<string, mixed> $entry
+     */
+    private static function stated(string $name, array $entry, Provider $provider): ?ModelChoice
+    {
+        $capabilities = $entry['capabilities'] ?? null;
+        if (Provider::Mistral !== $provider || !\is_array($capabilities) || !\array_key_exists('vision', $capabilities) && !\array_key_exists('function_calling', $capabilities)) {
+            return null;
+        }
+        // An embedding or a moderation model says no to chat completion: nobody can play with it.
+        $chat = $capabilities['completion_chat'] ?? true;
+
+        return new ModelChoice($name, true === ($capabilities['vision'] ?? false) && false !== $chat, true === ($capabilities['function_calling'] ?? false) && false !== $chat);
+    }
+
+    /**
+     * The entry of a server without a catalog: the capabilities it carries in a known shape, else none.
+     *
+     * @param array<string, mixed> $entry
+     */
+    private static function advertised(string $name, array $entry): ModelChoice
+    {
+        $architecture = \is_array($entry['architecture'] ?? null) ? $entry['architecture'] : [];
+        $inputs = \is_array($architecture['input_modalities'] ?? null) ? $architecture['input_modalities'] : null;
+        $outputs = \is_array($architecture['output_modalities'] ?? null) ? $architecture['output_modalities'] : null;
+        $parameters = \is_array($entry['supported_parameters'] ?? null) ? $entry['supported_parameters'] : null;
+
+        // An image or audio generator, an embedding: nothing it says it takes matters, it writes no text.
+        if (null !== $outputs && !\in_array('text', $outputs, true)) {
+            return new ModelChoice($name, false, false);
+        }
+
+        return new ModelChoice(
+            $name,
+            null === $inputs ? null : \in_array('image', $inputs, true),
+            null === $parameters ? null : \in_array('tools', $parameters, true),
+        );
+    }
+
+    /**
+     * @return list<array<string, mixed>> The entries of the list: each has an "id"
      *
      * @throws ModelListException
      */
@@ -96,24 +159,24 @@ final readonly class ModelLister
     {
         $base = $provider->addressOr($address);
         if ('' === $base) {
-            throw new ModelListException(\sprintf('%s needs the address of the server before its models can be listed.', $provider->label()));
+            throw new ModelListException(new Problem('list.needs_address'));
         }
         if ($provider->needsKey() && (null === $apiKey || '' === $apiKey)) {
-            throw new ModelListException(\sprintf('%s needs an API key before its models can be listed.', $provider->label()));
+            throw new ModelListException(new Problem('list.needs_key', ['%provider%' => $provider->label()]));
         }
 
         $headers = Provider::Anthropic === $provider
             ? ['x-api-key' => (string) $apiKey, 'anthropic-version' => self::ANTHROPIC_VERSION]
             : (null === $apiKey || '' === $apiKey ? [] : ['Authorization' => 'Bearer '.$apiKey]);
         $deadline = microtime(true) + self::MAX_DURATION_S;
-        $names = [];
+        $entries = [];
         $query = Provider::Anthropic === $provider ? ['limit' => 1000] : [];
 
         for ($page = 0; $page < self::MAX_PAGES; ++$page) {
             $body = $this->get($provider, $base, $base.'/v1/models', $query, $headers, $deadline);
             foreach ($body['data'] ?? [] as $model) {
                 if (\is_array($model) && \is_string($model['id'] ?? null) && '' !== $model['id']) {
-                    $names[] = $model['id'];
+                    $entries[] = $model;
                 }
             }
             // Anthropic pages: has_more, then the last id of the page is where the next starts.
@@ -123,7 +186,7 @@ final readonly class ModelLister
             $query['after_id'] = $body['last_id'];
         }
 
-        return array_values(array_unique($names));
+        return $entries;
     }
 
     /**
@@ -138,7 +201,7 @@ final readonly class ModelLister
     {
         $left = $deadline - microtime(true);
         if ($left <= 0) {
-            throw new ModelListException(\sprintf('%s took more than %d s to list its models.', $provider->label(), self::MAX_DURATION_S));
+            throw new ModelListException(new Problem('list.too_long', ['%provider%' => $provider->label(), '%seconds%' => (string) self::MAX_DURATION_S]));
         }
 
         try {
@@ -149,17 +212,17 @@ final readonly class ModelLister
                 'max_duration' => $left,
             ])->toArray();
         } catch (TimeoutExceptionInterface) {
-            throw new ModelListException(\sprintf('%s did not answer within %d s.', $provider->label(), self::TIMEOUT_S));
+            throw new ModelListException(new Problem('list.timeout', ['%provider%' => $provider->label(), '%seconds%' => (string) self::TIMEOUT_S]));
         } catch (HttpExceptionInterface $exception) {
             $status = $exception->getResponse()->getStatusCode();
 
             throw new ModelListException(match (true) {
-                401 === $status || 403 === $status => \sprintf('%s refused the API key (HTTP %d): check it.', $provider->label(), $status), 404 === $status => \sprintf('%s does not list its models at this address (HTTP 404): is the address right?', $provider->label()), 429 === $status => \sprintf('%s says too many requests (HTTP 429): try again in a moment.', $provider->label()), default => \sprintf('%s answered HTTP %d when asked for its models.', $provider->label(), $status),
+                401 === $status || 403 === $status => new Problem('list.refused_key', ['%provider%' => $provider->label(), '%status%' => (string) $status]), 404 === $status => new Problem('list.not_found', ['%provider%' => $provider->label()]), 429 === $status => new Problem('list.too_many', ['%provider%' => $provider->label()]), default => new Problem('list.http_error', ['%provider%' => $provider->label(), '%status%' => (string) $status]),
             });
         } catch (TransportExceptionInterface) {
-            throw new ModelListException(\sprintf('Nothing answers at %s: is the address right, is the server started?', $provider->hasAddress() ? $base : $provider->label()));
+            throw new ModelListException(new Problem('list.no_answer', ['%where%' => $provider->hasAddress() ? $base : $provider->label()]));
         } catch (DecodingExceptionInterface) {
-            throw new ModelListException(\sprintf('%s did not answer with a list of models.', $provider->label()));
+            throw new ModelListException(new Problem('list.not_a_list', ['%provider%' => $provider->label()]));
         }
     }
 }
