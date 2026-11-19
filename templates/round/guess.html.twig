@@ -66,7 +66,7 @@
                     </div>
                 {% endif %}
                 <h2>{{ 'heading.player_guesses'|trans }}</h2>
-                <ol data-ai-drawing-target="list">
+                <ol data-ai-drawing-target="list"{% if round.game.duel %} class="team-words"{% endif %}>
                     {% for guess in guesses %}
                         <li class="{{ guess.accepted ? 'accepted' }}">{{ guess.word }}</li>
                     {% endfor %}

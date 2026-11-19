@@ -4,6 +4,7 @@ namespace App\Ai;
 
 use App\Game\Language;
 use App\Game\Theme;
+use App\Game\WordCandidate;
 use App\Game\WordMatcher;
 use App\Repository\RoundRepository;
 use Random\Randomizer;
@@ -33,7 +34,7 @@ final readonly class WordPicker
     /**
      * @param Role $role The role whose model picks: the guesser when the player draws, the drawer when the AI draws
      */
-    public function pick(Theme $theme, Language $language, Role $role = Role::Guesser): string
+    public function pick(Theme $theme, Language $language, Role $role = Role::Guesser): WordCandidate
     {
         $recent = $this->rounds->recentTargetWords($theme, $language, self::RECENT_ROUNDS);
         $avoid = [] === $recent ? '' : "\nThese words were drawn recently, list other ones: ".implode(', ', $recent).'.';
@@ -44,7 +45,8 @@ final readonly class WordPicker
                 You run a drawing and guessing game. List words the player could draw.
                 Theme: {$theme->description()}.
                 Each word is a concrete noun in {$language->nameInEnglish()}, something one can draw in less than a minute with a black pen, known to everyone.
-                List {$candidates} different words, varied, not only the most obvious ones: one word per line, in lower case, without article, nothing else.{$avoid}
+                Choose words with one obvious meaning for a child, under the name everyone uses: "château fort" rather than "fort", which could be an adjective. A short phrase of up to three words is fine.
+                List {$candidates} different words, varied, not only the most obvious ones: one per line, in lower case, each with its indefinite article in {$language->nameInEnglish()} (for example "un château fort", "une souris", "ein Schloss", "a mouse"), nothing else.{$avoid}
                 PROMPT),
             Message::ofUser('List the words.'),
         );
@@ -55,7 +57,7 @@ final readonly class WordPicker
         for ($attempt = 1; $attempt <= self::ATTEMPTS; ++$attempt) {
             $word = self::draw($this->model->askList($role, $messages, max(1, (int) floor($deadline - microtime(true)))), $recent, $this->randomizer);
             if (null !== $word) {
-                return $word;
+                return WordCandidate::parse($word, $language);
             }
         }
 

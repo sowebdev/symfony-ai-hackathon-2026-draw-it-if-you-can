@@ -25,6 +25,11 @@ final class WordMatcherTest extends TestCase
         yield 'italian article' => ['il gatto', 'gatto'];
         yield 'italian elided article' => ["l'albero", 'albero'];
         yield 'spanish article' => ['el perro', 'perro'];
+        yield 'french indefinite article on a phrase' => ['un château fort', 'château fort'];
+        yield 'french definite article on a phrase' => ['le château fort', 'un château fort'];
+        yield 'german indefinite articles' => ['einen Hund', 'Hund'];
+        yield 'spanish indefinite article' => ['una casa', 'la casa'];
+        yield 'italian indefinite article' => ["un'amica", 'amica'];
         yield 'punctuation' => ['cat!', 'cat'];
         yield 'accented phrase' => ['Père Noël', 'père noël'];
         yield 'phrase with another case' => ['PERE NOEL', 'Père Noël'];

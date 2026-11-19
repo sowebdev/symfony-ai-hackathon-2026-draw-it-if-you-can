@@ -35,6 +35,17 @@ final class RoundTest extends TestCase
         new Round(new Game(Language::English, 6), 7, 'cat', 60_000, Theme::Animals);
     }
 
+    public function testTheWordIsShownWithItsArticleButCountsWithout(): void
+    {
+        $game = new Game(Language::French);
+
+        $round = new Round($game, 1, 'château fort', 60_000, Theme::Places, 'un');
+        self::assertSame('un château fort', $round->getTargetPhrase());
+        self::assertSame('château fort', $round->getTargetWord());
+        self::assertSame("un'amica", (new Round($game, 1, 'amica', 60_000, Theme::Places, "un'"))->getTargetPhrase());
+        self::assertSame('chat', (new Round($game, 1, 'chat', 60_000, Theme::Animals))->getTargetPhrase(), 'A round without article');
+    }
+
     public function testTheRoundIsOverOnceTheGraceSecondIsGone(): void
     {
         $clock = self::mockTime();

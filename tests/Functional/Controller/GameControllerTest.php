@@ -91,6 +91,17 @@ final class GameControllerTest extends WebTestCase
         self::assertSelectorNotExists('.copilot-badge', 'No copilot unless asked');
     }
 
+    public function testTheWordToDrawIsShownWithItsArticleAndTheAnswerIgnoresIt(): void
+    {
+        $client = self::createClient();
+        // The player draws: the model lists a word with its article.
+        self::scriptModel($client, word: 'un château fort', guesses: ['rien']);
+        $round = self::startFirstRound($client, 'fr', ['drawnBy' => 'player']);
+
+        $client->request('GET', $round);
+        self::assertSelectorTextContains('.target strong', 'un château fort');
+    }
+
     public function testTheHomePageSaysWhetherTheModelsCanPlay(): void
     {
         $client = self::createClient();

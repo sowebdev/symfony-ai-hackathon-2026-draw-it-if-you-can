@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real providers behind the game's model (Anthropic and OpenAI on their own bridges, Mistral on its own bridge, any other OpenAI-compatible service, local like Ollama or on the internet like OpenRouter, on the generic one), a setting stored in the database with its API key encrypted by `APP_ENCRYPTION_KEY` (`app:encryption-key`, run by `make install`), and the list of each provider's models, which shows only those that can play, which is the only source of the model.
 - A screen to choose the model, in three steps without JavaScript (provider and key; the model; check, then "Save and play"), in the five languages. One model by default, for drawing and guessing, with a box for another guesser; the cheapest family of the provider is preselected (« le moins cher »), one card per family, the older versions folded away; the check shows the circle the guesser was sent and its answer, the stroke the drawer drew, and where the model ran, and the loading screen shows while the models are tried. `make install` asks nothing any more: you choose the model on the page. The home page invites you there while no model is chosen, and leads there when a model does not answer; its health messages are translated. Without a model, "Start the game" leads to the screen and `make check` says so and gives its address.
 
+### Changed
+
+- The word to draw is easier to read: the game now asks for words with one obvious meaning, under their usual name ("château fort" rather than "fort"), and shows them with their article: « À dessiner : un château fort ». The article does not count for the answer ("château fort" and "le château fort" both find it).
+- The waiting text says « Tirage du mot… » (the word is drawn at random) instead of « L'IA choisit un mot… ».
+- The duel is easier to read: the player's team (« Toi et l'IA du jeu ») is in yellow and the rival agent in orange, in the top bar, in the words each side proposes, in the end-of-round note and in the final table. The end screen opens with a big banner in the winner's colour, with its name and both scores, and a clear tie.
+
 ### Fixed
 
 - The AI that guesses may answer a short phrase of three words at most, not only one word: with "père noël" to find, it said "Noël", then "Père", and could never win. "Père Noël" now finds "père noël".

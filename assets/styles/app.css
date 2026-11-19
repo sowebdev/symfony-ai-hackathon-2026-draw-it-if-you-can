@@ -928,8 +928,35 @@ button:focus-visible,
     gap: 0.8rem;
 }
 
-.side-score {
-    color: var(--found);
+/* One colour per side, everywhere: the player's team in the yellow of the game, the rival agent in
+   its orange. Always dark ink on a light fill (contrast above 8:1), never coloured text. */
+.side-team {
+    background: var(--marker);
+    color: var(--ink);
+}
+
+.side-rival {
+    background: #ffa94d;
+    color: var(--ink);
+}
+
+.side-score,
+.rival-score {
+    padding: 0.1rem 0.7rem;
+    border: 2px solid var(--ink);
+    border-radius: 8px 12px 9px 11px;
+}
+
+.side-score strong,
+.rival-score strong {
+    font-size: 1.3em;
+    font-weight: normal;
+}
+
+span.side-team,
+span.side-rival {
+    padding: 0.1rem 0.6rem;
+    border-radius: 8px;
 }
 
 .hints h2,
@@ -1236,18 +1263,69 @@ button.link:hover {
 }
 
 /* A duel: the score of each side in the bar, and the answers of the rival in its own column. */
-.rival-score {
-    color: var(--pencil);
+.guesses .rival-answers ol li,
+.guesses ol.team-words li {
+    color: var(--ink);
+    border-color: var(--ink);
 }
 
 .guesses .rival-answers ol li {
-    color: #d9a07a;
-    border-color: #f2c4a2;
+    background: #ffe8cc;
+    border-color: #ffa94d;
+}
+
+.guesses ol.team-words li {
+    background: #fff3bf;
+    border-color: var(--marker);
 }
 
 .guesses .rival-answers ol li.accepted {
-    color: var(--pencil);
-    border-color: var(--pencil);
+    background: #ffa94d;
+    border-color: var(--ink);
+}
+
+.guesses ol.team-words li.accepted {
+    background: var(--marker);
+    border-color: var(--ink);
+}
+
+/* The end of a duel: a banner in the colour of the winner. */
+.duel-banner {
+    width: min(100%, 44rem);
+    box-sizing: border-box;
+    padding: 1.2rem 1.5rem;
+    text-align: center;
+    background: #fff;
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    border-radius: 6px 12px 8px 14px;
+    box-shadow: 6px 8px 0 rgba(0, 0, 0, 0.12);
+}
+
+.duel-banner.side-team {
+    background: var(--marker);
+}
+
+.duel-banner.side-rival {
+    background: #ffa94d;
+}
+
+.duel-banner p {
+    margin: 0;
+}
+
+.duel-banner-title {
+    font-size: clamp(1.8rem, 6vw, 3rem);
+}
+
+.duel-banner-score {
+    font-size: clamp(2.6rem, 11vw, 5rem);
+    line-height: 1.1;
+}
+
+.round-end h2.side-team,
+.round-end h2.side-rival {
+    padding: 0.2rem 0.8rem;
 }
 
 /* The link that leaves the home page for the model screen. */

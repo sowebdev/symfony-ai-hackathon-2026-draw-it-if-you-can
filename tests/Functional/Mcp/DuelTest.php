@@ -83,7 +83,7 @@ final class DuelTest extends WebTestCase
         $this->client->request('GET', $round);
         self::assertSelectorTextContains('.round-end h2', 'Test a trouvé !');
         self::assertSelectorTextContains('.round-end-points', 'points pour Test');
-        self::assertSelectorTextContains('.duel-score', 'Toi et ton IA 0');
+        self::assertSelectorTextContains('.duel-score', "Toi et l'IA du jeu 0");
         self::assertSelectorTextContains('.rival-score strong', '1000');
         self::assertSelectorTextContains('.rival-answers', 'zèbre');
 
@@ -183,9 +183,9 @@ final class DuelTest extends WebTestCase
         }
 
         $this->client->request('GET', $round);
-        self::assertSelectorTextContains('.guesses h2', 'Ton IA propose');
-        self::assertSelectorTextContains('.round-end h2', 'Ton IA a trouvé !');
-        self::assertSelectorTextContains('.round-end-points', 'pour toi et ton IA');
+        self::assertSelectorTextContains('.guesses h2', "L'IA du jeu propose");
+        self::assertSelectorTextContains('.round-end h2', "L'IA du jeu a trouvé !");
+        self::assertSelectorTextContains('.round-end-points', "pour toi et l'IA du jeu");
     }
 
     public function testACopilotDoesNotAnswerAndARivalDoesNotWhisper(): void
@@ -232,8 +232,8 @@ final class DuelTest extends WebTestCase
         }
 
         $this->client->followRedirect();
-        self::assertSelectorTextContains('.final-score', 'Test gagne le duel.');
-        self::assertSelectorTextContains('.duel-final', 'Toi et ton IA 0 points, Test 3000 points');
+        self::assertSelectorTextContains('.duel-banner.side-rival .duel-banner-title', 'Test gagne !');
+        self::assertSelectorTextContains('.duel-banner-score', "0 à 3\u{202F}000");
         self::assertSelectorTextContains('table', 'Trouvé par');
     }
 }

@@ -78,6 +78,6 @@ final readonly class RoundStarter
         $word = $this->wordPicker->pick($theme, $game->getLanguage(), $role);
         $game->dealNextTheme($this->dealer->theme($theme));
 
-        return new Round($game, $number, $word, $this->roundSeconds * 1000, $theme);
+        return new Round($game, $number, $word->word, $this->roundSeconds * 1000, $theme, $word->article);
     }
 }

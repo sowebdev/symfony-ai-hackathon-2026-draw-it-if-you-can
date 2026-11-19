@@ -2,6 +2,7 @@
 
 namespace App\Ai;
 
+use App\Game\WordCandidate;
 use App\Game\WordMatcher;
 use Symfony\AI\Platform\Message\MessageBag;
 
@@ -62,7 +63,7 @@ final readonly class OneWordModel
         foreach (explode("\n", self::withoutReasoning($answer)) as $line) {
             // Numbered or bulleted lists: "1. mouse", "- mouse".
             $line = (string) preg_replace('/^\s*(?:\d+[.)]|[-*•])\s*/u', '', $line);
-            $word = self::clean($line);
+            $word = self::clean($line, WordCandidate::hasArticle($line) ? self::MAX_WORDS + 1 : self::MAX_WORDS);
             if (null !== $word) {
                 $words[WordMatcher::normalize($word)] ??= $word;
             }
@@ -71,7 +72,10 @@ final readonly class OneWordModel
         return array_values($words);
     }
 
-    public static function clean(string $answer): ?string
+    /**
+     * @param int $maxWords A phrase of this many words at most (a candidate of a list carries its article, one more)
+     */
+    public static function clean(string $answer, int $maxWords = self::MAX_WORDS): ?string
     {
         $answer = self::withoutReasoning($answer);
         $line = strtok(trim($answer), "\n");
@@ -80,7 +84,7 @@ final readonly class OneWordModel
         if ('' === $word || mb_strlen($word) > self::MAX_LENGTH || !preg_match("/^\p{L}[\p{L}\p{M}'’ -]*$/u", $word)) {
             return null;
         }
-        if (\count(preg_split('/\s+/', $word) ?: []) > self::MAX_WORDS) {
+        if (\count(preg_split('/\s+/', $word) ?: []) > $maxWords) {
             return null;
         }
 

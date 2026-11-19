@@ -14,8 +14,8 @@
         </p>
     {% endif %}
     {% if round.game.duel %}
-        <p class="duel-score"><span class="side-score">{{ 'label.you'|trans }} <strong>{{ team_score }}</strong></span>
-            <span class="rival-score">{{ include('game/_mode_sketch.html.twig', {mode: 'agent'}) }}{{ round.game.agentDisplayName ?? 'label.rival_unknown'|trans }} <strong>{{ rival_score }}</strong></span></p>
+        <p class="duel-score"><span class="side-score side-team">{{ 'label.you'|trans }} <strong>{{ team_score }}</strong></span>
+            <span class="rival-score side-rival">{{ include('game/_mode_sketch.html.twig', {mode: 'agent'}) }}{{ round.game.agentDisplayName ?? 'label.rival_unknown'|trans }} <strong>{{ rival_score }}</strong></span></p>
     {% else %}
         <p class="team-score">{{ 'label.team_score'|trans }} <strong>{{ team_score }}</strong></p>
     {% endif %}

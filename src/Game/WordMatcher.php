@@ -11,7 +11,7 @@ final class WordMatcher
 {
     private const array ARTICLES = [
         'a', 'an', 'the', 'le', 'la', 'les', 'l', 'un', 'une', 'des', 'du',
-        'der', 'die', 'das', 'den', 'dem', 'ein', 'eine',
+        'der', 'die', 'das', 'den', 'dem', 'ein', 'eine', 'einen', 'einem', 'einer',
         'el', 'los', 'las', 'una', 'unos', 'unas',
         'il', 'lo', 'gli', 'i', 'uno',
     ];

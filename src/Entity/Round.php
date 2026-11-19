@@ -102,6 +102,9 @@ class Round
         /** Dealt for each round: it frames the word, and the guesser knows it. */
         #[ORM\Column(enumType: Theme::class)]
         private Theme $theme,
+        /** The indefinite article the model gave the word ("un", "an", "un'"), null when it gave none or for an older round. */
+        #[ORM\Column(length: 10, nullable: true)]
+        private ?string $targetArticle = null,
     ) {
         if ($number < 1 || $number > $game->getRoundCount()) {
             throw new \InvalidArgumentException(\sprintf('Round %d is not in a game of %d rounds.', $number, $game->getRoundCount()));
@@ -181,6 +184,18 @@ class Round
     public function getGame(): Game
     {
         return $this->game;
+    }
+
+    /**
+     * The word with its article, as shown to the player ("un château fort"). Only getTargetWord() counts for the answer.
+     */
+    public function getTargetPhrase(): string
+    {
+        if (null === $this->targetArticle) {
+            return $this->targetWord;
+        }
+
+        return $this->targetArticle.(str_ends_with($this->targetArticle, "'") ? '' : ' ').$this->targetWord;
     }
 
     public function getTargetWord(): string

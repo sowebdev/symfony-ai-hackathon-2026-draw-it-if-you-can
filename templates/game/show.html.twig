@@ -5,12 +5,17 @@
         <h1>{{ 'heading.game_over'|trans }}</h1>
         {% if game.duel %}
             {% set rival = game.agentDisplayName ?? 'label.rival_unknown'|trans %}
-            <p class="final-score">
-                {% if total > rival_total %}{{ 'result.duel_won'|trans }}
-                {% elseif total < rival_total %}{{ 'result.duel_lost'|trans({'%name%': rival}) }}
-                {% else %}{{ 'result.duel_tie'|trans }}{% endif %}
-            </p>
-            <p class="duel-final">{{ 'result.duel_score'|trans({'%you%': total, '%name%': rival, '%rival%': rival_total}) }}</p>
+            {% set separator = 'label.thousands_separator'|trans %}
+            {% set rival_name = rival|slice(0, 1)|upper ~ rival|slice(1) %}
+            {% set outcome = total > rival_total ? 'won' : (total < rival_total ? 'lost' : 'tie') %}
+            <section class="duel-banner duel-{{ outcome }}{{ outcome == 'won' ? ' side-team' : (outcome == 'lost' ? ' side-rival') }}" aria-live="polite">
+                <p class="duel-banner-title">
+                    {% if outcome == 'won' %}{{ 'result.duel_won'|trans }}
+                    {% elseif outcome == 'lost' %}{{ 'result.duel_lost'|trans({'%name%': rival_name}) }}
+                    {% else %}{{ 'result.duel_tie'|trans }}{% endif %}
+                </p>
+                <p class="duel-banner-score">{{ 'result.duel_score'|trans({'%you%': total|number_format(0, '', separator), '%rival%': rival_total|number_format(0, '', separator)}) }}</p>
+            </section>
         {% else %}
             <p class="final-score">{{ 'result.final_score'|trans({'%points%': '<strong>' ~ total ~ '</strong>'})|raw }}</p>
         {% endif %}
@@ -32,10 +37,10 @@
                         <td>{{ row.round.number }}</td>
                         <td>{{ ('drawer.' ~ row.round.drawnBy.value)|trans }}</td>
                         <td>{{ row.round.theme|trans }}</td>
-                        <td>{{ row.round.targetWord }}</td>
+                        <td>{{ row.round.targetPhrase }}</td>
                         <td>{{ row.round.found ? (row.round.foundAfterMs / 1000)|number_format(1, 'label.decimal_separator'|trans) ~ ' s' : 'result.not_found'|trans }}</td>
                         {% if game.duel %}
-                            <td>{{ row.round.foundByRival ? rival : (row.round.found ? ('found_by.' ~ row.round.foundBy.value)|trans : '') }}</td>
+                            <td>{% if row.round.foundByRival %}<span class="side-rival">{{ rival }}</span>{% elseif row.round.found %}<span class="side-team">{{ ('found_by.' ~ row.round.foundBy.value)|trans }}</span>{% endif %}</td>
                         {% endif %}
                         <td>{{ row.points }}</td>
                     </tr>

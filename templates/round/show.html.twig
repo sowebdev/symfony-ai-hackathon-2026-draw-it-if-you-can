@@ -14,7 +14,7 @@
           {% if round.game.withAgent %}{{ include('round/_agent.html.twig') }}{% endif %}
           data-action="guesses:found->canvas#lock guesses:found->round-timer#finish round-timer:up->canvas#lock round-timer:up->guesses#stop agent:found->canvas#lock agent:found->guesses#stop agent:found->round-timer#finish">
         {{ include('round/_scoreboard.html.twig') }}
-        <p class="target">{{ 'instruction.draw'|trans }} <strong>{{ round.targetWord }}</strong></p>
+        <p class="target">{{ 'instruction.draw'|trans }} <strong>{{ round.targetPhrase }}</strong></p>
 
         <div class="board">
             <div class="stage">
@@ -25,7 +25,7 @@
             <section class="side guesses" aria-live="polite">
                 {{ include('round/_gauge.html.twig') }}
                 <h2>{{ (round.game.duel ? 'heading.your_ai_guesses' : 'heading.ai_guesses')|trans }}</h2>
-                <ol data-guesses-target="list">
+                <ol data-guesses-target="list"{% if round.game.duel %} class="team-words"{% endif %}>
                     {% for guess in guesses %}
                         <li data-guess-id="{{ guess.id }}" class="{{ guess.accepted ? 'accepted' }}">{{ guess.word }}</li>
                     {% endfor %}

@@ -50,6 +50,13 @@ final class OneWordModelTest extends TestCase
         self::assertNull(OneWordModel::clean($answer));
     }
 
+    public function testKeepsTheCandidatesWithTheirArticleOfAList(): void
+    {
+        $answer = "un château fort\nune souris\nHere are some words for you\nein Schloss\nun très grand château fort";
+
+        self::assertSame(['un château fort', 'une souris', 'ein Schloss'], OneWordModel::cleanList($answer));
+    }
+
     public function testKeepsTheUsableWordsOfAList(): void
     {
         $answer = "<think></think>1. mouse\n2) Keyboard\n- coffee mug\n* Mouse\nHere are some words:\n\n• rubber duck\n42";
