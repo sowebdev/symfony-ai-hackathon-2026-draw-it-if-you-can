@@ -50,6 +50,7 @@ final class ModelsController extends AbstractController
         private readonly ModelLister $lister,
         private readonly ModelCheck $modelCheck,
         private readonly Models $models,
+        private readonly ModelHealth $health,
         private readonly TranslatorInterface $translator,
     ) {
     }
@@ -191,7 +192,7 @@ final class ModelsController extends AbstractController
             $setup = $models->setup($role);
             $started = microtime(true);
             try {
-                $problem = $check->check($role);
+                $problem = $check->check($role, null);
             } catch (\Throwable $exception) {
                 $problem = ModelHealth::explain($exception, $setup->provider, $setup->reasoningOff);
             }
@@ -245,6 +246,8 @@ final class ModelsController extends AbstractController
             return $this->redirectToRoute('models_provider', ['back' => 1]);
         }
         $this->drafts->clear();
+        // Step 3 has just checked these models: the home page does not check them again.
+        $this->health->rememberHealthy();
 
         return $this->redirectToRoute('home');
     }

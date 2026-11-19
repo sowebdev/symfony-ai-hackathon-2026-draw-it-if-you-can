@@ -54,7 +54,7 @@ final readonly class Drawer implements DrawsStrokes
             $this->request($word, $theme, $drawn),
         );
 
-        $agent = $this->models->agent(Role::Drawer, new Pen($max), maxToolCalls: $max + 5);
+        $agent = $this->models->agent(Role::Drawer, new Pen($max), maxToolCalls: $max + 5, maxDurationS: null);
         $execution = $agent->call($messages, $this->models->options(Role::Drawer, ['stream' => true], self::MAX_TOKENS_PER_ANSWER));
 
         $assembler = new ToolCallAssembler();

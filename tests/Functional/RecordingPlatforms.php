@@ -19,7 +19,7 @@ final class RecordingPlatforms implements PlatformFactory
     /** @var list<array{string, array<string, mixed>}> */
     public array $invoked = [];
 
-    public function create(Provider $provider, ?string $address, #[\SensitiveParameter] ?string $apiKey): PlatformInterface
+    public function create(Provider $provider, ?string $address, #[\SensitiveParameter] ?string $apiKey, ?int $maxDurationS = null): PlatformInterface
     {
         $this->created[] = [$provider, $address, $apiKey];
 

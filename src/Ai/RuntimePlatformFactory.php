@@ -18,10 +18,10 @@ final class RuntimePlatformFactory implements PlatformFactory
     {
     }
 
-    public function create(Provider $provider, ?string $address, #[\SensitiveParameter] ?string $apiKey): PlatformInterface
+    public function create(Provider $provider, ?string $address, #[\SensitiveParameter] ?string $apiKey, ?int $maxDurationS = null): PlatformInterface
     {
-        $key = implode('|', [$provider->value, $provider->addressOr($address), hash('sha256', (string) $apiKey)]);
+        $key = implode('|', [$provider->value, $provider->addressOr($address), hash('sha256', (string) $apiKey), $maxDurationS ?? 'none']);
 
-        return $this->platforms[$key] ??= $provider->platform($address, $apiKey, $this->httpClient);
+        return $this->platforms[$key] ??= $provider->platform($address, $apiKey, null === $maxDurationS ? $this->httpClient : $this->httpClient->withOptions(['max_duration' => $maxDurationS]));
     }
 }

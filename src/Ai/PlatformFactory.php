@@ -11,5 +11,8 @@ use Symfony\Component\DependencyInjection\Attribute\AsAlias;
 #[AsAlias(RuntimePlatformFactory::class)]
 interface PlatformFactory
 {
-    public function create(Provider $provider, ?string $address, #[\SensitiveParameter] ?string $apiKey): PlatformInterface;
+    /**
+     * @param int|null $maxDurationS The longest a whole call may last, answer included; null: the HTTP client's own limits
+     */
+    public function create(Provider $provider, ?string $address, #[\SensitiveParameter] ?string $apiKey, ?int $maxDurationS = null): PlatformInterface;
 }

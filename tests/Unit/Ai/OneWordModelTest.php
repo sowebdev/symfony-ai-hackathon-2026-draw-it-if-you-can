@@ -20,6 +20,8 @@ final class OneWordModelTest extends TestCase
         yield 'first line only' => ["bicycle\nI think it is a bicycle.", 'bicycle'];
         yield 'empty reasoning block' => ["<think>\n</think>\n\ncat", 'cat'];
         yield 'two words' => ['coffee mug', 'coffee mug'];
+        yield 'phrase' => ['Père Noël', 'Père Noël'];
+        yield 'phrase of three words' => ['« pomme de terre ».', 'pomme de terre'];
         yield 'elision' => ["l'arbre", "l'arbre"];
     }
 
@@ -36,6 +38,7 @@ final class OneWordModelTest extends TestCase
     {
         yield 'empty' => [''];
         yield 'sentence' => ['I think this is a cat'];
+        yield 'four words' => ['a very big cat'];
         yield 'digits' => ['42'];
         yield 'symbols' => ['<svg>'];
         yield 'too long' => [str_repeat('a', 41)];

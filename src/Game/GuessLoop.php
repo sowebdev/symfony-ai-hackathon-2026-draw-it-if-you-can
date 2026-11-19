@@ -11,6 +11,7 @@ use App\Repository\GuessRepository;
 use App\Repository\RoundRepository;
 use App\Repository\StrokeRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\ServerEvent;
 
@@ -38,6 +39,7 @@ final readonly class GuessLoop
         private StrokeRenderer $renderer,
         private Guesser $guesser,
         private WordMatcher $matcher,
+        private LoggerInterface $logger,
         #[Autowire('%game.guess_pause_ms%')]
         private int $pauseMs,
         #[Autowire('%game.guess_stream_max_s%')]
@@ -104,7 +106,14 @@ final readonly class GuessLoop
         $said = array_map(static fn (Guess $guess): string => $guess->getWord(), $this->guesses->findByRound($round));
         $png = $this->renderer->toPng(array_map(static fn (Stroke $stroke): array => $stroke->getPoints(), $strokes));
 
-        $word = $this->guesser->guess($png, $round->getTheme(), $game->getLanguage(), $said);
+        try {
+            $word = $this->guesser->guess($png, $round->getTheme(), $game->getLanguage(), $said);
+        } catch (\Throwable $exception) {
+            // A model that stops answering (too slow, gone) is a guess that does not come, not the end of the stream.
+            $this->logger->warning('The AI could not guess: {message}', ['message' => $exception->getMessage(), 'exception' => $exception]);
+
+            return null;
+        }
         // A slow model may answer after the end of the round: too late.
         if (null === $word || $round->isTimeUp() || \in_array(WordMatcher::normalize($word), array_map(WordMatcher::normalize(...), $said), true)) {
             return null;

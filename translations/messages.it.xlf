@@ -58,6 +58,11 @@
                 <target>L'IA non è riuscita a scegliere una parola. Il modello è attivo? «make check» dice cosa non va.</target>
                 <note>The model gave no word to draw</note>
             </trans-unit>
+            <trans-unit id="error.model_timeout" resname="error.model_timeout">
+                <source>error.model_timeout</source>
+                <target>Il modello impiega troppo a rispondere. Se è in esecuzione sul tuo computer, forse si sta caricando: riprova tra un istante.</target>
+                <note>The model did not answer in time; the player can try again</note>
+            </trans-unit>
             <trans-unit id="theme.animals" resname="theme.animals">
                 <source>theme.animals</source>
                 <target>Animali</target>

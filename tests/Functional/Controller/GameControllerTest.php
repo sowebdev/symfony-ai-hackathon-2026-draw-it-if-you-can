@@ -4,6 +4,7 @@ namespace App\Tests\Functional\Controller;
 
 use App\Tests\Functional\ScriptedModel;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpClient\Exception\TransportException;
 
 final class GameControllerTest extends WebTestCase
 {
@@ -159,6 +160,23 @@ final class GameControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(503);
         self::assertSelectorTextContains('.error', 'could not pick a word');
+    }
+
+    public function testAModelThatNeverAnswersGivesAMessageAndARetryNotAnErrorPage(): void
+    {
+        $client = self::createClient();
+        /** @var \ArrayObject<string, \Throwable> $outage */
+        $outage = new \ArrayObject(['failure' => new TransportException('Max duration was reached for "http://model/v1/chat/completions".')]);
+        self::scriptModel($client, outage: $outage);
+
+        $client->request('POST', '/fr/games', []);
+        $next = $client->getResponse()->headers->get('Location').'/rounds';
+        $client->request('POST', $next);
+
+        self::assertResponseStatusCodeSame(504);
+        self::assertSelectorTextContains('.error', "Le modèle met trop de temps à répondre. S'il tourne sur ta machine, il est peut-être en train de se charger : réessaie dans un instant.");
+        self::assertSame($next, $client->getCrawler()->filter('main form')->attr('action'), 'Try again repeats the action');
+        self::assertSelectorExists('main form button[type=submit]');
     }
 
     public function testAnUnknownModeIsRejected(): void

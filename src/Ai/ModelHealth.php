@@ -5,7 +5,6 @@ namespace App\Ai;
 use Symfony\AI\Platform\Exception\BadRequestException;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
-use Symfony\Contracts\HttpClient\Exception\TimeoutExceptionInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -21,6 +20,9 @@ final readonly class ModelHealth
     /** A role that does not play is checked again soon: the model may be loading. */
     private const int SICK_TTL_S = 10;
 
+    /** A home page request has 30 s for all its roles. */
+    public const int ROLE_BUDGET_S = Models::REQUEST_LIMIT_S >> 1;
+
     public function __construct(
         private Models $models,
         private ModelSettings $settings,
@@ -33,7 +35,7 @@ final readonly class ModelHealth
     /**
      * @return list<array{role: string, model: string, ok: bool, problem: ?string}> Empty when no model is chosen yet
      */
-    public function report(bool $fresh = false): array
+    public function report(bool $fresh = false, ?int $roleBudgetS = self::ROLE_BUDGET_S): array
     {
         $report = [];
         if (!$this->settings->isStored()) {
@@ -42,14 +44,14 @@ final readonly class ModelHealth
         foreach (Role::cases() as $role) {
             $setup = $this->models->setup($role);
             $model = $this->translator->trans('label.model_at', ['%model%' => $setup->model, '%address%' => $setup->place()]);
-            $key = 'model_health.'.$role->value.'.'.hash('xxh3', $this->models->fingerprint($role));
+            $key = $this->key($role);
             if ($fresh) {
                 $this->cache->delete($key);
             }
             // Kept as an id and its parameters, not as a sentence: the language is the one of whoever looks.
-            $problem = $this->cache->get($key, function (ItemInterface $item) use ($role): ?array {
+            $problem = $this->cache->get($key, function (ItemInterface $item) use ($role, $roleBudgetS): ?array {
                 try {
-                    $problem = $this->check->check($role);
+                    $problem = $this->check->check($role, $roleBudgetS);
                 } catch (\Throwable $exception) {
                     $setup = $this->models->setup($role);
                     $problem = self::explain($exception, $setup->provider, $setup->reasoningOff);
@@ -62,6 +64,28 @@ final readonly class ModelHealth
         }
 
         return $report;
+    }
+
+    /**
+     * The models screen has just checked both models of the setting it saves: the home page shows
+     * that result, without calling the models again.
+     */
+    public function rememberHealthy(): void
+    {
+        foreach (Role::cases() as $role) {
+            $key = $this->key($role);
+            $this->cache->delete($key);
+            $this->cache->get($key, static function (ItemInterface $item): ?array {
+                $item->expiresAfter(self::HEALTHY_TTL_S);
+
+                return null;
+            });
+        }
+    }
+
+    private function key(Role $role): string
+    {
+        return 'model_health.'.$role->value.'.'.hash('xxh3', $this->models->fingerprint($role));
     }
 
     /**
@@ -82,10 +106,8 @@ final readonly class ModelHealth
             return new Problem('problem.model_missing', ['%model%' => $missing[1]]);
         }
         // A very slow answer: no byte for as long as the client waits, or a model that loads or thinks.
-        for ($previous = $exception; null !== $previous; $previous = $previous->getPrevious()) {
-            if ($previous instanceof TimeoutExceptionInterface) {
-                return new Problem('problem.slow', advice: $hasSwitch ? ($switchOff ? 'advice.reasoning_choose' : 'advice.reasoning_tick') : 'advice.reasoning_choose');
-            }
+        if (Models::isTooSlow($exception)) {
+            return new Problem('problem.slow', advice: $hasSwitch ? ($switchOff ? 'advice.reasoning_choose' : 'advice.reasoning_tick') : 'advice.reasoning_choose');
         }
         // The Generic bridge reads a text answer only: a model that reasons may answer with blocks,
         // its reasoning then its text (the bridge of Mistral reads them).

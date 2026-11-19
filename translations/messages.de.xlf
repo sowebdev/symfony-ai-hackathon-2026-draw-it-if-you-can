@@ -58,6 +58,11 @@
                 <target>Die KI konnte kein Wort auswählen. Läuft das Modell? „make check“ zeigt, was nicht stimmt.</target>
                 <note>The model gave no word to draw</note>
             </trans-unit>
+            <trans-unit id="error.model_timeout" resname="error.model_timeout">
+                <source>error.model_timeout</source>
+                <target>Das Modell braucht zu lange für die Antwort. Läuft es auf deinem Rechner, lädt es vielleicht gerade: Versuche es gleich noch einmal.</target>
+                <note>The model did not answer in time; the player can try again</note>
+            </trans-unit>
             <trans-unit id="theme.animals" resname="theme.animals">
                 <source>theme.animals</source>
                 <target>Tiere</target>

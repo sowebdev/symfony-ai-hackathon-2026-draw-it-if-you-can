@@ -15,7 +15,7 @@ final readonly class ScriptedPlatforms implements PlatformFactory
     {
     }
 
-    public function create(Provider $provider, ?string $address, #[\SensitiveParameter] ?string $apiKey): PlatformInterface
+    public function create(Provider $provider, ?string $address, #[\SensitiveParameter] ?string $apiKey, ?int $maxDurationS = null): PlatformInterface
     {
         return $this->platform;
     }

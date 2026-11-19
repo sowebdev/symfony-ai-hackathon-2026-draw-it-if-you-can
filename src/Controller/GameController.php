@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Ai\DraftStore;
 use App\Ai\ModelHealth;
+use App\Ai\Models;
 use App\Ai\ModelSettings;
 use App\Entity\Game;
 use App\Game\Dealer;
@@ -199,7 +200,10 @@ final class GameController extends AbstractController
     {
         $this->logger->error('No word to draw: {message}', ['message' => $exception->getMessage(), 'exception' => $exception]);
 
-        return $render('error.no_word', Response::HTTP_SERVICE_UNAVAILABLE);
+        // A model too slow is not a model that gave nothing: the player is told to wait and try again.
+        return Models::isTooSlow($exception)
+            ? $render('error.model_timeout', Response::HTTP_GATEWAY_TIMEOUT)
+            : $render('error.no_word', Response::HTTP_SERVICE_UNAVAILABLE);
     }
 
     private function renderHome(?string $error = null, int $status = Response::HTTP_OK): Response

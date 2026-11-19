@@ -7,6 +7,8 @@ use Symfony\AI\Agent\Toolbox\Toolbox;
 use Symfony\AI\Platform\Message\MessageBag;
 use Symfony\AI\Platform\PlatformInterface;
 use Symfony\AI\Platform\Result\DeferredResult;
+use Symfony\Contracts\HttpClient\Exception\TimeoutExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 /**
  * The model of each role: its platform, its name and the options it needs, from the current
@@ -15,6 +17,13 @@ use Symfony\AI\Platform\Result\DeferredResult;
  */
 final readonly class Models
 {
+    /**
+     * The longest a call to a model may last inside an ordinary request, whose PHP limit is 30 s:
+     * a slower model is a message for the player, not an error page. The streamed loops, which
+     * lift the PHP limit, and the check of the models screen, which raises it, say otherwise.
+     */
+    public const int REQUEST_LIMIT_S = 25;
+
     /**
      * @param array<string, RoleSetup> $setups A setting that is not saved yet, by role: what the model screen checks
      */
@@ -43,23 +52,26 @@ final readonly class Models
 
     /**
      * @param array<string, mixed> $options
-     * @param int|null             $maxTokens The longest answer, said the way the provider's API takes it
+     * @param int|null             $maxTokens    The longest answer, said the way the provider's API takes it
+     * @param int|null             $maxDurationS The longest the call may last, in seconds; null: no limit of its own
      */
-    public function invoke(Role $role, MessageBag $messages, array $options = [], ?int $maxTokens = null): DeferredResult
+    public function invoke(Role $role, MessageBag $messages, array $options = [], ?int $maxTokens = null, ?int $maxDurationS = self::REQUEST_LIMIT_S): DeferredResult
     {
         $setup = $this->setup($role);
 
-        return $this->platform($setup)->invoke($this->modelName($role, $setup), $messages, $this->optionsOf($setup, $options, $maxTokens));
+        return $this->platform($setup, $maxDurationS)->invoke($this->modelName($role, $setup), $messages, $this->optionsOf($setup, $options, $maxTokens));
     }
 
     /**
      * An agent on the model of the role, with the given tools. Call it with options().
+     *
+     * @param int|null $maxDurationS The longest each call of the agent may last, in seconds; null: no limit of its own
      */
-    public function agent(Role $role, object $tool, int $maxToolCalls): Agent
+    public function agent(Role $role, object $tool, int $maxToolCalls, ?int $maxDurationS = self::REQUEST_LIMIT_S): Agent
     {
         $setup = $this->setup($role);
 
-        return new Agent($this->platform($setup), $this->modelName($role, $setup), toolbox: new Toolbox([$tool]), maxToolCalls: $maxToolCalls);
+        return new Agent($this->platform($setup, $maxDurationS), $this->modelName($role, $setup), toolbox: new Toolbox([$tool]), maxToolCalls: $maxToolCalls);
     }
 
     /**
@@ -73,6 +85,20 @@ final readonly class Models
     public function options(Role $role, array $options = [], ?int $maxTokens = null): array
     {
         return $this->optionsOf($this->setup($role), $options, $maxTokens);
+    }
+
+    /**
+     * Whether the call failed for being too slow: the limit of the call, or the client's own.
+     */
+    public static function isTooSlow(\Throwable $exception): bool
+    {
+        for ($previous = $exception; null !== $previous; $previous = $previous->getPrevious()) {
+            if ($previous instanceof TimeoutExceptionInterface || ($previous instanceof TransportExceptionInterface && str_contains($previous->getMessage(), 'Max duration was reached'))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -106,9 +132,9 @@ final readonly class Models
         return $options;
     }
 
-    private function platform(RoleSetup $setup): PlatformInterface
+    private function platform(RoleSetup $setup, ?int $maxDurationS): PlatformInterface
     {
-        return $this->platforms->create($setup->provider, $setup->address, $setup->apiKey());
+        return $this->platforms->create($setup->provider, $setup->address, $setup->apiKey(), $maxDurationS);
     }
 
     /**

@@ -40,13 +40,22 @@ final readonly class ModelCheck
     /**
      * @return Problem|null What is wrong, or null if the role can play
      */
-    public function check(Role $role): ?Problem
+    public function check(Role $role, ?int $budgetS = Models::REQUEST_LIMIT_S): ?Problem
     {
+        $deadline = null === $budgetS ? null : microtime(true) + $budgetS;
         // Both roles read images: the guesser names the drawing, the drawer looks at its own to add
         // details. The drawer must also call a tool, or it cannot draw at all.
-        $problem = $this->checkSeesImages($role);
+        $problem = $this->checkSeesImages($role, self::remaining($deadline));
 
-        return null === $problem && Role::Drawer === $role ? $this->checkCallsTools() : $problem;
+        return null === $problem && Role::Drawer === $role ? $this->checkCallsTools(self::remaining($deadline)) : $problem;
+    }
+
+    /**
+     * What is left of the budget for the next call: at least a second, so that a spent budget fails fast.
+     */
+    private static function remaining(?float $deadline): ?int
+    {
+        return null === $deadline ? null : max(1, (int) floor($deadline - microtime(true)));
     }
 
     /**
@@ -89,7 +98,7 @@ final readonly class ModelCheck
      * One stroke on a circle, asked the way the game asks for the drawing: streamed, with the
      * draw_stroke tool. The check stops at the first stroke it can read.
      */
-    private function checkCallsTools(): ?Problem
+    private function checkCallsTools(?int $maxDurationS): ?Problem
     {
         $messages = new MessageBag(
             Message::forSystem(<<<PROMPT
@@ -98,7 +107,7 @@ final readonly class ModelCheck
                 PROMPT),
             Message::ofUser('Draw a circle in the middle of the canvas, with one single stroke. Then answer "done".'),
         );
-        $execution = $this->models->agent(Role::Drawer, new Pen(1), maxToolCalls: 3)
+        $execution = $this->models->agent(Role::Drawer, new Pen(1), maxToolCalls: 3, maxDurationS: $maxDurationS)
             ->call($messages, $this->models->options(Role::Drawer, ['stream' => true], self::MAX_TOKENS_FOR_A_STROKE));
 
         $assembler = new ToolCallAssembler();
@@ -122,13 +131,13 @@ final readonly class ModelCheck
         return new Problem('problem.no_stroke', advice: $this->reasoningAdvice(Role::Drawer));
     }
 
-    private function checkSeesImages(Role $role): ?Problem
+    private function checkSeesImages(Role $role, ?int $maxDurationS): ?Problem
     {
         $messages = new MessageBag(Message::ofUser(
             new Image($this->renderer->toPng([self::circle()]), 'image/png'),
             'What shape is drawn in this image? Answer with one word in English.',
         ));
-        $answer = $this->model->ask($role, $messages);
+        $answer = $this->model->ask($role, $messages, $maxDurationS);
 
         if (null === $answer) {
             return new Problem('problem.no_image_answer', advice: $this->reasoningAdvice($role));

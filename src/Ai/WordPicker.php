@@ -49,8 +49,11 @@ final readonly class WordPicker
             Message::ofUser('List the words.'),
         );
 
+        // The attempts share the time of an ordinary request: a model that answers late and badly
+        // is not asked again past it.
+        $deadline = microtime(true) + Models::REQUEST_LIMIT_S;
         for ($attempt = 1; $attempt <= self::ATTEMPTS; ++$attempt) {
-            $word = self::draw($this->model->askList($role, $messages), $recent, $this->randomizer);
+            $word = self::draw($this->model->askList($role, $messages, max(1, (int) floor($deadline - microtime(true)))), $recent, $this->randomizer);
             if (null !== $word) {
                 return $word;
             }

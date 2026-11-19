@@ -24,7 +24,7 @@ final readonly class CheckModelsCommand
             return Command::FAILURE;
         }
         $failed = false;
-        foreach ($this->health->report(fresh: true) as ['role' => $role, 'model' => $model, 'problem' => $problem]) {
+        foreach ($this->health->report(fresh: true, roleBudgetS: null) as ['role' => $role, 'model' => $model, 'problem' => $problem]) {
             if (null === $problem) {
                 $io->writeln("<info>OK</info>   {$role} ({$model})");
                 continue;

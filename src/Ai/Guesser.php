@@ -20,7 +20,7 @@ final readonly class Guesser
     /**
      * @param list<string> $alreadySaid
      *
-     * @return string|null A word, or null if the model gave no usable one
+     * @return string|null A word or a short phrase, or null if the model gave no usable one
      */
     public function guess(string $png, Theme $theme, Language $language, array $alreadySaid): ?string
     {
@@ -30,7 +30,7 @@ final readonly class Guesser
             Message::forSystem(<<<PROMPT
                 You play a drawing and guessing game, like a player around the table. Someone is drawing, and you call out what you think the drawing shows.
                 Theme: {$theme->description()}.
-                Answer with one single noun in {$language->nameInEnglish()}, your best guess, without article. Never repeat a word already said: if you still see the same thing, say a close alternative.
+                Answer in {$language->nameInEnglish()} with your best guess, without article: one noun, or a short phrase of three words at most when the thing has a name made of several words (like "père noël" or "coffee mug"). Nothing else. Never repeat a word already said: if you still see the same thing, say a close alternative.
                 PROMPT),
             Message::ofUser(
                 new Image($png, 'image/png'),

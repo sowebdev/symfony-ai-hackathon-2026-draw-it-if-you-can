@@ -33,14 +33,15 @@ final class ModelsControllerTest extends WebTestCase
     private array $asked = [];
 
     /**
-     * @param array<string, mixed>|null $list    What GET /v1/models answers; null: nothing answers
-     * @param list<string>              $guesses What the fake model answers when asked what shape it sees
-     * @param bool                      $chosen  Whether a model is stored already (by default none, as on a fresh install)
+     * @param array<string, mixed>|null     $list    What GET /v1/models answers; null: nothing answers
+     * @param list<string>                  $guesses What the fake model answers when asked what shape it sees
+     * @param bool                          $chosen  Whether a model is stored already (by default none, as on a fresh install)
+     * @param \ArrayObject<int, mixed>|null $calls   Gets the input of each call to the fake model
      */
-    private function client(?array $list, array $guesses = ['circle', 'circle'], bool $chosen = false): KernelBrowser
+    private function client(?array $list, array $guesses = ['circle', 'circle'], bool $chosen = false, ?\ArrayObject $calls = null): KernelBrowser
     {
         $client = self::createClient();
-        self::scriptModel($client, $guesses, chosen: $chosen);
+        self::scriptModel($client, $guesses, chosen: $chosen, calls: $calls);
         $http = new MockHttpClient(function (string $method, string $url) use ($list): MockResponse {
             $this->asked[] = $url;
             if (null === $list) {
@@ -168,6 +169,31 @@ final class ModelsControllerTest extends WebTestCase
         // The draft, and the key in it, is dropped once saved: going back to step 2 starts again.
         $client->request('GET', '/en/models/choose');
         self::assertResponseRedirects('/en/models');
+    }
+
+    public function testTheHomePageDoesNotCheckAgainWhatStepThreeJustChecked(): void
+    {
+        $calls = new \ArrayObject();
+        $client = $this->client(self::anthropicList(), calls: $calls);
+        $this->step1($client);
+        $crawler = $this->get($client, '/en/models/choose');
+        $client->submit($crawler->selectButton('Check the models')->form([
+            'models_step[guesserChoice]' => 'claude-haiku-5-5',
+            'models_step[drawerChoice]' => 'claude-sonnet-5-5',
+        ]));
+        $crawler = $this->get($client, '/en/models/check');
+        self::assertCount(2, $crawler->filter('.check-results li.ok'));
+        $callsOfStepThree = \count($calls);
+        self::assertGreaterThan(0, $callsOfStepThree);
+        $client->submit($crawler->selectButton('Save and play')->form());
+        self::assertResponseRedirects('/en');
+
+        $client->request('GET', '/en');
+        $client->request('GET', '/en/health');
+        $report = json_decode((string) $client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
+
+        self::assertTrue($report['ok'], 'The home page shows the result of step 3');
+        self::assertCount($callsOfStepThree, $calls, 'The models are not called again');
     }
 
     public function testTheKeyIsInTheSessionSealedAndNeverInAResponse(): void

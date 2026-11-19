@@ -26,6 +26,8 @@ final class WordMatcherTest extends TestCase
         yield 'italian elided article' => ["l'albero", 'albero'];
         yield 'spanish article' => ['el perro', 'perro'];
         yield 'punctuation' => ['cat!', 'cat'];
+        yield 'accented phrase' => ['Père Noël', 'père noël'];
+        yield 'phrase with another case' => ['PERE NOEL', 'Père Noël'];
         yield 'two words' => ['Coffee Mugs', 'coffee mug'];
     }
 

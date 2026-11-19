@@ -6,6 +6,7 @@ use App\Tests\Functional\EventStream;
 use App\Tests\Functional\ScriptedModel;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpClient\Exception\TransportException;
 
 final class RoundControllerTest extends WebTestCase
 {
@@ -114,6 +115,21 @@ final class RoundControllerTest extends WebTestCase
         $words = array_column(array_column($this->streamGuesses($round), 'data'), 'word');
 
         self::assertSame(['dog'], $words);
+    }
+
+    public function testTheStreamEndsCleanlyWhenTheModelStopsAnswering(): void
+    {
+        /** @var \ArrayObject<string, \Throwable> $outage */
+        $outage = new \ArrayObject();
+        self::scriptModel($this->client, outage: $outage);
+        $round = self::startFirstRound($this->client, 'en', ['drawnBy' => 'player']);
+        $this->addStroke($round, [[10, 10, 0], [500, 500, 300]]);
+        // From now on the model never answers in time.
+        $outage['failure'] = new TransportException('Max duration was reached for "http://model/v1/chat/completions".');
+
+        $events = $this->streamGuesses($round);
+
+        self::assertSame([], array_column($events, 'data'), 'No guess comes, and no error: the stream waits for a new drawing');
     }
 
     public function testTheAiSaysNothingOnAnEmptyCanvas(): void

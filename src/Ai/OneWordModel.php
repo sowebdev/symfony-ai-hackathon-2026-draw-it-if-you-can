@@ -6,7 +6,7 @@ use App\Game\WordMatcher;
 use Symfony\AI\Platform\Message\MessageBag;
 
 /**
- * Asks the model for a single word, and checks the answer by code: the model never decides
+ * Asks the model for a single word or a short phrase (three words at most: "père noël"), and checks the answer by code: the model never decides
  * what the game accepts.
  */
 final readonly class OneWordModel
@@ -27,12 +27,14 @@ final readonly class OneWordModel
     }
 
     /**
-     * @return string|null The word, or null if the answer is not a single word
+     * @param int|null $maxDurationS The longest the call may last; null: no limit of its own
+     *
+     * @return string|null The word or short phrase, or null if the answer is neither
      */
-    public function ask(Role $role, MessageBag $messages): ?string
+    public function ask(Role $role, MessageBag $messages, ?int $maxDurationS = Models::REQUEST_LIMIT_S): ?string
     {
         // No temperature: the default of each provider suits its models, and some refuse others.
-        $answer = $this->models->invoke($role, $messages, maxTokens: self::MAX_TOKENS_FOR_A_WORD)->asText();
+        $answer = $this->models->invoke($role, $messages, maxTokens: self::MAX_TOKENS_FOR_A_WORD, maxDurationS: $maxDurationS)->asText();
 
         return self::clean($answer);
     }
@@ -40,11 +42,13 @@ final readonly class OneWordModel
     /**
      * Asks for a list, one word per line, and keeps the usable words, each once.
      *
+     * @param int|null $maxDurationS The longest the call may last; null: no limit of its own
+     *
      * @return list<string>
      */
-    public function askList(Role $role, MessageBag $messages): array
+    public function askList(Role $role, MessageBag $messages, ?int $maxDurationS = Models::REQUEST_LIMIT_S): array
     {
-        $answer = $this->models->invoke($role, $messages, maxTokens: self::MAX_TOKENS_FOR_A_LIST)->asText();
+        $answer = $this->models->invoke($role, $messages, maxTokens: self::MAX_TOKENS_FOR_A_LIST, maxDurationS: $maxDurationS)->asText();
 
         return self::cleanList($answer);
     }

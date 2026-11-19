@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real providers behind the game's model (Anthropic and OpenAI on their own bridges, Mistral on its own bridge, any other OpenAI-compatible service, local like Ollama or on the internet like OpenRouter, on the generic one), a setting stored in the database with its API key encrypted by `APP_ENCRYPTION_KEY` (`app:encryption-key`, run by `make install`), and the list of each provider's models, which shows only those that can play, which is the only source of the model.
 - A screen to choose the model, in three steps without JavaScript (provider and key, models, check, then "Save and play"), in the five languages. `make install` asks nothing any more: you choose the model on the page. The home page invites you there while no model is chosen, and leads there when a model does not answer; its health messages are translated. Without a model, "Start the game" leads to the screen and `make check` says so and gives its address.
 
+### Fixed
+
+- The AI that guesses may answer a short phrase of three words at most, not only one word: with "père noël" to find, it said "Noël", then "Père", and could never win. "Père Noël" now finds "père noël".
+- A model too slow to draw the word of a round no longer ends on a PHP error page: after 25 seconds the game says the model takes too long, possibly because it is loading, and offers "Try again".
+
 ### Removed
 
 - The `AI_*` variables of `.env` and `make setup` (`app:setup`): the model is chosen on the page and stored in the database. Coming from 0.2, choose your model again on the page; the `AI_*` lines of `.env.local` can be deleted.

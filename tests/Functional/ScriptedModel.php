@@ -26,19 +26,25 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 trait ScriptedModel
 {
     /**
-     * @param list<string>                $guesses
-     * @param list<array{string, string}> $strokes        [part, cells] pairs, as the model writes them
-     * @param \Throwable|null             $drawingFailure Thrown by the drawing model after its strokes
-     * @param list<array{string, string}> $details        Strokes drawn each time the AI is asked for details
-     * @param bool                        $chosen         Whether a model is stored (false: the game has none yet)
+     * @param list<string>                          $guesses
+     * @param list<array{string, string}>           $strokes        [part, cells] pairs, as the model writes them
+     * @param \Throwable|null                       $drawingFailure Thrown by the drawing model after its strokes
+     * @param list<array{string, string}>           $details        Strokes drawn each time the AI is asked for details
+     * @param bool                                  $chosen         Whether a model is stored (false: the game has none yet)
+     * @param \ArrayObject<string, \Throwable>|null $outage         Set its "failure" to make the model fail at each call from then on: a model that never answers
+     * @param \ArrayObject<int, mixed>|null         $calls          Gets the input of each call to the model
      */
-    private static function scriptModel(KernelBrowser $client, array $guesses = [], string $word = 'cat', array $strokes = [], ?\Throwable $drawingFailure = null, array $details = [], bool $chosen = true): ScriptedDrawer
+    private static function scriptModel(KernelBrowser $client, array $guesses = [], string $word = 'cat', array $strokes = [], ?\Throwable $drawingFailure = null, array $details = [], bool $chosen = true, ?\ArrayObject $outage = null, ?\ArrayObject $calls = null): ScriptedDrawer
     {
         // The model lives in the container: it must survive from one request to the next.
         $client->disableReboot();
 
         $platform = MockPlatformFactory::createPlatform(
-            static function ($model, $input) use ($word, &$guesses): string|ResultInterface {
+            static function ($model, $input) use ($word, &$guesses, $outage, $calls): string|ResultInterface {
+                $calls?->append($input);
+                if (($failure = $outage['failure'] ?? null) instanceof \Throwable) {
+                    throw $failure;
+                }
                 // The check of the drawer asks for one stroke: the fake model draws it.
                 if (str_contains((string) json_encode($input), 'with one single stroke')) {
                     return self::oneStroke();
