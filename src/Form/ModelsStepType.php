@@ -18,19 +18,24 @@ final class ModelsStepType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $typed = ['required' => false, 'attr' => ['autocomplete' => 'off', 'spellcheck' => 'false', 'autocapitalize' => 'off']];
-        foreach (['guesser', 'drawer'] as $role) {
+        foreach (['drawer', 'guesser'] as $role) {
             // A list only when there is something to choose from: otherwise the text field is alone.
             if ([] !== $options[$role.'_choices']) {
+                // Radio buttons: the page draws them as cards, or lists them under "all the models".
                 $builder->add($role.'Choice', ChoiceType::class, [
                     'choices' => $options[$role.'_choices'],
+                    'expanded' => true,
                     'choice_translation_domain' => false,
-                    'placeholder' => 'models.pick',
+                    'placeholder' => false,
                     'required' => false,
-                    'label' => 'models.list_'.$role,
+                    'label' => false,
                     'invalid_message' => 'error.model_invalid',
                 ]);
             }
             $builder->add($role.'Name', TextType::class, $typed + ['label' => 'models.type_name']);
+            if ('drawer' === $role) {
+                $builder->add('otherGuesser', CheckboxType::class, ['required' => false, 'label' => 'models.other_guesser']);
+            }
         }
         if ($options['reasoning_switch']) {
             $builder->add('reasoningOff', CheckboxType::class, ['required' => false, 'label' => 'models.reasoning_off']);
@@ -42,7 +47,7 @@ final class ModelsStepType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => ModelsStep::class,
-            // Label => model name, as the list gives them: what the catalog says each one does.
+            // Model name => model name, as the list gives them.
             'guesser_choices' => [],
             'drawer_choices' => [],
             'reasoning_switch' => false,

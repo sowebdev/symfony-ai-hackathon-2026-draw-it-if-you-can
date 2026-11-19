@@ -2,7 +2,9 @@
 
 namespace App\Ai;
 
+use App\Drawing\GridStroke;
 use App\Drawing\StrokeRenderer;
+use App\Drawing\StrokeTracer;
 use App\Game\WordMatcher;
 use Symfony\AI\Agent\Exception\MaxIterationsExceededException;
 use Symfony\AI\Agent\Execution\Update\Progress;
@@ -26,6 +28,7 @@ final readonly class ModelCheck
         private OneWordModel $model,
         private StrokeRenderer $renderer,
         private Models $models,
+        private StrokeTracer $tracer,
     ) {
     }
 
@@ -34,7 +37,7 @@ final readonly class ModelCheck
      */
     public function with(Models $models): self
     {
-        return new self(new OneWordModel($models), $this->renderer, $models);
+        return new self(new OneWordModel($models), $this->renderer, $models, $this->tracer);
     }
 
     /**
@@ -42,12 +45,24 @@ final readonly class ModelCheck
      */
     public function check(Role $role, ?int $budgetS = Models::REQUEST_LIMIT_S): ?Problem
     {
+        return $this->run($role, $budgetS)->problem;
+    }
+
+    /**
+     * The same check, with what was answered and drawn, for the screen to show.
+     */
+    public function run(Role $role, ?int $budgetS = Models::REQUEST_LIMIT_S): ModelCheckResult
+    {
         $deadline = null === $budgetS ? null : microtime(true) + $budgetS;
         // Both roles read images: the guesser names the drawing, the drawer looks at its own to add
         // details. The drawer must also call a tool, or it cannot draw at all.
-        $problem = $this->checkSeesImages($role, self::remaining($deadline));
+        $seen = $this->checkSeesImages($role, self::remaining($deadline));
+        if (null !== $seen->problem || Role::Drawer !== $role) {
+            return $seen;
+        }
+        $drawn = $this->checkCallsTools(self::remaining($deadline));
 
-        return null === $problem && Role::Drawer === $role ? $this->checkCallsTools(self::remaining($deadline)) : $problem;
+        return new ModelCheckResult($drawn->problem, $seen->answer, $drawn->stroke);
     }
 
     /**
@@ -98,7 +113,7 @@ final readonly class ModelCheck
      * One stroke on a circle, asked the way the game asks for the drawing: streamed, with the
      * draw_stroke tool. The check stops at the first stroke it can read.
      */
-    private function checkCallsTools(?int $maxDurationS): ?Problem
+    private function checkCallsTools(?int $maxDurationS): ModelCheckResult
     {
         $messages = new MessageBag(
             Message::forSystem(<<<PROMPT
@@ -114,8 +129,8 @@ final readonly class ModelCheck
         try {
             foreach ($execution as $update) {
                 foreach ($assembler->feed($update instanceof Progress ? $update->getPayload() : null) as $call) {
-                    if (null !== Drawer::stroke($call)) {
-                        return null;
+                    if (null !== $stroke = Drawer::stroke($call)) {
+                        return $this->drawn($stroke);
                     }
                 }
             }
@@ -123,15 +138,20 @@ final readonly class ModelCheck
             // It keeps calling the tool with cells the pen cannot read: no stroke came out.
         }
         foreach ($assembler->finish() as $call) {
-            if (null !== Drawer::stroke($call)) {
-                return null;
+            if (null !== $stroke = Drawer::stroke($call)) {
+                return $this->drawn($stroke);
             }
         }
 
-        return new Problem('problem.no_stroke', advice: $this->reasoningAdvice(Role::Drawer));
+        return new ModelCheckResult(new Problem('problem.no_stroke', advice: $this->reasoningAdvice(Role::Drawer)));
     }
 
-    private function checkSeesImages(Role $role, ?int $maxDurationS): ?Problem
+    private function drawn(GridStroke $stroke): ModelCheckResult
+    {
+        return new ModelCheckResult(null, stroke: $this->tracer->draw($stroke, 0, 1)->points);
+    }
+
+    private function checkSeesImages(Role $role, ?int $maxDurationS): ModelCheckResult
     {
         $messages = new MessageBag(Message::ofUser(
             new Image($this->renderer->toPng([self::circle()]), 'image/png'),
@@ -140,9 +160,9 @@ final readonly class ModelCheck
         $answer = $this->model->ask($role, $messages, $maxDurationS);
 
         if (null === $answer) {
-            return new Problem('problem.no_image_answer', advice: $this->reasoningAdvice($role));
+            return new ModelCheckResult(new Problem('problem.no_image_answer', advice: $this->reasoningAdvice($role)));
         }
 
-        return self::isCircle($answer) ? null : new Problem('problem.not_a_circle', ['%answer%' => $answer]);
+        return new ModelCheckResult(self::isCircle($answer) ? null : new Problem('problem.not_a_circle', ['%answer%' => $answer]), $answer);
     }
 }

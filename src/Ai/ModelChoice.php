@@ -14,7 +14,14 @@ final readonly class ModelChoice
         public ?bool $vision = null,
         /** Calls tools */
         public ?bool $tools = null,
+        /** When the model was created (Unix time), if the list says */
+        public ?int $created = null,
     ) {
+    }
+
+    public function created(?int $created): self
+    {
+        return new self($this->name, $this->vision, $this->tools, $created);
     }
 
     /**
@@ -34,18 +41,18 @@ final readonly class ModelChoice
     }
 
     /**
-     * @return array{name: string, vision: ?bool, tools: ?bool}
+     * @return array{name: string, vision: ?bool, tools: ?bool, created: ?int}
      */
     public function toArray(): array
     {
-        return ['name' => $this->name, 'vision' => $this->vision, 'tools' => $this->tools];
+        return ['name' => $this->name, 'vision' => $this->vision, 'tools' => $this->tools, 'created' => $this->created];
     }
 
     /**
-     * @param array{name: string, vision: ?bool, tools: ?bool} $data
+     * @param array{name: string, vision: ?bool, tools: ?bool, created: ?int} $data
      */
     public static function fromArray(array $data): self
     {
-        return new self($data['name'], $data['vision'], $data['tools']);
+        return new self($data['name'], $data['vision'], $data['tools'], $data['created']);
     }
 }

@@ -82,6 +82,14 @@ final class ModelsControllerTest extends WebTestCase
         $this->bodies[] = (string) $client->getResponse()->getContent();
     }
 
+    /**
+     * @return list<string> The models offered as radio buttons for a role, cards and folded list together
+     */
+    private static function radios(Crawler $crawler, string $role): array
+    {
+        return $crawler->filter(\sprintf('input[type=radio][name="models_step[%sChoice]"]', $role))->each(static fn (Crawler $radio): string => (string) $radio->attr('value'));
+    }
+
     private static function selected(Crawler $crawler, string $field): mixed
     {
         return $crawler->selectButton('Check the models')->form()->getValues()[$field] ?? null;
@@ -123,24 +131,28 @@ final class ModelsControllerTest extends WebTestCase
         $this->step1($client);
         self::assertResponseRedirects('/en/models/choose');
 
-        // Step 2: only what the catalog says can play, sorted, nothing preselected, a field to type a name.
+        // Step 2: one choice, "the model", from what the catalog says can play, the cheapest preselected; a field to type a name.
         $crawler = $this->get($client, '/en/models/choose');
         self::assertResponseIsSuccessful();
-        $options = static fn (string $role): array => $crawler->filter(\sprintf('select[name="models_step[%sChoice]"] option', $role))->each(static fn (Crawler $option): string => trim($option->text()));
-        self::assertSame(['— choose a model —', 'claude-haiku-5-5 — reads images, calls tools', 'claude-sonnet-5-5 — reads images, calls tools'], $options('guesser'));
-        self::assertSame($options('guesser'), $options('drawer'));
-        self::assertCount(0, $crawler->filter('select option[selected]'), 'No model is preselected');
-        self::assertCount(1, $crawler->filter('input[name="models_step[guesserName]"]'));
+        self::assertSame(['claude-haiku-5-5', 'claude-sonnet-5-5'], self::radios($crawler, 'drawer'));
+        self::assertSame('claude-haiku-5-5', $crawler->filter('input[name="models_step[drawerChoice]"]:checked')->attr('value'), 'The cheapest family is preselected');
+        self::assertSelectorTextContains('.model-option.cheapest', 'claude-haiku-5-5');
+        self::assertSelectorTextContains('.model-option.cheapest', 'the cheapest');
+        self::assertCount(2, $crawler->filter('.cheapest-mark'), 'One mark in each list: the model above, and the guesser under the box');
+        self::assertStringNotContainsString('reads images', (string) $client->getResponse()->getContent(), 'Every model of a catalogued provider can play: it is not said on each line');
+        self::assertCount(1, $crawler->filter('input[name="models_step[otherGuesser]"]'));
+        self::assertCount(0, $crawler->filter('input[name="models_step[otherGuesser]"][checked]'), 'By default the guesser is the same model');
         self::assertCount(1, $crawler->filter('input[name="models_step[drawerName]"]'));
-        self::assertSelectorNotExists('input[type=checkbox]', 'Anthropic: the game decides about reasoning, no switch');
+        self::assertCount(1, $crawler->filter('input[name="models_step[guesserName]"]'));
+        self::assertCount(0, $crawler->filter('select'));
+        self::assertSelectorNotExists('input[type=checkbox][name="models_step[reasoningOff]"]', 'Anthropic: the game decides about reasoning, no switch');
         self::assertStringNotContainsStringIgnoringCase('tested', (string) $client->getResponse()->getContent());
         self::assertStringNotContainsStringIgnoringCase('suggested', (string) $client->getResponse()->getContent());
         self::assertSelectorExists('a[href="/en/models?back=1"]');
 
-        $client->submit($crawler->selectButton('Check the models')->form([
-            'models_step[guesserChoice]' => 'claude-haiku-5-5',
-            'models_step[drawerName]' => 'claude-brand-new-9',
-        ]));
+        $form = $crawler->selectButton('Check the models')->form(['models_step[guesserChoice]' => 'claude-haiku-5-5', 'models_step[drawerName]' => 'claude-brand-new-9']);
+        $form->setValues(['models_step[otherGuesser]' => true]);
+        $client->submit($form);
         self::assertResponseRedirects('/en/models/check');
         self::assertFalse(self::getContainer()->get(ModelSettings::class)->isStored(), 'Nothing is saved before the check passes');
 
@@ -148,8 +160,13 @@ final class ModelsControllerTest extends WebTestCase
         $crawler = $this->get($client, '/en/models/check');
         self::assertResponseIsSuccessful();
         self::assertCount(2, $crawler->filter('.check-results li.ok'));
-        self::assertSelectorTextContains('.check-results', 'checked, on this machine');
+        self::assertSelectorTextContains('.check-results', 'checked, at Anthropic');
+        self::assertStringNotContainsString('on this machine', (string) $client->getResponse()->getContent());
         self::assertSelectorTextContains('.check-results', 'claude-brand-new-9');
+        // What was asked and what came back: the circle sent to the guesser and its answer, the stroke of the drawer.
+        self::assertCount(1, $crawler->filter('.check-results li:first-child img.test-image[src^="data:image/png;base64,"]'));
+        self::assertSelectorTextContains('.check-results li:first-child .test-answer', 'It answered: circle');
+        self::assertCount(1, $crawler->filter('.check-results li:last-child svg.test-stroke path[d^="M"]'));
         self::assertFalse(self::getContainer()->get(ModelSettings::class)->isStored());
         $client->submit($crawler->selectButton('Save and play')->form());
         self::assertResponseRedirects('/en');
@@ -221,7 +238,9 @@ final class ModelsControllerTest extends WebTestCase
 
         $this->step1($client);
         $crawler = $this->get($client, '/en/models/choose');
-        $client->submit($crawler->selectButton('Check the models')->form(['models_step[guesserChoice]' => 'claude-haiku-5-5', 'models_step[drawerChoice]' => 'claude-sonnet-5-5']));
+        $form = $crawler->selectButton('Check the models')->form(['models_step[guesserChoice]' => 'claude-haiku-5-5', 'models_step[drawerChoice]' => 'claude-sonnet-5-5']);
+        $form->setValues(['models_step[otherGuesser]' => true]);
+        $client->submit($form);
         $crawler = $this->get($client, '/en/models/check');
 
         self::assertCount(1, $crawler->filter('.check-results li.ok'));
@@ -236,10 +255,11 @@ final class ModelsControllerTest extends WebTestCase
         self::assertResponseRedirects('/en/models/check');
         self::assertFalse(self::getContainer()->get(ModelSettings::class)->isStored());
 
-        // Back to step 2: what was chosen is still there.
+        // Back to step 2: what was chosen is still there, the two models apart.
         $crawler = $this->get($client, '/en/models/choose');
         self::assertSame('claude-haiku-5-5', self::selected($crawler, 'models_step[guesserChoice]'));
         self::assertSame('claude-sonnet-5-5', self::selected($crawler, 'models_step[drawerChoice]'));
+        self::assertSame('1', self::selected($crawler, 'models_step[otherGuesser]'));
         $this->noKeyInAnyPage();
     }
 
@@ -253,10 +273,10 @@ final class ModelsControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('.models-problem', 'The list of models cannot be read.');
         self::assertSelectorTextContains('.models-problem', 'Nothing answers at http://gate:8001');
-        self::assertCount(0, $crawler->filter('select'));
+        self::assertCount(0, $crawler->filter('input[type=radio]'));
         self::assertCount(2, $crawler->filter('input[type=text]'));
 
-        $client->submit($crawler->selectButton('Check the models')->form(['models_step[guesserName]' => 'qwen', 'models_step[drawerName]' => ' qwen ']));
+        $client->submit($crawler->selectButton('Check the models')->form(['models_step[drawerName]' => ' qwen ']));
         self::assertResponseRedirects('/en/models/check');
     }
 
@@ -266,10 +286,110 @@ final class ModelsControllerTest extends WebTestCase
         $this->step1($client);
 
         $crawler = $this->get($client, '/en/models/choose');
-        $client->submit($crawler->selectButton('Check the models')->form(['models_step[guesserChoice]' => 'claude-haiku-5-5']));
+        // The preselected model is only a first choice: the player may leave none.
+        $form = $crawler->selectButton('Check the models')->form();
+        unset($form['models_step[drawerChoice]']);
+        $client->submit($form);
+        self::assertResponseStatusCodeSame(422);
+        self::assertSelectorTextContains('.models-form', 'Choose a model in the list, or type its name.');
+
+        // The second choice is only asked for when its box is checked.
+        $form = $crawler->selectButton('Check the models')->form();
+        unset($form['models_step[guesserChoice]']);
+        $client->submit($form);
+        self::assertResponseRedirects('/en/models/check');
+    }
+
+    public function testAnotherGuesserIsAskedForOnlyWhenItsBoxIsChecked(): void
+    {
+        $client = $this->client(self::anthropicList());
+        $this->step1($client);
+        $crawler = $this->get($client, '/en/models/choose');
+
+        $form = $crawler->selectButton('Check the models')->form();
+        unset($form['models_step[guesserChoice]']);
+        $form->setValues(['models_step[otherGuesser]' => true]);
+        $client->submit($form);
 
         self::assertResponseStatusCodeSame(422);
         self::assertSelectorTextContains('.models-form', 'Choose a model in the list, or type its name.');
+    }
+
+    public function testASavedSettingWithTwoModelsOpensWithTheBoxChecked(): void
+    {
+        $client = $this->client(self::anthropicList());
+        self::getContainer()->get(ModelSettings::class)->save(Provider::Anthropic, null, 'claude-sonnet-5-5', 'claude-haiku-5-5', false, self::KEY);
+        $crawler = $this->get($client, '/en/models');
+        $client->submit($crawler->selectButton('List the models')->form(['provider_step[apiKey]' => '']));
+
+        $crawler = $this->get($client, '/en/models/choose');
+
+        self::assertCount(1, $crawler->filter('input[name="models_step[otherGuesser]"][checked]'));
+        self::assertSame('claude-sonnet-5-5', $crawler->filter('input[name="models_step[drawerChoice]"]:checked')->attr('value'), 'The saved model, not the cheapest');
+        self::assertSame('claude-haiku-5-5', $crawler->filter('input[name="models_step[guesserChoice]"]:checked')->attr('value'));
+    }
+
+    public function testASavedSettingWithOneModelOpensWithTheBoxUnchecked(): void
+    {
+        $client = $this->client(self::anthropicList());
+        self::getContainer()->get(ModelSettings::class)->save(Provider::Anthropic, null, 'claude-sonnet-5-5', 'claude-sonnet-5-5', false, self::KEY);
+        $crawler = $this->get($client, '/en/models');
+        $client->submit($crawler->selectButton('List the models')->form(['provider_step[apiKey]' => '']));
+
+        $crawler = $this->get($client, '/en/models/choose');
+
+        self::assertCount(0, $crawler->filter('input[name="models_step[otherGuesser]"][checked]'));
+        self::assertSame('claude-sonnet-5-5', $crawler->filter('input[name="models_step[drawerChoice]"]:checked')->attr('value'));
+    }
+
+    public function testOlderVersionsAreFoldedAwayAndTheCardsGoFromTheCheapest(): void
+    {
+        $ids = ['claude-opus-5-5', 'claude-haiku-4-5-20251001', 'claude-sonnet-5-5', 'claude-haiku-5-5'];
+        $client = $this->client(['data' => array_map(static fn (string $id): array => ['id' => $id], $ids), 'has_more' => false]);
+        $this->step1($client);
+
+        $crawler = $this->get($client, '/en/models/choose');
+
+        $cards = $crawler->filter('.model-cards')->first()->filter('input[type=radio]')->each(static fn (Crawler $radio): string => (string) $radio->attr('value'));
+        self::assertSame(['claude-haiku-5-5', 'claude-sonnet-5-5', 'claude-opus-5-5'], $cards);
+        self::assertSame(['claude-haiku-4-5-20251001'], $crawler->filter('details.long-list')->first()->filter('input[type=radio]')->each(static fn (Crawler $radio): string => (string) $radio->attr('value')));
+        self::assertSelectorTextContains('details.long-list summary', 'See all models');
+        self::assertCount(0, $crawler->filter('details.long-list[open]'));
+    }
+
+    public function testInFrenchTheGuesserDoesNotChooseTheWordAndTheCheckSaysWhereItRan(): void
+    {
+        $client = $this->client(self::anthropicList());
+        $this->step1($client);
+        $crawler = $client->request('GET', '/fr/models/choose');
+        self::assertSelectorTextContains('.guesser-models', 'Il devine ton dessin.');
+        self::assertSelectorTextNotContains('.guesser-models', 'choisit le mot');
+        self::assertSelectorTextContains('.model-option.cheapest', 'le moins cher');
+
+        $client->submit($crawler->selectButton('Vérifier les modèles')->form());
+        $crawler = $client->request('GET', '/fr/models/check');
+        self::assertSelectorTextContains('.check-results', 'vérifié, chez Anthropic');
+        self::assertCount(2, $crawler->filter('.check-results li.ok'));
+
+        // A server of your own: "sur ton serveur", not "sur cette machine".
+        self::ensureKernelShutdown();
+        $client = $this->client(['data' => [['id' => 'qwen']]]);
+        $this->step1($client, 'openai_compatible', '', 'http://gate:8001');
+        $crawler = $client->request('GET', '/fr/models/choose');
+        $client->submit($crawler->selectButton('Vérifier les modèles')->form(['models_step[drawerChoice]' => 'qwen']));
+        $client->request('GET', '/fr/models/check');
+        self::assertSelectorTextContains('.check-results', 'vérifié, sur ton serveur');
+    }
+
+    public function testTheWaitForTheModelsShowsTheLoadingScreen(): void
+    {
+        $client = $this->client(self::anthropicList());
+        $this->step1($client);
+
+        $crawler = $this->get($client, '/en/models/choose');
+
+        self::assertSame('loading#show', $crawler->filter('form.models-form')->attr('data-action'));
+        self::assertSelectorTextContains('#loading .loading-title', 'Checking the models');
     }
 
     public function testAnotherServerShowsTheReasoningSwitchOnOnlyForALocalAddress(): void
@@ -280,7 +400,7 @@ final class ModelsControllerTest extends WebTestCase
             $this->step1($client, 'openai_compatible', 'sk-or', $address);
             $crawler = $this->get($client, '/en/models/choose');
 
-            self::assertSelectorTextContains('.switch-label', 'Turn reasoning off, for a local model that thinks for too long');
+            self::assertSelectorTextContains('.switch:not(.other-guesser) .switch-label', 'Turn reasoning off, for a local model that thinks for too long');
             self::assertSame($on, null !== $crawler->filter('input[name="models_step[reasoningOff]"]')->attr('checked'), $address);
         }
     }
@@ -292,8 +412,10 @@ final class ModelsControllerTest extends WebTestCase
 
         $crawler = $this->get($client, '/en/models/choose');
 
-        self::assertSame(['— choose a model —', 'alpha', 'zeta'], $crawler->filter('select[name="models_step[guesserChoice]"] option')->each(static fn (Crawler $option): string => trim($option->text())));
-        self::assertSelectorTextContains('.role-models', 'capabilities unknown, the check will tell');
+        self::assertSame(['alpha', 'zeta'], self::radios($crawler, 'guesser'));
+        self::assertCount(0, $crawler->filter('input[name="models_step[drawerChoice]"]:checked'), 'No table of families: nothing is preselected');
+        self::assertCount(0, $crawler->filter('details.long-list'), 'A short list of a server of your own is shown as it is');
+        self::assertSelectorTextContains('.models-form', 'capabilities unknown, the check will tell');
     }
 
     public function testAHugeListIsFoldedAndTheTextFieldComesFirst(): void
@@ -307,10 +429,11 @@ final class ModelsControllerTest extends WebTestCase
         self::assertCount(2, $crawler->filter('details.long-list'));
         self::assertSelectorTextContains('details.long-list summary', 'Pick from the 300 models');
         self::assertCount(0, $crawler->filter('details.long-list[open]'));
-        self::assertCount(301, $crawler->filter('select[name="models_step[guesserChoice]"] option'), '300 models and the placeholder, in a plain select');
+        self::assertCount(300, $crawler->filter('details.long-list')->first()->filter('input[type=radio]'));
+        self::assertCount(0, $crawler->filter('.model-cards'));
         self::assertCount(0, $crawler->filter('datalist'));
         $html = (string) $client->getResponse()->getContent();
-        self::assertLessThan(strpos($html, 'long-list'), strpos($html, 'models_step[guesserName]'), 'The text field is above the folded list');
+        self::assertLessThan(strpos($html, 'long-list'), strpos($html, 'models_step[drawerName]'), 'The text field is above the folded list');
     }
 
     public function testTheSavedKeyIsKeptWhenTheFieldIsEmptyAndOnlyForTheSameProviderAndAddress(): void

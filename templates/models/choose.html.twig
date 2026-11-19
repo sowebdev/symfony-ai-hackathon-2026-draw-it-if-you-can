@@ -2,7 +2,9 @@
 
 {% block title %}{{ 'models.title'|trans }} · Draw It If You Can{% endblock %}
 
-{# Step 2: a model for each role, from the list of the provider, or typed. #}
+{# Step 2: the model, from the list of the provider or typed, and optionally another one to guess. #}
+{% block loading %}{{ include('_loading.html.twig', {loading_title: 'status.checking_models'}) }}{% endblock %}
+
 {% block body %}
     <main class="models">
         <a class="models-home" href="{{ path('home') }}">← {{ 'action.back_home'|trans }}</a>
@@ -17,45 +19,33 @@
             </div>
         {% endif %}
 
-        {{ form_start(form, {attr: {class: 'models-form', novalidate: 'novalidate'}}) }}
-            {% for role in ['guesser', 'drawer'] %}
-                {% set listField = form[role ~ 'Choice'] is defined ? form[role ~ 'Choice'] : null %}
-                {% set typed = form[role ~ 'Name'] %}
-                {% set count = counts[role] %}
-                <fieldset class="role-models">
-                    <legend>{{ ('role.' ~ role)|trans }}</legend>
-                    <p class="hint">{{ ('models.needs_' ~ role)|trans }}</p>
+        {# The wait for the models (several seconds) shows the loading screen of the game. #}
+        {{ form_start(form, {attr: {class: 'models-form', novalidate: 'novalidate', 'data-controller': 'loading', 'data-action': 'loading#show'}}) }}
+            <fieldset class="role-models">
+                <legend>{{ 'models.the_model'|trans }}</legend>
+                <p class="hint">{{ 'models.the_model_hint'|trans }}</p>
+                {{ include('models/_role_choice.html.twig', {field: form.drawerChoice is defined ? form.drawerChoice : null, typed: form.drawerName, layout: layouts.drawer}) }}
+            </fieldset>
 
-                    {% if listField and count <= long_list %}
-                        <div class="field">
-                            {{ form_label(listField) }}
-                            {{ form_widget(listField) }}
-                            {{ form_errors(listField) }}
-                        </div>
-                    {% endif %}
+            {# A second choice, shown by CSS only (:has(:checked)): unchecked, the guesser is the model above. #}
+            <div class="other-guesser field switch">
+                <label class="switch-label">
+                    {{ form_widget(form.otherGuesser) }}
+                    <span>{{ 'models.other_guesser'|trans }}</span>
+                </label>
+                {{ form_errors(form.otherGuesser) }}
+            </div>
+            <fieldset class="role-models guesser-models">
+                <legend>{{ 'role.guesser'|trans }}</legend>
+                <p class="hint">{{ 'models.needs_guesser'|trans }}</p>
+                {{ include('models/_role_choice.html.twig', {field: form.guesserChoice is defined ? form.guesserChoice : null, typed: form.guesserName, layout: layouts.guesser}) }}
+            </fieldset>
 
-                    <div class="field">
-                        {{ form_label(typed, listField ? 'models.type_name' : 'models.model_name') }}
-                        {{ form_widget(typed) }}
-                        {{ form_errors(typed) }}
-                    </div>
-
-                    {% if listField and count > long_list %}
-                        {# Hundreds of models are not a page: the list is folded, the text field comes first. #}
-                        <details class="long-list"{% if listField.vars.data %} open{% endif %}>
-                            <summary>{{ 'models.pick_from'|trans({'%count%': count}) }}</summary>
-                            {{ form_widget(listField) }}
-                            {{ form_errors(listField) }}
-                        </details>
-                    {% endif %}
-
-                    {% if listField and not capabilities_known %}
-                        <p class="hint">{{ 'models.capabilities_unknown'|trans }}</p>
-                    {% elseif not listField %}
-                        <p class="hint">{{ 'models.typed_unknown'|trans }}</p>
-                    {% endif %}
-                </fieldset>
-            {% endfor %}
+            {% if not capabilities_known and (layouts.drawer.count > 0) %}
+                <p class="hint">{{ 'models.capabilities_unknown'|trans }}</p>
+            {% elseif layouts.drawer.count == 0 %}
+                <p class="hint">{{ 'models.typed_unknown'|trans }}</p>
+            {% endif %}
 
             {% if form.reasoningOff is defined %}
                 <div class="field switch">

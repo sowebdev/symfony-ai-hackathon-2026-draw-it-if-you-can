@@ -1,9 +1,9 @@
 # The models
 
-The AI has two roles, each with its own model, and one provider for both:
+The AI has two roles, one provider for both, and by default one model for both (you may choose another one to guess):
 
 - **the drawer** draws while you guess, and looks at its drawing to add the details that are missing;
-- **the guesser** picks the word you draw, then guesses your drawing.
+- **the guesser** guesses your drawing (the word to draw is drawn at random from a list the model gives).
 
 Both models must read images, and the drawer must also call tools.
 
@@ -12,8 +12,8 @@ Both models must read images, and the drawer must also call tools.
 Open the game and follow the page (the home page invites you there while no model is chosen, its health card leads there when a model does not answer, and "Change the model" at the bottom of the home page always does):
 
 1. **Provider.** Four cards: Anthropic, OpenAI, Mistral, or another OpenAI-compatible service. Paste your API key (a password field: empty means "keep the saved key", of which only the end is shown, `…3f9a`; a saved key is never sent to another address than the one it was saved for). For another service, the address too: the field shows only when that card is checked, and starts empty. The game runs in Docker, so your machine is `host.docker.internal` there, not `localhost`; the usual ports are Ollama 11434, LM Studio 1234, llama.cpp 8080, among others (`http://host.docker.internal:11434`). Leave the key empty if your server asks for none. Then "List the models".
-2. **Models.** One list for each role (the guesser reads images; the drawer reads images and calls tools) and a field to type any model name: the typed name wins. The lists show only what can play. The models saved already, if any, are selected; nothing else is.
-3. **Check.** Each role is tried on a tiny task whose answer is known (the guesser names a circle drawn in an image; the drawer draws one stroke with its tool), and the result is said in plain words. Only when both pass does "Save and play" appear, which saves the setting and goes home. On a failure nothing is saved and your choices stay filled.
+2. **The model.** One choice, used for both roles: the model that draws can always guess too. The list shows only what can play, as one card per family (its most recent version), from the cheapest family; the cheapest is preselected and marked « the cheapest » (`src/Ai/ModelFamilies.php`: no list of models carries prices, so the order of the families is kept by hand, to be reviewed when a provider adds one). Older versions and unknown families are under "See all models". A field takes any model name: the typed name wins. The box "Another model to guess" shows a second choice, in CSS alone; a saved setting whose two models differ opens with it checked. The models saved already, if any, stay selected: the preselection is only for a first choice. For a server of your own the capabilities are unknown and the screen says so once.
+3. **Check.** Each role is tried on a tiny task whose answer is known (the guesser names a circle drawn in an image; the drawer draws one stroke with its tool); the card shows the image the guesser was sent and its answer, or the stroke the drawer drew, and where the model ran (at the provider, or on your server). The loading screen shows while the models are tried. Only when both pass does "Save and play" appear, which saves the setting and goes home. On a failure nothing is saved and your choices stay filled.
 
 Between the steps the API key is kept in your session, sealed with `APP_ENCRYPTION_KEY`, and never goes back to the browser; it is dropped once saved, or when you leave for the home page. The screen has no login: the game listens on 127.0.0.1 only and must not be exposed.
 
@@ -38,7 +38,7 @@ The limit of an answer is sent as `max_output_tokens`, which each bridge turns i
 - Mistral: its own answer carries capabilities (vision, function calling) and decides when present; else the catalog of the bridge.
 - Another service: no catalog. When its answer carries capabilities in a known shape (OpenRouter and the Hugging Face router: `architecture.input_modalities`, `output_modalities`, `supported_parameters`) the list is filtered on them; otherwise it is shown as it is, sorted by name, with "capabilities unknown, the check will tell". Past 50 models the list is folded under the text field.
 
-The labels say only what is known now: what a catalog states ("reads images", "calls tools"), "capabilities unknown", and "checked" after the check passed, on this machine. New models come out every month: nothing is "tested" or "suggested" by the game. The table "What I tried" below is a dated record of what I tried, not a promise.
+The screen says only what is known now: "capabilities unknown" for a server whose list does not say, and "checked" after the check passed, with where the model ran. New models come out every month: nothing is "tested" or "suggested" by the game. The table "What I tried" below is a dated record of what I tried, not a promise.
 
 `make check` tries the model of each role on a tiny task whose answer is known (each must name a circle drawn in an image; the drawer must also draw one stroke with its tool) and tells what is wrong.
 

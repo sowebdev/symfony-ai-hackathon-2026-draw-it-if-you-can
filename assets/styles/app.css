@@ -1374,7 +1374,8 @@ button.link:hover {
     grid-column: 1 / -1;
 }
 
-.provider-card {
+.provider-card,
+.model-option {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -1387,17 +1388,22 @@ button.link:hover {
     transition: transform 0.15s, border-color 0.15s;
 }
 
-.provider-card:nth-child(odd) { transform: rotate(-0.8deg); }
-.provider-card:nth-child(even) { transform: rotate(0.6deg); }
+.provider-card:nth-child(odd),
+.model-cards .model-option:nth-child(odd) { transform: rotate(-0.8deg); }
+.provider-card:nth-child(even),
+.model-cards .model-option:nth-child(even) { transform: rotate(0.6deg); }
 
-.provider-card:has(input:checked) {
+.provider-card:has(input:checked),
+.model-option:has(input:checked),
+.model-cards .model-option:has(input:checked) {
     transform: rotate(0) translateY(-3px);
     border-color: var(--ink);
     box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.12);
 }
 
 /* The mark of the choice: a filled, slightly lopsided dot with a check, in the corner. */
-.provider-card:has(input:checked)::after {
+.provider-card:has(input:checked)::after,
+.model-option:has(input:checked)::after {
     content: '✓';
     position: absolute;
     top: -12px;
@@ -1416,13 +1422,15 @@ button.link:hover {
     box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.18);
 }
 
-.provider-card:has(input:focus-visible) {
+.provider-card:has(input:focus-visible),
+.model-option:has(input:focus-visible) {
     outline: 3px dashed var(--pencil);
     outline-offset: 4px;
 }
 
 /* The radio button stays for the keyboard and screen readers, the card shows the choice. */
-.provider-card input {
+.provider-card input,
+.model-option input {
     position: absolute;
     opacity: 0;
     pointer-events: none;
@@ -1488,6 +1496,52 @@ button.link:hover {
 .role-models:not(:last-of-type) {
     padding-bottom: 0.9rem;
     border-bottom: 2px dashed #d8cfbd;
+}
+
+.model-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1rem 0.9rem;
+    padding-top: 0.4rem;
+}
+
+.model-option {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem 0.6rem;
+    min-height: 2.75rem;
+    padding: 0.6rem 0.9rem;
+    overflow-wrap: anywhere;
+}
+
+.model-option code {
+    font-size: 1.05rem;
+}
+
+.cheapest-mark {
+    font-style: normal;
+    font-size: 0.85rem;
+    padding: 0.05rem 0.5rem;
+    color: #fff;
+    background: var(--found);
+    border-radius: 999px;
+}
+
+.model-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+/* The second choice, for a guesser other than the model above: shown by CSS alone. */
+.guesser-models {
+    display: none;
+}
+
+.models-form:has(.other-guesser input:checked) .guesser-models {
+    display: flex;
 }
 
 .role-models .hint {
@@ -1594,6 +1648,36 @@ button.link:hover {
 .check-results li.failed::before {
     content: '✗';
     color: #b42318;
+}
+
+.test {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    margin-top: 0.7rem;
+}
+
+.test-image,
+.test-stroke {
+    flex: none;
+    width: 6rem;
+    height: 6rem;
+    background: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 4px 8px 5px 9px;
+    transform: rotate(-1.5deg);
+}
+
+.test-stroke path {
+    fill: none;
+    stroke: #2b2b2b;
+    stroke-width: 18;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.test-answer {
+    font-size: 1.15rem;
 }
 
 .check-results .verdict {

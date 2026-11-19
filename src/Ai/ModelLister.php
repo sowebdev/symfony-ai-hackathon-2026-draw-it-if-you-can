@@ -38,12 +38,12 @@ final readonly class ModelLister
     public function list(Provider $provider, ?string $address, #[\SensitiveParameter] ?string $apiKey, bool $fresh = false): ModelList
     {
         // The key is a hash in the key of the cache: a list is for a key, never the key itself.
-        $cacheKey = \sprintf('model_list.v2.%s.%s', $provider->value, substr(hash('sha256', $provider->addressOr($address)."\0".$apiKey), 0, 32));
+        $cacheKey = \sprintf('model_list.v3.%s.%s', $provider->value, substr(hash('sha256', $provider->addressOr($address)."\0".$apiKey), 0, 32));
         if ($fresh) {
             $this->cache->delete($cacheKey);
         }
 
-        /** @var array{choices: list<array{name: string, vision: ?bool, tools: ?bool}>, problem: ?array{id: string, parameters: array<string, string>, advice: ?string}} $found */
+        /** @var array{choices: list<array{name: string, vision: ?bool, tools: ?bool, created: ?int}>, problem: ?array{id: string, parameters: array<string, string>, advice: ?string}} $found */
         $found = $this->cache->get($cacheKey, function (ItemInterface $item) use ($provider, $address, $apiKey): array {
             $item->expiresAfter($provider->listTtl());
             try {
@@ -88,12 +88,33 @@ final readonly class ModelLister
             }
             $choice = null === $known ? self::advertised($name, $entry) : (self::stated($name, $entry, $provider) ?? self::catalogued($name, $known));
             if (null !== $choice && $choice->canPlay(Role::Guesser)) {
-                $choices[$name] = $choice;
+                $choices[$name] = $choice->created(self::created($entry));
             }
         }
         uasort($choices, static fn (ModelChoice $a, ModelChoice $b): int => strnatcasecmp($a->name, $b->name));
 
         return array_values($choices);
+    }
+
+    /**
+     * When an entry says it was created: `created_at` (Anthropic, an ISO date) or `created` (OpenAI,
+     * Mistral, OpenRouter, a Unix time).
+     *
+     * @param array<string, mixed> $entry
+     */
+    private static function created(array $entry): ?int
+    {
+        $created = $entry['created_at'] ?? $entry['created'] ?? null;
+        if (\is_int($created) && $created > 0) {
+            return $created;
+        }
+        if (\is_string($created) && '' !== $created) {
+            $time = strtotime($created);
+
+            return false === $time ? null : $time;
+        }
+
+        return null;
     }
 
     /**

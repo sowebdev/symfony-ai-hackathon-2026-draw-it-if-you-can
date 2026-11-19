@@ -1,0 +1,57 @@
+{# One role's choice: a card per family (its newest model, the cheapest marked), the other models folded away, and the field to type a name. #}
+{# `field` is the radio group (absent when the list is empty), `typed` the text field, `layout` what the controller arranged. #}
+{% set radios = {} %}
+{% if field %}
+    {% for radio in field %}
+        {% set radios = radios|merge({(radio.vars.value): radio}) %}
+    {% endfor %}
+{% endif %}
+
+{% macro option(radio, cheapest) %}
+    <label class="model-option{{ cheapest ? ' cheapest' : '' }}">
+        {{ form_widget(radio) }}
+        <code>{{ radio.vars.value }}</code>
+        {% if cheapest %}<em class="cheapest-mark">{{ 'models.cheapest'|trans }}</em>{% endif %}
+    </label>
+{% endmacro %}
+
+{% if field %}
+    {% if layout.cards %}
+        <div class="model-cards">
+            {% for name in layout.cards %}
+                {{ _self.option(radios[name], name == layout.cheapest) }}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if layout.others %}
+        {% set unfold = layout.cards is empty and not layout.long %}
+        {% if unfold %}
+            <div class="model-list">
+                {% for name in layout.others %}
+                    {{ _self.option(radios[name], false) }}
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endif %}
+{% endif %}
+
+<div class="field">
+    {{ form_label(typed, field ? 'models.type_name' : 'models.model_name') }}
+    {{ form_widget(typed) }}
+    {{ form_errors(typed) }}
+</div>
+
+{% if field and layout.others and not (layout.cards is empty and not layout.long) %}
+    {# Older versions and unknown families; hundreds of models are not a page either: the text field comes first. #}
+    {% set chosen = field.vars.data %}
+    <details class="long-list"{% if chosen and chosen in layout.others %} open{% endif %}>
+        <summary>{{ layout.long ? 'models.pick_from'|trans({'%count%': layout.count}) : 'models.all_models'|trans }}</summary>
+        <div class="model-list">
+            {% for name in layout.others %}
+                {{ _self.option(radios[name], false) }}
+            {% endfor %}
+        </div>
+    </details>
+{% endif %}
+{% if field %}{{ form_errors(field) }}{% endif %}

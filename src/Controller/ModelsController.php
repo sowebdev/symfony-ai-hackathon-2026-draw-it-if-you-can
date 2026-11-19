@@ -5,8 +5,10 @@ namespace App\Controller;
 use App\Ai\DraftStore;
 use App\Ai\EncryptionException;
 use App\Ai\ModelCheck;
+use App\Ai\ModelCheckResult;
 use App\Ai\ModelChoice;
 use App\Ai\ModelDraft;
+use App\Ai\ModelFamilies;
 use App\Ai\ModelHealth;
 use App\Ai\ModelLister;
 use App\Ai\Models;
@@ -14,6 +16,7 @@ use App\Ai\ModelSettings;
 use App\Ai\Problem;
 use App\Ai\Provider;
 use App\Ai\Role;
+use App\Drawing\StrokeRenderer;
 use App\Form\ModelsStep;
 use App\Form\ModelsStepType;
 use App\Form\ProviderStep;
@@ -52,6 +55,7 @@ final class ModelsController extends AbstractController
         private readonly Models $models,
         private readonly ModelHealth $health,
         private readonly TranslatorInterface $translator,
+        private readonly StrokeRenderer $renderer,
     ) {
     }
 
@@ -126,24 +130,37 @@ final class ModelsController extends AbstractController
 
         $list = $this->lister->list($draft->provider, $draft->address, $key, fresh: $request->query->getBoolean('fresh'));
         $choices = [];
+        $layouts = [];
         foreach (Role::cases() as $role) {
-            foreach ($list->for($role) as $choice) {
-                $choices[$role->value][$this->label($choice)] = $choice->name;
-            }
+            $listed = $list->for($role);
+            $arranged = ModelFamilies::arrange($draft->provider, $listed);
+            $names = static fn (array $models): array => array_map(static fn (ModelChoice $choice): string => $choice->name, $models);
+            $choices[$role->value] = array_combine($names($listed), $names($listed));
+            $long = \count($listed) > self::LONG_LIST;
+            // The cheapest is only a first choice: a model chosen before, or saved, keeps its place.
+            $layouts[$role->value] = [
+                'count' => \count($listed),
+                'cards' => $long ? [] : $names($arranged['cards']),
+                'others' => $long ? $names($listed) : $names($arranged['others']),
+                'cheapest' => ModelFamilies::cheapest($draft->provider, $listed)?->name,
+                'long' => $long,
+            ];
         }
-        $step = new ModelsStep(reasoningOff: $draft->reasoningOff);
-        foreach ([Role::Guesser, Role::Drawer] as $role) {
-            $current = Role::Guesser === $role ? $draft->guesserModel : $draft->drawerModel;
-            $listed = \in_array($current, $choices[$role->value] ?? [], true);
-            if (Role::Guesser === $role) {
-                [$step->guesserChoice, $step->guesserName] = [$listed ? $current : null, $listed || '' === $current ? null : $current];
-            } else {
-                [$step->drawerChoice, $step->drawerName] = [$listed ? $current : null, $listed || '' === $current ? null : $current];
-            }
+
+        $model = $draft->drawerModel;
+        $guesser = '' === $draft->guesserModel ? $model : $draft->guesserModel;
+        $other = $guesser !== $model;
+        if ('' === $model) {
+            $model = $layouts[Role::Drawer->value]['cheapest'] ?? '';
         }
+        $step = new ModelsStep(otherGuesser: $other, reasoningOff: $draft->reasoningOff);
+        [$step->drawerChoice, $step->drawerName] = self::split($model, $choices[Role::Drawer->value]);
+        // The guesser's choice sits under the box: the same model if the guesser's list has it, else the cheapest.
+        $second = $other || isset($choices[Role::Guesser->value][$model]) ? ($other ? $guesser : $model) : ($layouts[Role::Guesser->value]['cheapest'] ?? '');
+        [$step->guesserChoice, $step->guesserName] = self::split($second, $choices[Role::Guesser->value]);
         $form = $this->createForm(ModelsStepType::class, $step, [
-            'guesser_choices' => $choices[Role::Guesser->value] ?? [],
-            'drawer_choices' => $choices[Role::Drawer->value] ?? [],
+            'guesser_choices' => $choices[Role::Guesser->value],
+            'drawer_choices' => $choices[Role::Drawer->value],
             'reasoning_switch' => $draft->provider->hasReasoningSwitch(),
         ]);
         $form->handleRequest($request);
@@ -158,7 +175,7 @@ final class ModelsController extends AbstractController
             'form' => $form,
             'draft' => $draft,
             'problem' => $list->problem?->trans($this->translator),
-            'counts' => [Role::Guesser->value => \count($choices[Role::Guesser->value] ?? []), Role::Drawer->value => \count($choices[Role::Drawer->value] ?? [])],
+            'layouts' => $layouts,
             'capabilities_known' => $list->hasCapabilities(),
             'long_list' => self::LONG_LIST,
         ], new Response(status: $form->isSubmitted() && !$form->isValid() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
@@ -188,20 +205,27 @@ final class ModelsController extends AbstractController
         $models = $this->models->with($drawer, $guesser);
         $check = $this->modelCheck->with($models);
         $results = [];
+        $circle = 'data:image/png;base64,'.base64_encode($this->renderer->toPng([ModelCheck::circle()]));
         foreach ([Role::Guesser, Role::Drawer] as $role) {
             $setup = $models->setup($role);
             $started = microtime(true);
             try {
-                $problem = $check->check($role, null);
+                $outcome = $check->run($role, null);
             } catch (\Throwable $exception) {
-                $problem = ModelHealth::explain($exception, $setup->provider, $setup->reasoningOff);
+                $outcome = new ModelCheckResult(ModelHealth::explain($exception, $setup->provider, $setup->reasoningOff));
             }
+            $problem = $outcome->problem;
             $seconds = (int) round(microtime(true) - $started);
             $results[] = [
                 'role' => $role->value,
                 'model' => $setup->model,
+                'provider' => $setup->provider->value,
                 'ok' => null === $problem,
                 'problem' => $problem?->trans($this->translator),
+                // What was asked and what came back: the circle the guesser was sent and its answer, the stroke the drawer drew.
+                'circle' => Role::Guesser === $role ? $circle : null,
+                'answer' => Role::Guesser === $role ? $outcome->answer : null,
+                'path' => null === $outcome->stroke ? null : self::path($outcome->stroke),
                 'seconds' => $seconds,
                 'slow' => null === $problem && $seconds >= self::SLOW_S ? $this->slowNote($seconds, $setup->provider->hasReasoningSwitch(), $setup->reasoningOff) : null,
             ];
@@ -267,14 +291,26 @@ final class ModelsController extends AbstractController
         return new ModelDraft($provider, $address, $sealedKey, reasoningOff: $provider->reasoningOffByDefault($address));
     }
 
-    private function label(ModelChoice $choice): string
+    /**
+     * The points of a stroke as the path of an SVG on the canvas of the game (1000 x 1000).
+     *
+     * @param list<array{int, int, int}> $points
+     */
+    private static function path(array $points): string
     {
-        $says = array_filter([
-            true === $choice->vision ? $this->translator->trans('models.reads_images') : null,
-            true === $choice->tools ? $this->translator->trans('models.calls_tools') : null,
-        ]);
+        return implode(' ', array_map(static fn (array $point, int $i): string => \sprintf('%s%d %d', 0 === $i ? 'M' : 'L', $point[0], $point[1]), $points, array_keys($points)));
+    }
 
-        return [] === $says ? $choice->name : $choice->name.' — '.implode(', ', $says);
+    /**
+     * A model name goes to the radio buttons when the list has it, else to the text field.
+     *
+     * @param array<string, string> $listed
+     *
+     * @return array{?string, ?string}
+     */
+    private static function split(string $model, array $listed): array
+    {
+        return isset($listed[$model]) ? [$model, null] : [null, '' === $model ? null : $model];
     }
 
     private function slowNote(int $seconds, bool $hasSwitch, bool $switchOff): string

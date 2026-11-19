@@ -6,25 +6,29 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
- * Step 2 of the model screen: a model for each role, taken from the list or typed by name (the typed
- * name wins), and the reasoning switch where the game cannot decide.
+ * Step 2 of the model screen: the model, taken from the list or typed by name (the typed name wins),
+ * and optionally another one to guess, and the reasoning switch where the game cannot decide.
  */
 final class ModelsStep
 {
     public function __construct(
-        public ?string $guesserChoice = null,
-        #[Assert\Length(max: 200, maxMessage: 'error.too_long')]
-        public ?string $guesserName = null,
+        /** The model: the drawer's, which can guess as well */
         public ?string $drawerChoice = null,
         #[Assert\Length(max: 200, maxMessage: 'error.too_long')]
         public ?string $drawerName = null,
+        /** Whether the guesser is another model than the one that draws */
+        public bool $otherGuesser = false,
+        public ?string $guesserChoice = null,
+        #[Assert\Length(max: 200, maxMessage: 'error.too_long')]
+        public ?string $guesserName = null,
         public bool $reasoningOff = false,
     ) {
     }
 
     public function guesser(): string
     {
-        return self::pick($this->guesserName, $this->guesserChoice);
+        // The model that draws sees images: it can always guess too.
+        return $this->otherGuesser ? self::pick($this->guesserName, $this->guesserChoice) : $this->drawer();
     }
 
     public function drawer(): string
@@ -35,11 +39,11 @@ final class ModelsStep
     #[Assert\Callback]
     public function validate(ExecutionContextInterface $context): void
     {
-        if ('' === $this->guesser()) {
-            $context->buildViolation('error.model_needed')->atPath('guesserName')->addViolation();
-        }
         if ('' === $this->drawer()) {
             $context->buildViolation('error.model_needed')->atPath('drawerName')->addViolation();
+        }
+        if ($this->otherGuesser && '' === $this->guesser()) {
+            $context->buildViolation('error.model_needed')->atPath('guesserName')->addViolation();
         }
     }
 

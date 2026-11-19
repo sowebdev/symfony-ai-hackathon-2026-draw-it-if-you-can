@@ -788,21 +788,6 @@
                 <target>Type the name of each model instead.</target>
                 <note>Step 2, when the list of models cannot be read</note>
             </trans-unit>
-            <trans-unit id="models.list_guesser" resname="models.list_guesser">
-                <source>models.list_guesser</source>
-                <target>From the list: models that read images</target>
-                <note>Label of the list of the guesser</note>
-            </trans-unit>
-            <trans-unit id="models.list_drawer" resname="models.list_drawer">
-                <source>models.list_drawer</source>
-                <target>From the list: models that read images and call tools</target>
-                <note>Label of the list of the drawer</note>
-            </trans-unit>
-            <trans-unit id="models.pick" resname="models.pick">
-                <source>models.pick</source>
-                <target>— choose a model —</target>
-                <note>First option of a list of models</note>
-            </trans-unit>
             <trans-unit id="models.type_name" resname="models.type_name">
                 <source>models.type_name</source>
                 <target>…or type a model name</target>
@@ -815,23 +800,8 @@
             </trans-unit>
             <trans-unit id="models.needs_guesser" resname="models.needs_guesser">
                 <source>models.needs_guesser</source>
-                <target>It picks the word and guesses your drawing: it must read images.</target>
+                <target>It guesses your drawing.</target>
                 <note>Under the legend of the guesser, step 2</note>
-            </trans-unit>
-            <trans-unit id="models.needs_drawer" resname="models.needs_drawer">
-                <source>models.needs_drawer</source>
-                <target>It draws with a tool and looks at its drawing: it must read images and call tools.</target>
-                <note>Under the legend of the drawer, step 2</note>
-            </trans-unit>
-            <trans-unit id="models.reads_images" resname="models.reads_images">
-                <source>models.reads_images</source>
-                <target>reads images</target>
-                <note>Capability stated by a catalog, after a model name</note>
-            </trans-unit>
-            <trans-unit id="models.calls_tools" resname="models.calls_tools">
-                <source>models.calls_tools</source>
-                <target>calls tools</target>
-                <note>Capability stated by a catalog, after a model name</note>
             </trans-unit>
             <trans-unit id="models.pick_from" resname="models.pick_from">
                 <source>models.pick_from</source>
@@ -863,14 +833,9 @@
                 <target>Checking the models</target>
                 <note>Title of step 3</note>
             </trans-unit>
-            <trans-unit id="models.check_intro" resname="models.check_intro">
-                <source>models.check_intro</source>
-                <target>Each model is tried on a tiny task: the guesser names a circle drawn in an image, the drawer draws one stroke with its tool.</target>
-                <note>Under the title of step 3</note>
-            </trans-unit>
             <trans-unit id="models.checked" resname="models.checked">
                 <source>models.checked</source>
-                <target>checked, on this machine</target>
+                <target>checked</target>
                 <note>Step 3, after a model passed its check</note>
             </trans-unit>
             <trans-unit id="models.nothing_saved" resname="models.nothing_saved">
@@ -1002,6 +967,56 @@
                 <source>list.not_a_list</source>
                 <target>%provider% did not answer with a list of models.</target>
                 <note>The answer is not a list of models</note>
+            </trans-unit>
+            <trans-unit id="models.the_model" resname="models.the_model">
+                <source>models.the_model</source>
+                <target>The model</target>
+                <note>Step 2, legend of the one choice</note>
+            </trans-unit>
+            <trans-unit id="models.the_model_hint" resname="models.the_model_hint">
+                <source>models.the_model_hint</source>
+                <target>It draws, and it guesses your drawing too.</target>
+                <note>Step 2, under the legend of the model</note>
+            </trans-unit>
+            <trans-unit id="models.other_guesser" resname="models.other_guesser">
+                <source>models.other_guesser</source>
+                <target>Another model to guess</target>
+                <note>Step 2, checkbox that shows a second choice</note>
+            </trans-unit>
+            <trans-unit id="models.cheapest" resname="models.cheapest">
+                <source>models.cheapest</source>
+                <target>the cheapest</target>
+                <note>Step 2, mark of the preselected model</note>
+            </trans-unit>
+            <trans-unit id="models.all_models" resname="models.all_models">
+                <source>models.all_models</source>
+                <target>See all models</target>
+                <note>Step 2, summary of the folded list</note>
+            </trans-unit>
+            <trans-unit id="models.checked_at" resname="models.checked_at">
+                <source>models.checked_at</source>
+                <target>at %provider%</target>
+                <note>Step 3, where a cloud model runs</note>
+            </trans-unit>
+            <trans-unit id="models.checked_own" resname="models.checked_own">
+                <source>models.checked_own</source>
+                <target>on your server</target>
+                <note>Step 3, where a model of an OpenAI-compatible service runs</note>
+            </trans-unit>
+            <trans-unit id="models.sent_circle" resname="models.sent_circle">
+                <source>models.sent_circle</source>
+                <target>The image it was sent</target>
+                <note>Step 3, alt text of the circle</note>
+            </trans-unit>
+            <trans-unit id="models.answered" resname="models.answered">
+                <source>models.answered</source>
+                <target>It answered: %answer%</target>
+                <note>Step 3, the answer of the guesser</note>
+            </trans-unit>
+            <trans-unit id="models.drew" resname="models.drew">
+                <source>models.drew</source>
+                <target>The stroke it drew</target>
+                <note>Step 3, alt text of the stroke of the drawer</note>
             </trans-unit>
         </body>
     </file>
