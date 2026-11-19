@@ -1,6 +1,6 @@
 # A single service: the game and its tools. The SQLite database is a file under var/.
-# The models are reached at the addresses of AI_* in .env. host.docker.internal is the machine
-# itself, where a local server such as Ollama usually runs. Another setup (a Docker network of
+# The model is chosen on the models screen of the game. host.docker.internal is the machine
+# itself, where a local server usually runs. Another setup (a Docker network of
 # your own, for instance) goes in compose.override.yaml, which is not committed.
 services:
   php:

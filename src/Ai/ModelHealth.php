@@ -23,6 +23,7 @@ final readonly class ModelHealth
 
     public function __construct(
         private Models $models,
+        private ModelSettings $settings,
         private ModelCheck $check,
         private CacheInterface $cache,
         private TranslatorInterface $translator,
@@ -30,11 +31,14 @@ final readonly class ModelHealth
     }
 
     /**
-     * @return list<array{role: string, model: string, ok: bool, problem: ?string}>
+     * @return list<array{role: string, model: string, ok: bool, problem: ?string}> Empty when no model is chosen yet
      */
     public function report(bool $fresh = false): array
     {
         $report = [];
+        if (!$this->settings->isStored()) {
+            return $report;
+        }
         foreach (Role::cases() as $role) {
             $setup = $this->models->setup($role);
             $model = $this->translator->trans('label.model_at', ['%model%' => $setup->model, '%address%' => $setup->place()]);

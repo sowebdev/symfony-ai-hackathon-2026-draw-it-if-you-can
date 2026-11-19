@@ -348,6 +348,11 @@
                 <target>A model does not answer as it should. Choose another one, or check the address and the key, on the model screen. “make check” says the same in a terminal.</target>
                 <note>Home page, when a model fails its check</note>
             </trans-unit>
+            <trans-unit id="help.no_model" resname="help.no_model">
+                <source>help.no_model</source>
+                <target>No model is chosen yet. Choose the one that draws and guesses, on the model screen: the game cannot start without it.</target>
+                <note>Home page, when no model is chosen yet</note>
+            </trans-unit>
             <trans-unit id="action.check_again" resname="action.check_again">
                 <source>action.check_again</source>
                 <target>Check again</target>
@@ -660,7 +665,7 @@
             </trans-unit>
             <trans-unit id="models.key_hint" resname="models.key_hint">
                 <source>models.key_hint</source>
-                <target>Kept encrypted in the game’s database and never shown again. Leave it empty for a server of your own that asks for none.</target>
+                <target>Leave it empty if your server does not ask for one.</target>
                 <note>Under the API key field, when no key is saved</note>
             </trans-unit>
             <trans-unit id="models.key_saved" resname="models.key_saved">
@@ -675,7 +680,7 @@
             </trans-unit>
             <trans-unit id="models.address_hint" resname="models.address_hint">
                 <source>models.address_hint</source>
-                <target>The other providers have their own address. From inside Docker, your machine is host.docker.internal: this is the address of Ollama.</target>
+                <target>The address of your server. The game runs in Docker, so your machine is called host.docker.internal there, not localhost.</target>
                 <note>Under the address field</note>
             </trans-unit>
             <trans-unit id="provider.anthropic" resname="provider.anthropic">

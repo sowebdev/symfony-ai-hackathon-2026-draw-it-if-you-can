@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Ai\DraftStore;
 use App\Ai\ModelHealth;
+use App\Ai\ModelSettings;
 use App\Entity\Game;
 use App\Game\Dealer;
 use App\Game\Language;
@@ -30,6 +31,7 @@ final class GameController extends AbstractController
         private readonly RoundStarter $starter,
         private readonly EntityManagerInterface $entityManager,
         private readonly RoundRepository $rounds,
+        private readonly ModelSettings $settings,
         private readonly ScoreGauge $gauge,
         private readonly LocaleSwitcher $localeSwitcher,
         private readonly LoggerInterface $logger,
@@ -68,7 +70,7 @@ final class GameController extends AbstractController
     {
         $report = $health->report($request->query->getBoolean('fresh'));
 
-        return $this->json(['ok' => [] === array_filter($report, static fn (array $role): bool => !$role['ok']), 'roles' => $report]);
+        return $this->json(['ok' => [] !== $report && [] === array_filter($report, static fn (array $role): bool => !$role['ok']), 'roles' => $report]);
     }
 
     /**
@@ -77,6 +79,10 @@ final class GameController extends AbstractController
     #[Route('/{_locale}/games', name: 'game_create', requirements: ['_locale' => new EnumRequirement(Language::class)], methods: ['POST'])]
     public function create(Request $request, Dealer $dealer, #[MapRequestPayload] NewGame $payload = new NewGame()): Response
     {
+        // No model is chosen yet: nobody could draw or guess, so the player goes and chooses one.
+        if (!$this->settings->isStored()) {
+            return $this->redirectToRoute('models_provider');
+        }
         $game = new Game(Language::from($request->getLocale()), $this->roundCount, $payload->drawnBy ?? $dealer->firstDrawer(), $payload->mode);
         $this->starter->open($game);
 
@@ -201,6 +207,7 @@ final class GameController extends AbstractController
         return $this->render('game/home.html.twig', [
             'languages' => Language::cases(),
             'error' => $error,
+            'has_model' => $this->settings->isStored(),
         ], new Response(status: $status));
     }
 }

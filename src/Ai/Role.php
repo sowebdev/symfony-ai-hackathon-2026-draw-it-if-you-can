@@ -3,7 +3,7 @@
 namespace App\Ai;
 
 /**
- * What the AI does in the game. Each role has its own endpoint and model (AI_<ROLE>_* in .env).
+ * What the AI does in the game. Each role has its own model, chosen on the models screen.
  */
 enum Role: string
 {

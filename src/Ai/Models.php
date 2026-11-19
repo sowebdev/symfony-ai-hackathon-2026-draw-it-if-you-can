@@ -10,7 +10,7 @@ use Symfony\AI\Platform\Result\DeferredResult;
 
 /**
  * The model of each role: its platform, its name and the options it needs, from the current
- * setting (ModelSettings: the game's, else the AI_* variables). The platform is built when it is
+ * setting (ModelSettings: the one stored from the models screen). The platform is built when it is
  * needed, so that a new setting takes effect at once.
  */
 final readonly class Models
@@ -117,7 +117,7 @@ final readonly class Models
     private function modelName(Role $role, RoleSetup $setup): string
     {
         if ('' === $setup->model) {
-            throw new \LogicException(\sprintf('No model is set for the role "%s": choose one in the settings of the game, or fill in its AI_*_MODEL variable.', $role->name));
+            throw new \LogicException(\sprintf('No model is set for the role "%s": choose one on the models screen of the game.', $role->name));
         }
 
         return $setup->model;

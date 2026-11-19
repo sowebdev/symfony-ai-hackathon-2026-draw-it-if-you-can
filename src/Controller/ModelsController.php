@@ -67,15 +67,15 @@ final class ModelsController extends AbstractController
         }
         $draft = $this->drafts->get();
 
-        // The draft, else what is saved, else the first card; the address is offered even when it is not the one saved.
+        // The draft, else what is saved, else the first card; the address is empty unless one of them has it.
         $provider = Provider::Anthropic;
-        $address = Provider::SUGGESTED_ADDRESS;
+        $address = null;
         if (null !== $draft) {
             $provider = $draft->provider;
-            $address = $draft->address ?? $address;
+            $address = $draft->address;
         } elseif (null !== $view) {
             $provider = $view->provider;
-            $address = Provider::Compatible === $view->provider ? ($view->address ?? $address) : $address;
+            $address = $view->address;
         }
         $step = new ProviderStep($provider, null, $address);
         $form = $this->createForm(ProviderStepType::class, $step);

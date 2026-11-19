@@ -6,6 +6,7 @@ use App\Ai\Encryption;
 use App\Ai\EncryptionException;
 use App\Ai\Models;
 use App\Ai\ModelSettings;
+use App\Ai\NoModelException;
 use App\Ai\PlatformFactory;
 use App\Ai\Provider;
 use App\Ai\Role;
@@ -17,7 +18,7 @@ use Symfony\AI\Platform\Message\MessageBag;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
- * The setting in the database, its API key sealed, and the game reading it before the environment.
+ * The setting in the database, its API key sealed, and the game reading it: the only source of the model.
  */
 final class ModelSettingsTest extends KernelTestCase
 {
@@ -47,24 +48,16 @@ final class ModelSettingsTest extends KernelTestCase
         $models->invoke($role, new MessageBag(Message::ofUser('hello')), maxTokens: 123)->asText();
     }
 
-    public function testWithoutASettingTheGameReadsTheEnvironment(): void
+    public function testWithoutASettingTheGameHasNoModel(): void
     {
         self::assertFalse($this->settings()->isStored());
         self::assertNull($this->settings()->view());
 
-        $setup = $this->settings()->forRole(Role::Drawer);
-        self::assertSame(Provider::Compatible, $setup->provider, 'The AI_* variables speak the API of OpenAI, on the Generic bridge');
-        self::assertSame(self::getContainer()->getParameter('kernel.environment'), 'test');
-        self::assertSame($_SERVER['AI_DRAWER_BASE_URL'] ?? $_ENV['AI_DRAWER_BASE_URL'] ?? 'http://host.docker.internal:11434', $setup->address);
-
-        $this->ask($this->models());
-        self::assertSame(Provider::Compatible, $this->platforms->created[0][0]);
-        // What the options were before the setting existed: the limit, and the reasoning switch of the variable.
-        self::assertSame(123, $this->platforms->invoked[0][1]['max_output_tokens']);
-        self::assertSame('none', $this->platforms->invoked[0][1]['reasoning_effort']);
+        $this->expectException(NoModelException::class);
+        $this->settings()->forRole(Role::Drawer);
     }
 
-    public function testTheDatabaseWinsOverTheEnvironment(): void
+    public function testTheStoredSettingIsWhatTheGameCalls(): void
     {
         $this->settings()->save(Provider::Anthropic, null, 'claude-sonnet-5-5', 'claude-haiku-5-5', true, self::KEY);
 
@@ -202,7 +195,7 @@ final class ModelSettingsTest extends KernelTestCase
         $this->settings()->save(Provider::Compatible, '  ', 'qwen', 'qwen', false);
     }
 
-    public function testRemovingTheSettingGivesTheEnvironmentBack(): void
+    public function testRemovingTheSettingLeavesTheGameWithoutAModel(): void
     {
         $this->settings()->save(Provider::Anthropic, null, 'claude-haiku-5-5', 'claude-haiku-5-5', false, self::KEY);
         self::assertSame(Provider::Anthropic, $this->settings()->forRole(Role::Guesser)->provider);
@@ -210,7 +203,8 @@ final class ModelSettingsTest extends KernelTestCase
         $this->settings()->remove();
 
         self::assertFalse($this->settings()->isStored());
-        self::assertSame(Provider::Compatible, $this->settings()->forRole(Role::Guesser)->provider);
+        $this->expectException(NoModelException::class);
+        $this->settings()->forRole(Role::Guesser);
     }
 
     public function testTheMessagesThatDescribeTheModelNeverHoldTheKey(): void
@@ -232,8 +226,6 @@ final class ModelSettingsTest extends KernelTestCase
             $container->get(AiSettingRepository::class),
             $container->get(EntityManagerInterface::class),
             $encryption,
-            'http://env:1', 'env-model', '', true,
-            'http://env:1', 'env-model', '', true,
         );
     }
 }

@@ -4,7 +4,7 @@ namespace App\Ai;
 
 /**
  * What a role needs to call its model: who answers, where, with which key, which model. Read from the
- * setting of the game, or from the AI_* variables when there is none. It holds the API key: it goes
+ * setting of the game. It holds the API key: it goes
  * to the platform and nowhere else, and is hidden from var_dump() and from the debug output.
  */
 final readonly class RoleSetup

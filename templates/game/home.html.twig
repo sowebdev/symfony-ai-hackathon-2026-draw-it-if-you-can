@@ -40,7 +40,14 @@
                 <button type="submit">{{ 'action.start_game'|trans }}</button>
             </div>
         </form>
-        {{ include('game/_health.html.twig') }}
+        {% if has_model %}
+            {{ include('game/_health.html.twig') }}
+        {% else %}
+            <section class="health no-model">
+                <p>{{ 'help.no_model'|trans }}</p>
+                <a class="button" href="{{ path('models_provider') }}">{{ 'action.choose_model'|trans }}</a>
+            </section>
+        {% endif %}
         <p class="change-model"><a href="{{ path('models_provider') }}">{{ 'action.change_model'|trans }}</a></p>
     </main>
 {% endblock %}

@@ -5,11 +5,10 @@ namespace App\Ai;
 use App\Entity\AiSetting;
 use App\Repository\AiSettingRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
- * The model of each role: the setting saved in the game, if there is one, else the AI_* variables
- * of .env and .env.local, as before the setting existed (make setup, app:setup and the CI).
+ * The model of each role: the one setting saved from the models screen, the only source. With none,
+ * the game has no model.
  */
 final readonly class ModelSettings
 {
@@ -17,54 +16,32 @@ final readonly class ModelSettings
         private AiSettingRepository $repository,
         private EntityManagerInterface $entityManager,
         private Encryption $encryption,
-        #[Autowire('%env(AI_DRAWER_BASE_URL)%')]
-        private string $drawerBaseUrl,
-        #[Autowire('%env(AI_DRAWER_MODEL)%')]
-        private string $drawerModel,
-        #[\SensitiveParameter]
-        #[Autowire('%env(AI_DRAWER_API_KEY)%')]
-        private string $drawerApiKey,
-        #[Autowire('%env(bool:AI_DRAWER_DISABLE_THINKING)%')]
-        private bool $drawerDisableThinking,
-        #[Autowire('%env(AI_GUESSER_BASE_URL)%')]
-        private string $guesserBaseUrl,
-        #[Autowire('%env(AI_GUESSER_MODEL)%')]
-        private string $guesserModel,
-        #[\SensitiveParameter]
-        #[Autowire('%env(AI_GUESSER_API_KEY)%')]
-        private string $guesserApiKey,
-        #[Autowire('%env(bool:AI_GUESSER_DISABLE_THINKING)%')]
-        private bool $guesserDisableThinking,
     ) {
     }
 
     /**
-     * What a role calls: the database first, then the environment (a server that speaks the API of
-     * OpenAI, at the address of the variable).
+     * What a role calls, from the stored setting.
      *
      * @internal for Models: the setup holds the API key
      *
+     * @throws NoModelException    when no setting is stored
      * @throws EncryptionException when the stored key cannot be opened
      */
     public function forRole(Role $role): RoleSetup
     {
-        if (null !== $setting = $this->repository->current()) {
-            return new RoleSetup(
-                $setting->getProvider(),
-                $setting->getAddress(),
-                $this->openKey($setting),
-                Role::Drawer === $role ? $setting->getDrawerModel() : $setting->getGuesserModel(),
-                $setting->isReasoningOff(),
-            );
-        }
+        $setting = $this->repository->current() ?? throw new NoModelException();
 
-        return Role::Drawer === $role
-            ? new RoleSetup(Provider::Compatible, $this->drawerBaseUrl, $this->drawerApiKey, $this->drawerModel, $this->drawerDisableThinking)
-            : new RoleSetup(Provider::Compatible, $this->guesserBaseUrl, $this->guesserApiKey, $this->guesserModel, $this->guesserDisableThinking);
+        return new RoleSetup(
+            $setting->getProvider(),
+            $setting->getAddress(),
+            $this->openKey($setting),
+            Role::Drawer === $role ? $setting->getDrawerModel() : $setting->getGuesserModel(),
+            $setting->isReasoningOff(),
+        );
     }
 
     /**
-     * Whether the game was set up in the game: false means it still reads the AI_* variables.
+     * Whether a model is chosen: false means the game has none yet.
      */
     public function isStored(): bool
     {
@@ -72,7 +49,7 @@ final readonly class ModelSettings
     }
 
     /**
-     * The setting for the screen, without its key; null when the game still reads the variables.
+     * The setting for the screen, without its key; null when no model is chosen yet.
      */
     public function view(): ?SettingView
     {
@@ -166,7 +143,7 @@ final readonly class ModelSettings
     }
 
     /**
-     * Forgets the setting: the game reads the AI_* variables again.
+     * Forgets the setting: the game has no model again.
      */
     public function remove(): void
     {

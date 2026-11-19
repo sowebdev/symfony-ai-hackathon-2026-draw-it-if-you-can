@@ -9,9 +9,9 @@ Both models must read images, and the drawer must also call tools.
 
 ## Choosing the model on the screen
 
-Open the game and follow the page (the health card of the home page leads there when no model answers, and "Change the model" at the bottom of the home page always does):
+Open the game and follow the page (the home page invites you there while no model is chosen, its health card leads there when a model does not answer, and "Change the model" at the bottom of the home page always does):
 
-1. **Provider.** Four cards: Anthropic, OpenAI, Mistral, or another OpenAI-compatible service. Paste your API key (a password field: empty means "keep the saved key", of which only the end is shown, `…3f9a`; a saved key is never sent to another address than the one it was saved for). For another service, the address too; the field offers Ollama's, `http://host.docker.internal:11434`. Then "List the models".
+1. **Provider.** Four cards: Anthropic, OpenAI, Mistral, or another OpenAI-compatible service. Paste your API key (a password field: empty means "keep the saved key", of which only the end is shown, `…3f9a`; a saved key is never sent to another address than the one it was saved for). For another service, the address too: the field shows only when that card is checked, and starts empty. The game runs in Docker, so your machine is `host.docker.internal` there, not `localhost`; the usual ports are Ollama 11434, LM Studio 1234, llama.cpp 8080, among others (`http://host.docker.internal:11434`). Leave the key empty if your server asks for none. Then "List the models".
 2. **Models.** One list for each role (the guesser reads images; the drawer reads images and calls tools) and a field to type any model name: the typed name wins. The lists show only what can play. The models saved already, if any, are selected; nothing else is.
 3. **Check.** Each role is tried on a tiny task whose answer is known (the guesser names a circle drawn in an image; the drawer draws one stroke with its tool), and the result is said in plain words. Only when both pass does "Save and play" appear, which saves the setting and goes home. On a failure nothing is saved and your choices stay filled.
 
@@ -30,7 +30,7 @@ Ollama is not a provider of its own: the game does not use its bridge, which sen
 
 The limit of an answer is sent as `max_output_tokens`, which each bridge turns into the name its API wants (`max_tokens` for Generic, Anthropic and Mistral). A model the catalog does not know yet still works: the game does not trust a catalog, the check tries the model.
 
-**Where the model is chosen.** The game reads, in this order: the setting stored in the database, then the `AI_*` variables below. With no stored setting, nothing changes: `make setup` and `.env.local` work as before. A stored setting keeps the API key encrypted with `APP_ENCRYPTION_KEY` (32 random bytes in base64): `make install` writes one into `.env.local` (`bin/console app:encryption-key`) if there is none and never replaces it. Without it, a setting with an API key cannot be saved; lose it and the stored key cannot be read again, so save the setting again. See [ADR 4](adr/0004-platforms-built-at-runtime-from-a-stored-setting.md) for what this protects and what it does not.
+**Where the model is chosen.** Only here: the setting stored in the database is the only source, there is no environment variable and no command to set it up. Until one is stored the game has no model: the home page says so, "Start the game" leads to the models screen, and `make check` says no model is chosen yet and gives the address of the page. The stored setting keeps the API key encrypted with `APP_ENCRYPTION_KEY` (32 random bytes in base64): `make install` writes one into `.env.local` (`bin/console app:encryption-key`) if there is none and never replaces it. Without it, a setting with an API key cannot be saved; lose it and the stored key cannot be read again, so save the setting again. See [ADR 4](adr/0004-platforms-built-at-runtime-from-a-stored-setting.md) for what this protects and what it does not. Coming from 0.2: choose the model again on the page; the `AI_*` lines of `.env.local` can be deleted.
 
 **The lists of models** are the provider's `GET /v1/models`, kept an hour for Anthropic, OpenAI and Mistral, 30 seconds for another service. They show only the models that can play, for each role:
 
@@ -40,23 +40,14 @@ The limit of an answer is sent as `max_output_tokens`, which each bridge turns i
 
 The labels say only what is known now: what a catalog states ("reads images", "calls tools"), "capabilities unknown", and "checked" after the check passed, on this machine. New models come out every month: nothing is "tested" or "suggested" by the game. The table "What I tried" below is a dated record of what I tried, not a promise.
 
-`make setup` gives both roles the same model, which is what you want most of the time. To give each role its own, set them by hand in `.env.local` (defaults in `.env`):
-
-```bash
-AI_DRAWER_BASE_URL=https://api.anthropic.com
-AI_DRAWER_MODEL=claude-sonnet-5-5
-AI_DRAWER_API_KEY=...
-AI_DRAWER_DISABLE_THINKING=false   # true turns reasoning off: for local models, an API may refuse it
-```
-
-Then `make check` tries each model on a tiny task whose answer is known (each must name a circle drawn in an image; the drawer must also draw one stroke with its tool) and tells what is wrong.
+`make check` tries the model of each role on a tiny task whose answer is known (each must name a circle drawn in an image; the drawer must also draw one stroke with its tool) and tells what is wrong.
 
 ## Reasoning
 
 The game needs short answers every few seconds, and the providers disagree on how to turn reasoning off: a wrong option is a 400.
 
 - **Anthropic, OpenAI, Mistral**: the game decides from the catalog and you see no switch. A model the catalog marks as thinking gets the least effort its API takes (OpenAI: `low`; Anthropic and Mistral: nothing, which is the right thing for the first and what is safe for the second); one that does not think, or a model you typed by name, gets no reasoning option at all.
-- **Another OpenAI-compatible service**: the game cannot know, so the screen shows a switch, "Turn reasoning off, for a local model that thinks for too long". It starts on when the address is local (`localhost`, `127.0.0.1`, `host.docker.internal`, a private network or a name without a dot) and off otherwise, since a cloud API may refuse `reasoning_effort: none` or `chat_template_kwargs`. With `DISABLE_THINKING` in `.env.local`, the same switch.
+- **Another OpenAI-compatible service**: the game cannot know, so the screen shows a switch, "Turn reasoning off, for a local model that thinks for too long". It starts on when the address is local (`localhost`, `127.0.0.1`, `host.docker.internal`, a private network or a name without a dot) and off otherwise, since a cloud API may refuse `reasoning_effort: none` or `chat_template_kwargs`.
 - **When the check fails** because of it (a refused option, a block answer, a very slow answer, no usable answer), the message says which way to flip the switch.
 - **A model that always reasons** may answer in blocks: the bridges of Mistral read them; the Generic bridge may not (seen with `mistral-large-4` before the bridge of Mistral was used): choose another model, or turn reasoning off.
 
@@ -86,6 +77,6 @@ The strokes of the AI look drawn by a hand; `HUMANIZED_DRAWING=false` in `.env.l
 The model screen, the home page and `make check` say what is wrong. The common cases:
 
 - **Nothing answers at this address**: the server is not started, or the address is wrong. From inside Docker, your machine is `host.docker.internal`, not `localhost`.
-- **The server refused the API key**: check it on the model screen (or `AI_<ROLE>_API_KEY`). A local server may need one too, depending on how it is started.
+- **The server refused the API key**: check it on the model screen. A local server may need one too, depending on how it is started.
 - **The server does not have this model**: download it first (with Ollama, `ollama pull <model>`), or check its name.
 - **The model answers, but the check fails**: it does not read images, or cannot call tools. Both roles need images, the drawer needs tools (it is asked for one stroke).

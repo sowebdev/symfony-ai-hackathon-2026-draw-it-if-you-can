@@ -82,6 +82,6 @@ sequenceDiagram
 | `src/Drawing` | Strokes: the grid, the hand-drawn line, the PNG |
 | `src/Mcp` | The tools and prompts an agent sees |
 | `src/Controller` | Pages and HTTP endpoints, thin |
-| `src/Command` | `app:setup`, `app:ai:check`, and `app:draw`, which makes a model draw words pass after pass and writes a page to `var/bench` |
+| `src/Command` | `app:ai:check`, and `app:draw`, which makes a model draw words pass after pass and writes a page to `var/bench` |
 | `assets/controllers` | Stimulus: the canvas, the drawing of the AI, the timer, the agent, the lobby |
 | `docs/adr` | The decisions and why |

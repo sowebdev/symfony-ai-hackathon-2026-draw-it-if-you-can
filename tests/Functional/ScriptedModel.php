@@ -3,7 +3,9 @@
 namespace App\Tests\Functional;
 
 use App\Ai\Drawer;
+use App\Ai\ModelSettings;
 use App\Ai\PlatformFactory;
+use App\Ai\Provider;
 use App\Game\Dealer;
 use Random\Engine;
 use Random\Randomizer;
@@ -17,7 +19,7 @@ use Symfony\AI\Platform\Test\MockPlatformFactory;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 /**
- * Replaces the models with a script: the word to draw is "cat", the guesses are taken in order,
+ * Chooses a model and replaces it with a script: the word to draw is "cat", the guesses are taken in order,
  * and the AI draws the given strokes. The dealer always takes its first choice: the AI draws first
  * unless the test says otherwise, and the first round is about animals.
  */
@@ -28,8 +30,9 @@ trait ScriptedModel
      * @param list<array{string, string}> $strokes        [part, cells] pairs, as the model writes them
      * @param \Throwable|null             $drawingFailure Thrown by the drawing model after its strokes
      * @param list<array{string, string}> $details        Strokes drawn each time the AI is asked for details
+     * @param bool                        $chosen         Whether a model is stored (false: the game has none yet)
      */
-    private static function scriptModel(KernelBrowser $client, array $guesses = [], string $word = 'cat', array $strokes = [], ?\Throwable $drawingFailure = null, array $details = []): ScriptedDrawer
+    private static function scriptModel(KernelBrowser $client, array $guesses = [], string $word = 'cat', array $strokes = [], ?\Throwable $drawingFailure = null, array $details = [], bool $chosen = true): ScriptedDrawer
     {
         // The model lives in the container: it must survive from one request to the next.
         $client->disableReboot();
@@ -48,6 +51,10 @@ trait ScriptedModel
             },
         );
         $client->getContainer()->set(PlatformFactory::class, new ScriptedPlatforms($platform));
+        // The stored setting is the only source of the model: one is chosen, the platform behind it is the script.
+        if ($chosen) {
+            $client->getContainer()->get(ModelSettings::class)->save(Provider::Compatible, 'http://scripted:8000', 'scripted', 'scripted', true);
+        }
         $client->getContainer()->set(Drawer::class, $drawer = new ScriptedDrawer($strokes, $drawingFailure, $details));
         $client->getContainer()->set(Dealer::class, new Dealer(new Randomizer(new class implements Engine {
             public function generate(): string

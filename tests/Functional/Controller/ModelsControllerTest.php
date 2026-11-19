@@ -35,11 +35,12 @@ final class ModelsControllerTest extends WebTestCase
     /**
      * @param array<string, mixed>|null $list    What GET /v1/models answers; null: nothing answers
      * @param list<string>              $guesses What the fake model answers when asked what shape it sees
+     * @param bool                      $chosen  Whether a model is stored already (by default none, as on a fresh install)
      */
-    private function client(?array $list, array $guesses = ['circle', 'circle']): KernelBrowser
+    private function client(?array $list, array $guesses = ['circle', 'circle'], bool $chosen = false): KernelBrowser
     {
         $client = self::createClient();
-        self::scriptModel($client, $guesses);
+        self::scriptModel($client, $guesses, chosen: $chosen);
         $http = new MockHttpClient(function (string $method, string $url) use ($list): MockResponse {
             $this->asked[] = $url;
             if (null === $list) {
@@ -105,7 +106,9 @@ final class ModelsControllerTest extends WebTestCase
         self::assertSelectorTextContains('.provider-cards', 'Another OpenAI-compatible service (Ollama, LM Studio, OpenRouter…)');
         self::assertCount(1, $crawler->filter('input[type=password]'));
         self::assertSame('', $crawler->filter('input[type=password]')->attr('value') ?? '');
-        self::assertSame('http://host.docker.internal:11434', $crawler->filter('input[name="provider_step[address]"]')->attr('value'), 'The field offers the address of Ollama');
+        self::assertSame('', $crawler->filter('input[name="provider_step[address]"]')->attr('value') ?? '', 'The address starts empty: the game names no default server');
+        self::assertSame('http://host.docker.internal:PORT', $crawler->filter('input[name="provider_step[address]"]')->attr('placeholder'));
+        self::assertSame('anthropic', $crawler->filter('.provider-cards input:checked')->attr('value'));
         self::assertSelectorExists('button:contains("List the models")');
         // The only attribute of Stimulus is the one of the CSRF token of the form, whose fallback needs no script here (the browser's own headers do it).
         self::assertSame(['csrf-protection'], $crawler->filter('main.models [data-controller]')->each(static fn (Crawler $node): string => (string) $node->attr('data-controller')));
@@ -324,6 +327,59 @@ final class ModelsControllerTest extends WebTestCase
         $this->noKeyInAnyPage('sk-or-secret-0123456789abcdef');
     }
 
+    public function testWithNoModelTheHomePageInvitesToChooseOne(): void
+    {
+        $client = $this->client(self::anthropicList());
+
+        $crawler = $client->request('GET', '/fr');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorNotExists('.health[data-controller]', 'No failing health card without a model');
+        self::assertSame('/fr/models', $crawler->filter('.no-model a.button')->attr('href'));
+        self::assertStringNotContainsStringIgnoringCase('ollama', (string) $client->getResponse()->getContent());
+
+        // A game cannot start: the player is led to the screen.
+        $client->request('POST', '/fr/games');
+        self::assertResponseRedirects('/fr/models');
+
+        $client->request('GET', '/fr/health?fresh=1');
+        $report = json_decode((string) $client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
+        self::assertFalse($report['ok']);
+        self::assertSame([], $report['roles']);
+    }
+
+    public function testASavedCompatibleSettingPrefillsItsCardAndItsAddress(): void
+    {
+        $client = $this->client(['data' => [['id' => 'qwen']]]);
+        self::getContainer()->get(ModelSettings::class)->save(Provider::Compatible, 'http://host.docker.internal:8080', 'qwen', 'qwen', false);
+
+        $crawler = $this->get($client, '/en/models');
+
+        self::assertSame('openai_compatible', $crawler->filter('.provider-cards input:checked')->attr('value'));
+        self::assertSame('http://host.docker.internal:8080', $crawler->filter('input[name="provider_step[address]"]')->attr('value'));
+    }
+
+    public function testTheHintsOfTheKeyAndTheAddressNameNoEngineAndSayNothingOfEncryption(): void
+    {
+        $client = $this->client(self::anthropicList());
+
+        $crawler = $this->get($client, '/fr/models');
+
+        $hints = $crawler->filter('.field .hint')->each(static fn (Crawler $hint): string => trim($hint->text()));
+        self::assertContains('Laisse vide si ton serveur n’en demande pas.', $hints);
+        self::assertContains('L’adresse de ton serveur. Le jeu tourne dans Docker, donc ta machine s’y appelle host.docker.internal, et pas localhost.', $hints);
+        foreach ($hints as $hint) {
+            self::assertStringNotContainsStringIgnoringCase('ollama', $hint);
+            self::assertStringNotContainsStringIgnoringCase('chiffr', $hint);
+        }
+
+        // With a key saved, the hint says it is kept and shows its end, without the word.
+        self::getContainer()->get(ModelSettings::class)->save(Provider::Anthropic, null, 'claude-haiku-5-5', 'claude-haiku-5-5', false, self::KEY);
+        $crawler = $this->get($client, '/fr/models');
+        self::assertSelectorTextContains('.field .hint', '(…3f9a)');
+        self::assertStringNotContainsStringIgnoringCase('chiffr', $crawler->filter('.field')->first()->text());
+    }
+
     public function testTheAddressIsNeededAndMustBeAnAddress(): void
     {
         $client = $this->client(self::anthropicList());
@@ -365,7 +421,7 @@ final class ModelsControllerTest extends WebTestCase
 
     public function testTheHomePageLeadsToTheScreen(): void
     {
-        $client = $this->client(self::anthropicList(), ['circle', 'square']);
+        $client = $this->client(self::anthropicList(), ['circle', 'square'], chosen: true);
 
         // A permanent link at the bottom of the home page...
         $crawler = $client->request('GET', '/fr');

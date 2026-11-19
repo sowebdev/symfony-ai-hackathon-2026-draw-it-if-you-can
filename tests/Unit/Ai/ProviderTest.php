@@ -21,8 +21,6 @@ final class ProviderTest extends TestCase
         foreach (['ollama', 'own_server'] as $old) {
             self::assertNotContains($old, array_map(static fn (Provider $p): string => $p->value, Provider::cases()));
         }
-        self::assertNull(Provider::Anthropic->suggestedAddress());
-        self::assertSame('http://host.docker.internal:11434', Provider::Compatible->suggestedAddress());
 
         self::assertSame([true, true, true, false], array_map(static fn (Provider $p): bool => $p->needsKey(), Provider::cases()));
         // The three clouds are always at the same place; the last one has an address to set.

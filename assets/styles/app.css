@@ -1365,8 +1365,13 @@ button.link:hover {
 
 .provider-cards {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.9rem;
+}
+
+/* The three named providers share a row; the open service has the next one to itself. */
+.provider-card.provider-openai_compatible {
+    grid-column: 1 / -1;
 }
 
 .provider-card {
@@ -1391,16 +1396,24 @@ button.link:hover {
     box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.12);
 }
 
-.provider-card:has(input:checked)::before {
-    content: '';
+/* The mark of the choice: a filled, slightly lopsided dot with a check, in the corner. */
+.provider-card:has(input:checked)::after {
+    content: '✓';
     position: absolute;
-    top: -10px;
-    left: 50%;
-    width: 60px;
-    height: 20px;
-    margin-left: -30px;
-    background: var(--tape);
-    transform: rotate(-3deg);
+    top: -12px;
+    right: -10px;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ink);
+    color: #fff;
+    font-size: 1.3rem;
+    line-height: 1;
+    border-radius: 55% 45% 50% 50% / 50% 55% 45% 50%;
+    transform: rotate(-6deg);
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.18);
 }
 
 .provider-card:has(input:focus-visible) {
@@ -1431,6 +1444,15 @@ button.link:hover {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
+}
+
+/* The address only matters for the open service: no JavaScript, the checked card decides. */
+.models-form .field-address {
+    display: none;
+}
+
+.models-form:has(.provider-openai_compatible input:checked) .field-address {
+    display: flex;
 }
 
 .models-form .field input[type='text'],
@@ -1591,6 +1613,10 @@ button.link:hover {
         grid-template-columns: 1fr;
     }
 
+    .provider-card.provider-openai_compatible {
+        grid-column: auto;
+    }
+
     .models-form {
         padding: 1.6rem 1rem 1.2rem;
     }
@@ -1610,4 +1636,8 @@ button.link:hover {
     .models-actions a:not(.button) {
         justify-content: center;
     }
+}
+
+.health.no-model p {
+    margin: 0 0 0.6rem;
 }

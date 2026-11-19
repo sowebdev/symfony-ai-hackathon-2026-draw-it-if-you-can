@@ -348,6 +348,11 @@
                 <target>Un modelo no responde como debe. Elige otro, o comprueba la dirección y la clave, en la pantalla del modelo. «make check» dice lo mismo en un terminal.</target>
                 <note>Home page, when a model fails its check</note>
             </trans-unit>
+            <trans-unit id="help.no_model" resname="help.no_model">
+                <source>help.no_model</source>
+                <target>Todavía no se ha elegido ningún modelo. Elige el que dibuja y adivina, en la pantalla del modelo: sin él, el juego no puede empezar.</target>
+                <note>Home page, when no model is chosen yet</note>
+            </trans-unit>
             <trans-unit id="action.check_again" resname="action.check_again">
                 <source>action.check_again</source>
                 <target>Comprobar de nuevo</target>
@@ -660,7 +665,7 @@
             </trans-unit>
             <trans-unit id="models.key_hint" resname="models.key_hint">
                 <source>models.key_hint</source>
-                <target>Se guarda cifrada en la base de datos del juego y no se vuelve a mostrar. Déjala vacía para un servidor tuyo que no pida ninguna.</target>
+                <target>Déjalo vacío si tu servidor no pide ninguna.</target>
                 <note>Under the API key field, when no key is saved</note>
             </trans-unit>
             <trans-unit id="models.key_saved" resname="models.key_saved">
@@ -675,7 +680,7 @@
             </trans-unit>
             <trans-unit id="models.address_hint" resname="models.address_hint">
                 <source>models.address_hint</source>
-                <target>Los demás proveedores tienen su propia dirección. Desde Docker, tu máquina es host.docker.internal: esta es la dirección de Ollama.</target>
+                <target>La dirección de tu servidor. El juego funciona en Docker, así que tu máquina se llama allí host.docker.internal, y no localhost.</target>
                 <note>Under the address field</note>
             </trans-unit>
             <trans-unit id="provider.anthropic" resname="provider.anthropic">

@@ -36,7 +36,7 @@ final class ProviderStepType extends AbstractType
             ->add('address', TextType::class, [
                 'required' => false,
                 'label' => 'models.address',
-                'attr' => ['autocomplete' => 'off', 'spellcheck' => 'false', 'autocapitalize' => 'off', 'inputmode' => 'url'],
+                'attr' => ['autocomplete' => 'off', 'spellcheck' => 'false', 'autocapitalize' => 'off', 'inputmode' => 'url', 'placeholder' => 'http://host.docker.internal:PORT'],
             ])
             ->add('list', SubmitType::class, ['label' => 'action.list_models']);
     }

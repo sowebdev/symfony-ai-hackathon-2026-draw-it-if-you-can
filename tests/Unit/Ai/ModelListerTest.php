@@ -230,7 +230,7 @@ final class ModelListerTest extends TestCase
         // The mock cannot be slow: its timeout is an exception of the same family.
         $lister = $this->lister(static fn (): MockResponse => throw new TimeoutException('Idle timeout reached'));
 
-        $problem = $lister->list(Provider::Compatible, Provider::SUGGESTED_ADDRESS, null)->problem;
+        $problem = $lister->list(Provider::Compatible, 'http://host.docker.internal:11434', null)->problem;
 
         self::assertSame('list.timeout', $problem?->id);
         self::assertSame('3', $problem->parameters['%seconds%']);
@@ -304,9 +304,9 @@ final class ModelListerTest extends TestCase
             return 1 === ++$calls ? self::json([], 500) : self::json(['data' => [['id' => 'qwen']]]);
         });
 
-        $first = $lister->list(Provider::Compatible, Provider::SUGGESTED_ADDRESS, null)->problem;
+        $first = $lister->list(Provider::Compatible, 'http://host.docker.internal:11434', null)->problem;
         self::assertSame('list.http_error', $first?->id);
         self::assertSame('500', $first->parameters['%status%']);
-        self::assertSame(['qwen'], self::names($lister->list(Provider::Compatible, Provider::SUGGESTED_ADDRESS, null)->choices));
+        self::assertSame(['qwen'], self::names($lister->list(Provider::Compatible, 'http://host.docker.internal:11434', null)->choices));
     }
 }

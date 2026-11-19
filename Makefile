@@ -2,13 +2,11 @@
 # The image is built with the machine's user, so that the files it writes belong to them.
 
 .DEFAULT_GOAL := help
-.PHONY: help install encryption-key setup start up stop shell db check test test-unit test-functional lint schema cs cs-fix phpstan audit ci
+.PHONY: help install encryption-key start up stop shell db check test test-unit test-functional lint schema cs cs-fix phpstan audit ci
 
 export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
 EXEC = docker compose exec -T php
-# A terminal gets the questions of make setup; a script or the CI skips them (-T, then -n).
-NO_TTY := $(shell test -t 0 || echo 1)
 CONSOLE = $(EXEC) php bin/console
 PHPUNIT = $(EXEC) vendor/bin/phpunit
 
@@ -29,11 +27,6 @@ install: ## Build the image, install the dependencies and the database; the mode
 encryption-key:
 	@$(CONSOLE) app:encryption-key
 
-setup: up ## Choose the models (an API key or your own server), save them in .env.local and try them
-	@docker compose exec $(if $(NO_TTY),-T) php php bin/console app:setup $(if $(NO_TTY),-n) $(SETUP_ARGS)
-	@echo "Trying the model..."
-	@$(MAKE) --no-print-directory check
-
 start: ## Start the game, on a free port, and tell its address (a port of your own: APP_PORT=8050 make start)
 	@./docker/start.sh --announce
 
@@ -49,7 +42,7 @@ shell: up ## Open a shell in the container
 db: up ## Create the development database and run the migrations
 	$(CONSOLE) doctrine:migrations:migrate -n
 
-check: up ## Try the model of each role on a tiny task (after changing AI_* in .env.local)
+check: up ## Try the model of each role on a tiny task (the one chosen on the models screen)
 	@$(CONSOLE) app:ai:check
 
 test: test-unit test-functional ## Run all the tests

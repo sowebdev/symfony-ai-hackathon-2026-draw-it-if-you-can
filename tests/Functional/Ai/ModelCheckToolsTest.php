@@ -3,7 +3,9 @@
 namespace App\Tests\Functional\Ai;
 
 use App\Ai\ModelCheck;
+use App\Ai\ModelSettings;
 use App\Ai\PlatformFactory;
+use App\Ai\Provider;
 use App\Ai\Role;
 use App\Tests\Functional\ScriptedPlatforms;
 use Symfony\AI\Platform\Result\ResultInterface;
@@ -40,6 +42,7 @@ final class ModelCheckToolsTest extends KernelTestCase
             return 'circle';
         });
         self::getContainer()->set(PlatformFactory::class, new ScriptedPlatforms($platform));
+        self::getContainer()->get(ModelSettings::class)->save(Provider::Compatible, 'http://scripted:8000', 'scripted', 'scripted', true);
 
         return self::getContainer()->get(ModelCheck::class);
     }
@@ -97,6 +100,7 @@ final class ModelCheckToolsTest extends KernelTestCase
             return 'cat';
         });
         self::getContainer()->set(PlatformFactory::class, new ScriptedPlatforms($platform));
+        self::getContainer()->get(ModelSettings::class)->save(Provider::Compatible, 'http://scripted:8000', 'scripted', 'scripted', true);
 
         self::assertContains(self::getContainer()->get(ModelCheck::class)->check(Role::Drawer)?->id, ['problem.no_image_answer', 'problem.not_a_circle']);
         self::assertSame(['image'], $asked);

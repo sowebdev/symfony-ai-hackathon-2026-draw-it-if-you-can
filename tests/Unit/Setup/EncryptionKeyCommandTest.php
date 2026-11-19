@@ -46,12 +46,12 @@ final class EncryptionKeyCommandTest extends TestCase
 
     public function testKeepsTheOtherLinesAndStartsALineOfItsOwn(): void
     {
-        file_put_contents($this->path, "APP_PORT=8050\nAI_DRAWER_MODEL=qwen");
+        file_put_contents($this->path, "APP_PORT=8050\nOTHER_SETTING=1");
 
         $this->runCommand();
 
         $lines = explode("\n", (string) file_get_contents($this->path));
-        self::assertSame(['APP_PORT=8050', 'AI_DRAWER_MODEL=qwen'], \array_slice($lines, 0, 2));
+        self::assertSame(['APP_PORT=8050', 'OTHER_SETTING=1'], \array_slice($lines, 0, 2));
         self::assertStringStartsWith('APP_ENCRYPTION_KEY=', $lines[2]);
     }
 

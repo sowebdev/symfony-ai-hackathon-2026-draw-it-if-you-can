@@ -45,9 +45,6 @@ enum Provider: string
     /** Nor is the one of Mistral. */
     public const string MISTRAL_URL = 'https://api.mistral.ai';
 
-    /** What the address field offers: Ollama's, which is also the default of the README. */
-    public const string SUGGESTED_ADDRESS = 'http://host.docker.internal:11434';
-
     /**
      * The name in English, for logs and the console; the screen translates (provider.<value>).
      */
@@ -59,14 +56,6 @@ enum Provider: string
             self::Mistral => 'Mistral',
             self::Compatible => 'Another OpenAI-compatible service',
         };
-    }
-
-    /**
-     * The address to offer in the field, null when the address is not a choice.
-     */
-    public function suggestedAddress(): ?string
-    {
-        return self::Compatible === $this ? self::SUGGESTED_ADDRESS : null;
     }
 
     /**
