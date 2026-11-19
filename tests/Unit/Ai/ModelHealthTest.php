@@ -91,11 +91,11 @@ final class ModelHealthTest extends TestCase
 
     public function testAProblemIsKeptAsIdsAndTranslatedByWhoLooks(): void
     {
-        $problem = new Problem('problem.not_a_circle', ['%answer%' => 'cat'], 'advice.reasoning_tick');
+        $problem = new Problem('problem.no_vision', [], 'advice.reasoning_tick');
 
         self::assertEquals($problem, Problem::fromArray($problem->toArray()));
         $translator = new \Symfony\Component\Translation\IdentityTranslator();
-        self::assertSame('problem.not_a_circle advice.reasoning_tick', $problem->trans($translator));
+        self::assertSame('problem.no_vision advice.reasoning_tick', $problem->trans($translator));
     }
 
     public function testAGuesserThatFollowsTheDrawerIsOneLineForBoth(): void

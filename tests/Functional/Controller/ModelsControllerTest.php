@@ -280,7 +280,7 @@ final class ModelsControllerTest extends WebTestCase
         self::assertSame(['qwen3.8-27b-vision'], self::radios($crawler));
         self::assertSelectorNotExists('.follows-line');
         // The switch is folded behind "Advanced settings", on for a local address.
-        self::assertSelectorTextContains('details.long-list summary', 'Advanced settings');
+        self::assertSelectorTextContains('details.long-list:has(.switch-label) summary', 'Advanced settings');
         self::assertSame('checked', $crawler->filter('input[name="model_step[reasoningOff]"]')->attr('checked') ?? '');
         $client->submit($crawler->selectButton('Check and play')->form(['model_step[choice]' => 'qwen3.8-27b-vision']));
         self::assertResponseRedirects('/en/models/check');
@@ -428,8 +428,9 @@ final class ModelsControllerTest extends WebTestCase
         self::assertCount(1, $crawler->filter('.role-line.failed'));
         self::assertSelectorTextContains('.role-line.ok', 'It draws · claude-sonnet-5-5 at Anthropic');
         self::assertSelectorTextContains('.role-line.failed', 'It guesses · claude-haiku-5-5 at Anthropic');
-        self::assertSelectorTextContains('.role-line.failed .why', 'does not recognize a circle');
-        self::assertSelectorTextContains('.role-line.failed .why', '(it answered “square”)');
+        self::assertSelectorTextContains('.role-line.failed .why', 'This model does not read images. Choose another one.');
+        self::assertStringNotContainsString('square', $crawler->filter('.role-line.failed')->text(), 'The answer of the model stays out of the page');
+        self::assertStringNotContainsStringIgnoringCase('circle', $crawler->filter('.role-line.failed')->text(), 'So does the test');
         self::assertSame('/en/models/guesser', $crawler->filter('.role-line.failed a')->attr('href'));
         self::assertSelectorTextContains('.role-line.failed button', 'Try again');
         self::assertCount(1, $crawler->filter('button:contains("Try again")'), 'Only the failed role can be tried again');
@@ -462,7 +463,7 @@ final class ModelsControllerTest extends WebTestCase
 
         self::assertCount(1, $crawler->filter('.role-line.failed'));
         self::assertSelectorTextContains('.role-line.failed', 'It draws');
-        self::assertSelectorTextContains('.role-line.failed .why', 'must be a model that reads images');
+        self::assertSelectorTextContains('.role-line.failed .why', 'This model does not read images. Choose another one.');
         self::assertSelectorTextContains('.role-line.follows', 'It guesses your drawing too.');
         self::assertSame('claude-sonnet-5-5', $this->settings()->forRole(Role::Drawer)->model);
     }
@@ -482,10 +483,15 @@ final class ModelsControllerTest extends WebTestCase
         self::assertSelectorTextContains('details.saved-keys summary', 'Saved keys (2)');
         self::assertCount(2, $crawler->filter('.saved-keys li'));
         self::assertSelectorTextContains('.saved-keys li:nth-child(1)', '…3f9a');
-        self::assertSelectorTextContains('.saved-keys li:nth-child(1)', 'It draws with it');
+        self::assertSelectorTextContains('.saved-keys li:nth-child(1)', 'Used to draw');
         self::assertCount(1, $crawler->filter('.saved-keys li:nth-child(1) button[disabled]'));
         self::assertSelectorTextContains('.saved-keys li:nth-child(2)', 'http://gate:8001');
         self::assertCount(0, $crawler->filter('.saved-keys li:nth-child(2) button[disabled]'));
+
+        // One line when both roles use it, in French as well.
+        $this->settings()->choose(Role::Guesser, Provider::Anthropic, null, 'claude-haiku-5-5', false);
+        $client->request('GET', '/fr/models');
+        self::assertSelectorTextContains('.saved-keys li:nth-child(1)', 'Sert à dessiner et à deviner');
 
         // A forget posted for the account in use is refused, even with the token of another form.
         $form = $crawler->filter('.saved-keys li:nth-child(2) form')->form();
@@ -590,8 +596,41 @@ final class ModelsControllerTest extends WebTestCase
         $cards = $crawler->filter('.model-cards')->first()->filter('input[type=radio]')->each(static fn (Crawler $radio): string => (string) $radio->attr('value'));
         self::assertSame(['claude-haiku-5-5', 'claude-sonnet-5-5', 'claude-opus-5-5'], $cards);
         self::assertSame(['claude-haiku-4-5-20251001'], $crawler->filter('details.long-list')->first()->filter('input[type=radio]')->each(static fn (Crawler $radio): string => (string) $radio->attr('value')));
-        self::assertSelectorTextContains('details.long-list summary', 'See all models');
+        self::assertSelectorTextContains('details.long-list summary', 'See all models, or type a name');
         self::assertCount(0, $crawler->filter('details.long-list[open]'));
+        self::assertCount(1, $crawler->filter('details.long-list')->first()->filter('input[name="model_step[name]"]'), 'The typed name is folded with the list');
+        self::assertCount(1, $crawler->filter('input[name="model_step[name]"]'));
+    }
+
+    public function testATypedNameOpensTheFoldedPart(): void
+    {
+        $client = $this->client(self::anthropicList());
+        $this->chooseProvider($client, 'drawer', 'anthropic');
+        $this->giveAccess($client, 'drawer');
+
+        // Submitted and refused (too long): the part stays open, with the value.
+        $crawler = $this->get($client, '/en/models/drawer/model');
+        $crawler = $client->submit($crawler->selectButton('Check and play')->form(['model_step[name]' => str_repeat('x', 201)]));
+        self::assertResponseStatusCodeSame(422);
+        self::assertCount(1, $crawler->filter('details.long-list[open] input[name="model_step[name]"]'));
+
+        // Stored as a typed name: open when the page comes back.
+        $this->settings()->choose(Role::Drawer, Provider::Anthropic, null, 'claude-brand-new-9', false, self::KEY);
+        $crawler = $this->get($client, '/en/models/drawer/model');
+        self::assertCount(1, $crawler->filter('details.long-list[open] input[name="model_step[name]"]'));
+        self::assertSame('claude-brand-new-9', $crawler->filter('input[name="model_step[name]"]')->attr('value'));
+    }
+
+    public function testWithoutAListTheTypedNameIsShownAtOnce(): void
+    {
+        $client = $this->client(null);
+        $this->chooseProvider($client, 'drawer', 'anthropic');
+        $this->giveAccess($client, 'drawer');
+
+        $crawler = $this->get($client, '/en/models/drawer/model');
+
+        self::assertCount(1, $crawler->filter('input[name="model_step[name]"]'));
+        self::assertCount(0, $crawler->filter('details.long-list input[name="model_step[name]"]'), 'The only way is not folded');
     }
 
     public function testAModelOfUnknownCapabilitiesIsAmongTheOthersMarkedAndNeverACard(): void
@@ -651,7 +690,8 @@ final class ModelsControllerTest extends WebTestCase
 
         self::assertSame(['alpha', 'zeta'], self::radios($crawler));
         self::assertCount(0, $crawler->filter('input[name="model_step[choice]"]:checked'), 'No table of families: nothing is preselected');
-        self::assertCount(1, $crawler->filter('details.long-list'), 'A short list of a server of your own is shown as it is: only the advanced settings are folded');
+        self::assertCount(0, $crawler->filter('details.long-list input[type=radio]'), 'A short list of a server of your own is shown as it is');
+        self::assertCount(1, $crawler->filter('details.long-list input[name="model_step[name]"]'), 'Only the typed name is folded');
         self::assertSelectorTextContains('.models-form', 'capabilities unknown, the check will tell');
 
         // The switch is for the other server only.
@@ -663,7 +703,7 @@ final class ModelsControllerTest extends WebTestCase
         self::assertSelectorNotExists('input[name="model_step[reasoningOff]"]');
     }
 
-    public function testAHugeListIsFoldedAndTheTextFieldComesFirst(): void
+    public function testAHugeListIsFoldedWithTheTextField(): void
     {
         $entries = array_map(static fn (int $i): array => ['id' => \sprintf('vendor/model-%03d', $i)], range(1, 300));
         $client = $this->client(['data' => $entries]);
@@ -676,8 +716,7 @@ final class ModelsControllerTest extends WebTestCase
         self::assertCount(300, $crawler->filter('details.long-list')->first()->filter('input[type=radio]'));
         self::assertCount(0, $crawler->filter('.model-cards'));
         self::assertCount(0, $crawler->filter('datalist'));
-        $html = (string) $client->getResponse()->getContent();
-        self::assertLessThan(strpos($html, 'long-list'), strpos($html, 'model_step[name]'), 'The text field is above the folded list');
+        self::assertCount(1, $crawler->filter('details.long-list input[name="model_step[name]"]'), 'The text field is folded with the list');
     }
 
     public function testTheAddressIsNeededAndMustBeAnAddress(): void
@@ -798,7 +837,7 @@ final class ModelsControllerTest extends WebTestCase
         $client->request('GET', '/fr/health?fresh=1');
         $report = json_decode((string) $client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
         self::assertFalse($report['ok']);
-        self::assertStringContainsString('ne reconnaît pas un cercle', $report['roles'][1]['problem'], 'The health messages are translated');
+        self::assertStringContainsString('Ce modèle ne lit pas les images. Choisis-en un autre.', $report['roles'][1]['problem'], 'The health messages are translated');
     }
 
     public function testACrossSiteFormIsRefused(): void

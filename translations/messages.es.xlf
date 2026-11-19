@@ -810,18 +810,18 @@
             </trans-unit>
             <trans-unit id="problem.no_stroke" resname="problem.no_stroke">
                 <source>problem.no_stroke</source>
-                <target>El modelo no llamó a la herramienta draw_stroke, o no con casillas que el juego pueda leer: el dibujante debe ser un modelo que llame a herramientas.</target>
+                <target>Este modelo no sabe dibujar (no llama a herramientas). Elige otro.</target>
                 <note>The drawer did not call its tool</note>
             </trans-unit>
             <trans-unit id="problem.no_image_answer" resname="problem.no_image_answer">
                 <source>problem.no_image_answer</source>
-                <target>El modelo no dio ninguna respuesta utilizable sobre una imagen: debe ser un modelo que lea imágenes.</target>
+                <target>Este modelo no responde cuando se le muestra una imagen: probablemente no lee imágenes.</target>
                 <note>A model gave no usable answer about an image</note>
             </trans-unit>
-            <trans-unit id="problem.not_a_circle" resname="problem.not_a_circle">
-                <source>problem.not_a_circle</source>
-                <target>El modelo no reconoce un círculo en una imagen (respondió «%answer%»): debe ser un modelo que lea imágenes.</target>
-                <note>A model did not see the circle; %answer% is what it answered</note>
+            <trans-unit id="problem.no_vision" resname="problem.no_vision">
+                <source>problem.no_vision</source>
+                <target>Este modelo no lee imágenes. Elige otro.</target>
+                <note>A model did not see the circle in an image: it does not read images</note>
             </trans-unit>
             <trans-unit id="list.needs_address" resname="list.needs_address">
                 <source>list.needs_address</source>
@@ -880,7 +880,7 @@
             </trans-unit>
             <trans-unit id="models.all_models" resname="models.all_models">
                 <source>models.all_models</source>
-                <target>Ver todos los modelos</target>
+                <target>Ver todos los modelos, o escribir un nombre</target>
                 <note>Step 2, summary of the folded list</note>
             </trans-unit>
             <trans-unit id="models.unknown_capabilities" resname="models.unknown_capabilities">
@@ -945,12 +945,17 @@
             </trans-unit>
             <trans-unit id="models.used_by_drawer" resname="models.used_by_drawer">
                 <source>models.used_by_drawer</source>
-                <target>Dibuja con ella</target>
+                <target>Sirve para dibujar</target>
                 <note>Why a stored key cannot be forgotten</note>
             </trans-unit>
             <trans-unit id="models.used_by_guesser" resname="models.used_by_guesser">
                 <source>models.used_by_guesser</source>
-                <target>Adivina con ella</target>
+                <target>Sirve para adivinar</target>
+                <note>Why a stored key cannot be forgotten</note>
+            </trans-unit>
+            <trans-unit id="models.used_by_both" resname="models.used_by_both">
+                <source>models.used_by_both</source>
+                <target>Sirve para dibujar y adivinar</target>
                 <note>Why a stored key cannot be forgotten</note>
             </trans-unit>
             <trans-unit id="models.question_provider_drawer" resname="models.question_provider_drawer">

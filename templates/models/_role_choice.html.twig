@@ -1,4 +1,4 @@
-{# The choice of a model: a card per family (its newest model, the cheapest marked), the other models folded away, and the field to type a name. #}
+{# The choice of a model: a card per family (its newest model, the cheapest marked), the other models and the field to type a name folded away. #}
 {# `field` is the radio group (absent when the list is empty), `typed` the text field, `layout` what the controller arranged. #}
 {% set radios = {} %}
 {% if field %}
@@ -16,43 +16,47 @@
     </label>
 {% endmacro %}
 
-{% if field %}
-    {% if layout.cards %}
-        <div class="model-cards">
-            {% for name in layout.cards %}
-                {{ _self.option(radios[name], name == layout.cheapest, name in layout.unknown) }}
+{% if field and layout.cards %}
+    <div class="model-cards">
+        {% for name in layout.cards %}
+            {{ _self.option(radios[name], name == layout.cheapest, name in layout.unknown) }}
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% macro typed_field(typed, field) %}
+    <div class="field">
+        {{ form_label(typed, field ? 'models.type_name' : 'models.model_name') }}
+        {{ form_widget(typed) }}
+        {{ form_errors(typed) }}
+    </div>
+{% endmacro %}
+
+{% if not field %}
+    {# No list to pick from, or none that can be read: the text field is the only way, shown at once. #}
+    {{ _self.typed_field(typed, field) }}
+{% else %}
+    {# Older versions and unknown families, and the typed name: folded, open when a typed name or one of those models is the choice. #}
+    {% set chosen = field.vars.data %}
+    {% set unfolded = layout.cards is empty and not layout.long %}
+    {% set open = typed.vars.value is not empty or typed.vars.errors|length or (chosen and chosen in layout.others and not unfolded) %}
+    {% if unfolded and layout.others %}
+        <div class="model-list">
+            {% for name in layout.others %}
+                {{ _self.option(radios[name], false, name in layout.unknown) }}
             {% endfor %}
         </div>
     {% endif %}
-
-    {% if layout.others %}
-        {% set unfold = layout.cards is empty and not layout.long %}
-        {% if unfold %}
+    <details class="long-list"{% if open %} open{% endif %}>
+        <summary>{{ layout.long ? 'models.pick_from'|trans({'%count%': layout.count}) : 'models.all_models'|trans }}</summary>
+        {% if layout.others and not unfolded %}
             <div class="model-list">
                 {% for name in layout.others %}
                     {{ _self.option(radios[name], false, name in layout.unknown) }}
                 {% endfor %}
             </div>
         {% endif %}
-    {% endif %}
-{% endif %}
-
-<div class="field">
-    {{ form_label(typed, field ? 'models.type_name' : 'models.model_name') }}
-    {{ form_widget(typed) }}
-    {{ form_errors(typed) }}
-</div>
-
-{% if field and layout.others and not (layout.cards is empty and not layout.long) %}
-    {# Older versions and unknown families; hundreds of models are not a page either: the text field comes first. #}
-    {% set chosen = field.vars.data %}
-    <details class="long-list"{% if chosen and chosen in layout.others %} open{% endif %}>
-        <summary>{{ layout.long ? 'models.pick_from'|trans({'%count%': layout.count}) : 'models.all_models'|trans }}</summary>
-        <div class="model-list">
-            {% for name in layout.others %}
-                {{ _self.option(radios[name], false, name in layout.unknown) }}
-            {% endfor %}
-        </div>
+        {{ _self.typed_field(typed, field) }}
     </details>
+    {{ form_errors(field) }}
 {% endif %}
-{% if field %}{{ form_errors(field) }}{% endif %}

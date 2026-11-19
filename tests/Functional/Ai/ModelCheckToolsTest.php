@@ -106,7 +106,7 @@ final class ModelCheckToolsTest extends KernelTestCase
         $settings->choose(Role::Drawer, Provider::Compatible, 'http://scripted:8000', 'scripted', true);
         $settings->choose(Role::Guesser, Provider::Compatible, 'http://scripted:8000', 'scripted', true);
 
-        self::assertContains(self::getContainer()->get(ModelCheck::class)->check(Role::Drawer)?->id, ['problem.no_image_answer', 'problem.not_a_circle']);
+        self::assertContains(self::getContainer()->get(ModelCheck::class)->check(Role::Drawer)?->id, ['problem.no_image_answer', 'problem.no_vision']);
         self::assertSame(['image'], $asked);
     }
 }

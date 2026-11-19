@@ -6,6 +6,8 @@ use App\Drawing\GridStroke;
 use App\Drawing\StrokeRenderer;
 use App\Drawing\StrokeTracer;
 use App\Game\WordMatcher;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Symfony\AI\Agent\Exception\MaxIterationsExceededException;
 use Symfony\AI\Agent\Execution\Update\Progress;
 use Symfony\AI\Platform\Message\Content\Image;
@@ -29,6 +31,7 @@ final readonly class ModelCheck
         private StrokeRenderer $renderer,
         private Models $models,
         private StrokeTracer $tracer,
+        private LoggerInterface $logger = new NullLogger(),
     ) {
     }
 
@@ -37,7 +40,7 @@ final readonly class ModelCheck
      */
     public function with(Models $models): self
     {
-        return new self(new OneWordModel($models), $this->renderer, $models, $this->tracer);
+        return new self(new OneWordModel($models), $this->renderer, $models, $this->tracer, $this->logger);
     }
 
     /**
@@ -163,6 +166,12 @@ final readonly class ModelCheck
             return new ModelCheckResult(new Problem('problem.no_image_answer', advice: $this->reasoningAdvice($role)));
         }
 
-        return new ModelCheckResult(self::isCircle($answer) ? null : new Problem('problem.not_a_circle', ['%answer%' => $answer]), $answer);
+        if (self::isCircle($answer)) {
+            return new ModelCheckResult(null, $answer);
+        }
+        // What the model said is for the logs: the page says what is wrong, not the test.
+        $this->logger->info('A model did not name the circle in the check image.', ['role' => $role->value, 'answer' => $answer]);
+
+        return new ModelCheckResult(new Problem('problem.no_vision'), $answer);
     }
 }

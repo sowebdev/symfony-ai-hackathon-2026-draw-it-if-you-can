@@ -177,8 +177,7 @@ final class GameControllerTest extends WebTestCase
         self::assertFalse($report['ok']);
         self::assertTrue($report['roles'][0]['ok']);
         self::assertFalse($report['roles'][1]['ok']);
-        self::assertStringContainsString('does not recognize a circle', $report['roles'][1]['problem']);
-        self::assertStringContainsString('(it answered “square”)', $report['roles'][1]['problem']);
+        self::assertSame('This model does not read images. Choose another one.', $report['roles'][1]['problem']);
     }
 
     public function testADrawerThatDoesNotSeeImagesIsReported(): void
@@ -192,7 +191,7 @@ final class GameControllerTest extends WebTestCase
 
         self::assertFalse($report['ok']);
         self::assertSame('drawer', $report['roles'][0]['role']);
-        self::assertStringContainsString('must be a model that reads images', $report['roles'][0]['problem']);
+        self::assertSame('This model does not read images. Choose another one.', $report['roles'][0]['problem']);
         self::assertTrue($report['roles'][1]['ok']);
     }
 

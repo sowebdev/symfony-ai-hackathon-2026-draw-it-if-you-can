@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Models screen: a stored key says « Sert à dessiner / à deviner » (or both on one line); the typed model name is folded with the list of models; a failed check says what is wrong with the model and what to do, without the test or the model's answer (kept in the logs).
 - The word to draw is easier to read: the game now asks for words with one obvious meaning, under their usual name ("château fort" rather than "fort"), and shows them with their article: « À dessiner : un château fort ». The article does not count for the answer ("château fort" and "le château fort" both find it).
 - The waiting text says « Tirage du mot… » (the word is drawn at random) instead of « L'IA choisit un mot… ».
 - The duel is easier to read: the player's team (« Toi et l'IA du jeu ») is in yellow and the rival agent in orange, in the top bar, in the words each side proposes, in the end-of-round note and in the final table. The end screen opens with a big banner in the winner's colour, with its name and both scores, and a clear tie.
