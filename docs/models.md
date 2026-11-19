@@ -1,11 +1,27 @@
 # The models
 
-The AI has two roles, each with its own OpenAI-compatible endpoint, model and optional API key:
+The AI has two roles, each with its own model, and one provider for both:
 
 - **the drawer** draws while you guess, and looks at its drawing to add the details that are missing;
 - **the guesser** picks the word you draw, then guesses your drawing.
 
 Both models must read images, and the drawer must also call tools.
+
+## Providers
+
+| Provider | Bridge | Address | API key | Reasoning switch (`DISABLE_THINKING` / the setting) |
+|---|---|---|---|---|
+| Anthropic | its own (`symfony/ai-anthropic-platform`) | fixed, `https://api.anthropic.com` | needed | sends nothing: thinking is off until asked |
+| OpenAI | its own (`symfony/ai-open-ai-platform`, Responses API) | fixed | needed | nothing for a model that does not think; `reasoning.effort: low` for one the catalog says thinks |
+| Mistral | Generic | `https://api.mistral.ai` | needed | `reasoning_effort: none` and `chat_template_kwargs` |
+| Ollama | Generic (its own bridge sends no argument delta for tool calls: the strokes would come all at the end) | `http://host.docker.internal:11434` | no | `reasoning_effort: none` and `chat_template_kwargs` |
+| Your own server (llama.cpp, LM Studio...) | Generic | the one you give | optional | `reasoning_effort: none` and `chat_template_kwargs` |
+
+The limit of an answer is sent as `max_output_tokens`, which each bridge turns into the name its API wants (`max_tokens` for Generic and Anthropic). Where the bridge has a catalog (Anthropic, OpenAI), a model it does not list yet still works: the game does not trust a catalog, `make check` tries the model. Generic providers have no catalog, so all their models are "others, untested".
+
+**Where the model is chosen.** The game reads, in this order: the setting stored in the database, then the `AI_*` variables below. With no stored setting, nothing changes: `make setup` and `.env.local` work as before. A stored setting keeps the API key encrypted with `APP_ENCRYPTION_KEY` (32 random bytes in base64): `make install` writes one into `.env.local` if there is none and never replaces it. Without it, a setting with an API key cannot be saved; lose it and the stored key cannot be read again, so save the setting again. See [ADR 4](adr/0004-platforms-built-at-runtime-from-a-stored-setting.md) for what this protects and what it does not.
+
+**The list of models** of a provider is its `GET /v1/models`, sorted by what its bridge's catalog says each model can do: for the guesser those that read images, for the drawer those that read images and call tools, then "others, untested". It is kept an hour for Anthropic, OpenAI and Mistral, 30 seconds for Ollama and your own server. When it cannot be read, the reason is given and the model name can be typed.
 
 `make setup` gives both roles the same model, which is what you want most of the time. To give each role its own, set them by hand in `.env.local` (defaults in `.env`):
 
@@ -16,7 +32,7 @@ AI_DRAWER_API_KEY=...
 AI_DRAWER_DISABLE_THINKING=false   # true turns reasoning off: for local models, an API may refuse it
 ```
 
-Then `make check` tries each model on a tiny task whose answer is known (each must name a circle drawn in an image) and tells what is wrong.
+Then `make check` tries each model on a tiny task whose answer is known (each must name a circle drawn in an image; the drawer must also draw one stroke with its tool) and tells what is wrong.
 
 ## Reasoning
 
@@ -54,4 +70,4 @@ The home page and `make check` say what is wrong. The common cases:
 - **Nothing answers at this address**: the server is not started, or the address is wrong. From inside Docker, your machine is `host.docker.internal`, not `localhost`.
 - **The server refused the API key**: check `AI_<ROLE>_API_KEY`. A local server may need one too, depending on how it is started.
 - **The server does not have this model**: download it first (with Ollama, `ollama pull <model>`), or check its name.
-- **The model answers, but the check fails**: it does not read images, or cannot call tools. Both roles need images, the drawer needs tools.
+- **The model answers, but the check fails**: it does not read images, or cannot call tools. Both roles need images, the drawer needs tools (it is asked for one stroke).

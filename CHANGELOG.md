@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Real providers behind the game's model (Anthropic and OpenAI on their own bridges, Mistral, Ollama and your own server on the generic one), a setting stored in the database with its API key encrypted by `APP_ENCRYPTION_KEY` (`make install` generates it), and the list of each provider's models; without a stored setting the game still reads the `AI_*` variables. The screen comes next.
+
 ## [0.2.0] - 2026-11-18
 
 ### Fixed

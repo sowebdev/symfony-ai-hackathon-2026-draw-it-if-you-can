@@ -4,44 +4,33 @@ namespace App\Ai;
 
 use Symfony\AI\Agent\Agent;
 use Symfony\AI\Agent\Toolbox\Toolbox;
+use Symfony\AI\Platform\Capability;
 use Symfony\AI\Platform\Message\MessageBag;
 use Symfony\AI\Platform\PlatformInterface;
 use Symfony\AI\Platform\Result\DeferredResult;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
- * The model of each role: its platform, its name and the options it needs.
+ * The model of each role: its platform, its name and the options it needs, from the current
+ * setting (ModelSettings: the game's, else the AI_* variables). The platform is built when it is
+ * needed, so that a new setting takes effect at once.
  */
 final readonly class Models
 {
     public function __construct(
-        #[Autowire(service: 'ai.platform.generic.drawer')]
-        private PlatformInterface $drawerPlatform,
-        #[Autowire('%env(AI_DRAWER_MODEL)%')]
-        private string $drawerModel,
-        #[Autowire('%env(AI_DRAWER_BASE_URL)%')]
-        private string $drawerBaseUrl,
-        #[Autowire('%env(bool:AI_DRAWER_DISABLE_THINKING)%')]
-        private bool $drawerDisableThinking,
-        #[Autowire(service: 'ai.platform.generic.guesser')]
-        private PlatformInterface $guesserPlatform,
-        #[Autowire('%env(AI_GUESSER_MODEL)%')]
-        private string $guesserModel,
-        #[Autowire('%env(AI_GUESSER_BASE_URL)%')]
-        private string $guesserBaseUrl,
-        #[Autowire('%env(bool:AI_GUESSER_DISABLE_THINKING)%')]
-        private bool $guesserDisableThinking,
+        private ModelSettings $settings,
+        private PlatformFactory $platforms,
     ) {
     }
 
     /**
      * @param array<string, mixed> $options
+     * @param int|null             $maxTokens The longest answer, said the way the provider's API takes it
      */
-    public function invoke(Role $role, MessageBag $messages, array $options = []): DeferredResult
+    public function invoke(Role $role, MessageBag $messages, array $options = [], ?int $maxTokens = null): DeferredResult
     {
-        $platform = $this->of($role)[0];
+        $setup = $this->settings->forRole($role);
 
-        return $platform->invoke($this->modelName($role), $messages, $this->options($role, $options));
+        return $this->platform($setup)->invoke($this->modelName($role, $setup), $messages, $this->optionsOf($setup, $options, $maxTokens));
     }
 
     /**
@@ -49,29 +38,22 @@ final readonly class Models
      */
     public function agent(Role $role, object $tool, int $maxToolCalls): Agent
     {
-        $platform = $this->of($role)[0];
+        $setup = $this->settings->forRole($role);
 
-        return new Agent($platform, $this->modelName($role), toolbox: new Toolbox([$tool]), maxToolCalls: $maxToolCalls);
+        return new Agent($this->platform($setup), $this->modelName($role, $setup), toolbox: new Toolbox([$tool]), maxToolCalls: $maxToolCalls);
     }
 
     /**
-     * The call options, with those the role needs.
+     * The call options, with those the provider takes: the limit of the answer, and the switch of
+     * reasoning where it is understood.
      *
      * @param array<string, mixed> $options
      *
      * @return array<string, mixed>
      */
-    public function options(Role $role, array $options = []): array
+    public function options(Role $role, array $options = [], ?int $maxTokens = null): array
     {
-        if ($this->of($role)[3]) {
-            // No reasoning: a local model may reason for tens of seconds (tests of 10/11/2026).
-            // llama.cpp reads chat_template_kwargs, Ollama reads reasoning_effort and ignores the
-            // other (13/11/2026); a cloud API may refuse either, hence the switch.
-            $options['chat_template_kwargs'] = ['enable_thinking' => false];
-            $options['reasoning_effort'] = 'none';
-        }
-
-        return $options;
+        return $this->optionsOf($this->settings->forRole($role), $options, $maxTokens);
     }
 
     /**
@@ -79,32 +61,49 @@ final readonly class Models
      */
     public function describe(Role $role): string
     {
-        [, $model, $baseUrl] = $this->of($role);
+        return $this->settings->forRole($role)->describe();
+    }
 
-        return \sprintf('%s at %s', $model, $baseUrl);
+    /**
+     * Changes when the provider, the address, the model or the key does.
+     */
+    public function fingerprint(Role $role): string
+    {
+        return $this->settings->forRole($role)->fingerprint();
+    }
+
+    /**
+     * @param array<string, mixed> $options
+     *
+     * @return array<string, mixed>
+     */
+    private function optionsOf(RoleSetup $setup, array $options, ?int $maxTokens): array
+    {
+        if (null !== $maxTokens) {
+            $options += $setup->provider->limit($maxTokens);
+        }
+        if ($setup->reasoningOff) {
+            $thinks = $setup->provider->knows($setup->model)?->supports(Capability::THINKING) ?? false;
+            $options += $setup->provider->reasoningOff($thinks);
+        }
+
+        return $options;
+    }
+
+    private function platform(RoleSetup $setup): PlatformInterface
+    {
+        return $this->platforms->create($setup->provider, $setup->address, $setup->apiKey());
     }
 
     /**
      * @return non-empty-string
      */
-    private function modelName(Role $role): string
+    private function modelName(Role $role, RoleSetup $setup): string
     {
-        $model = $this->of($role)[1];
-        if ('' === $model) {
-            throw new \LogicException(\sprintf('No model is set for the role "%s": fill in its AI_*_MODEL variable.', $role->name));
+        if ('' === $setup->model) {
+            throw new \LogicException(\sprintf('No model is set for the role "%s": choose one in the settings of the game, or fill in its AI_*_MODEL variable.', $role->name));
         }
 
-        return $model;
-    }
-
-    /**
-     * @return array{PlatformInterface, string, string, bool}
-     */
-    private function of(Role $role): array
-    {
-        return match ($role) {
-            Role::Drawer => [$this->drawerPlatform, $this->drawerModel, $this->drawerBaseUrl, $this->drawerDisableThinking],
-            Role::Guesser => [$this->guesserPlatform, $this->guesserModel, $this->guesserBaseUrl, $this->guesserDisableThinking],
-        };
+        return $setup->model;
     }
 }

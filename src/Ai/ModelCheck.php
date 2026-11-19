@@ -4,6 +4,8 @@ namespace App\Ai;
 
 use App\Drawing\StrokeRenderer;
 use App\Game\WordMatcher;
+use Symfony\AI\Agent\Exception\MaxIterationsExceededException;
+use Symfony\AI\Agent\Execution\Update\Progress;
 use Symfony\AI\Platform\Message\Content\Image;
 use Symfony\AI\Platform\Message\Message;
 use Symfony\AI\Platform\Message\MessageBag;
@@ -17,9 +19,13 @@ final readonly class ModelCheck
     /** What a model that sees the circle may answer, once normalized. */
     private const array CIRCLE = ['circle', 'ring', 'round', 'oval', 'o', 'zero', 'cercle', 'rond', 'anneau', 'ovale'];
 
+    /** Room for a model that reasons a little before its stroke; a ceiling, not a budget. */
+    private const int MAX_TOKENS_FOR_A_STROKE = 2000;
+
     public function __construct(
         private OneWordModel $model,
         private StrokeRenderer $renderer,
+        private Models $models,
     ) {
     }
 
@@ -29,8 +35,10 @@ final readonly class ModelCheck
     public function check(Role $role): ?string
     {
         // Both roles read images: the guesser names the drawing, the drawer looks at its own to add
-        // details. Tool calling is checked once the AI draws.
-        return $this->checkSeesImages($role);
+        // details. The drawer must also call a tool, or it cannot draw at all.
+        $problem = $this->checkSeesImages($role);
+
+        return null === $problem && Role::Drawer === $role ? $this->checkCallsTools() : $problem;
     }
 
     /**
@@ -57,6 +65,43 @@ final readonly class ModelCheck
 
     /** Said when a model gives nothing usable: the most likely cause after a missing skill. */
     private const string REASONING_HINT = 'A model that reasons before answering may spend all its tokens on it: choose one that does not reason.';
+
+    /**
+     * One stroke on a circle, asked the way the game asks for the drawing: streamed, with the
+     * draw_stroke tool. The check stops at the first stroke it can read.
+     */
+    private function checkCallsTools(): ?string
+    {
+        $messages = new MessageBag(
+            Message::forSystem(<<<PROMPT
+                You draw with the draw_stroke tool on a canvas of 50 x 50 cells, each named xNyM (x from 1 on the left to 50, y from 1 at the top to 50). The centre is x25y25.
+                ONE call to the tool draws one stroke: the cells the pen goes through, in order, comma-separated (e.g. "x10y12,x15y20,x18y25"). End on the starting cell to close a shape.
+                PROMPT),
+            Message::ofUser('Draw a circle in the middle of the canvas, with one single stroke. Then answer "done".'),
+        );
+        $execution = $this->models->agent(Role::Drawer, new Pen(1), maxToolCalls: 3)
+            ->call($messages, $this->models->options(Role::Drawer, ['stream' => true], self::MAX_TOKENS_FOR_A_STROKE));
+
+        $assembler = new ToolCallAssembler();
+        try {
+            foreach ($execution as $update) {
+                foreach ($assembler->feed($update instanceof Progress ? $update->getPayload() : null) as $call) {
+                    if (null !== Drawer::stroke($call)) {
+                        return null;
+                    }
+                }
+            }
+        } catch (MaxIterationsExceededException) {
+            // It keeps calling the tool with cells the pen cannot read: no stroke came out.
+        }
+        foreach ($assembler->finish() as $call) {
+            if (null !== Drawer::stroke($call)) {
+                return null;
+            }
+        }
+
+        return 'The model did not call the draw_stroke tool, or not with cells the game can read: the drawer must be a model that calls tools. '.self::REASONING_HINT;
+    }
 
     private function checkSeesImages(Role $role): ?string
     {

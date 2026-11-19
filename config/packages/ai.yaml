@@ -1,12 +1,3 @@
-ai:
-    platform:
-        # One OpenAI-compatible endpoint per role: a local llama.cpp server or a provider's API.
-        # No model catalog: the generic bridge accepts any model name. Whether the model can do
-        # its job (see an image, for the guesser) is checked by trying it: bin/console app:ai:check.
-        generic:
-            drawer:
-                base_url: '%env(AI_DRAWER_BASE_URL)%'
-                api_key: '%env(default::AI_DRAWER_API_KEY)%'
-            guesser:
-                base_url: '%env(AI_GUESSER_BASE_URL)%'
-                api_key: '%env(default::AI_GUESSER_API_KEY)%'
+# The platforms are not declared here: they are built at runtime from the current setting, the one
+# saved in the game or else the AI_* variables of .env (src/Ai/Models, docs/adr/0004-platforms-built-at-runtime-from-a-stored-setting.md).
+ai: ~

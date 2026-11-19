@@ -32,7 +32,7 @@ final readonly class OneWordModel
     public function ask(Role $role, MessageBag $messages): ?string
     {
         // No temperature: the default of each provider suits its models, and some refuse others.
-        $answer = $this->models->invoke($role, $messages, ['max_tokens' => self::MAX_TOKENS_FOR_A_WORD])->asText();
+        $answer = $this->models->invoke($role, $messages, maxTokens: self::MAX_TOKENS_FOR_A_WORD)->asText();
 
         return self::clean($answer);
     }
@@ -44,7 +44,7 @@ final readonly class OneWordModel
      */
     public function askList(Role $role, MessageBag $messages): array
     {
-        $answer = $this->models->invoke($role, $messages, ['max_tokens' => self::MAX_TOKENS_FOR_A_LIST])->asText();
+        $answer = $this->models->invoke($role, $messages, maxTokens: self::MAX_TOKENS_FOR_A_LIST)->asText();
 
         return self::cleanList($answer);
     }

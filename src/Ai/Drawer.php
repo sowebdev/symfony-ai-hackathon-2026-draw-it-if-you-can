@@ -55,7 +55,7 @@ final readonly class Drawer implements DrawsStrokes
         );
 
         $agent = $this->models->agent(Role::Drawer, new Pen($max), maxToolCalls: $max + 5);
-        $execution = $agent->call($messages, $this->models->options(Role::Drawer, ['stream' => true, 'max_tokens' => self::MAX_TOKENS_PER_ANSWER]));
+        $execution = $agent->call($messages, $this->models->options(Role::Drawer, ['stream' => true], self::MAX_TOKENS_PER_ANSWER));
 
         $assembler = new ToolCallAssembler();
         $drawn = 0;
@@ -133,7 +133,7 @@ final readonly class Drawer implements DrawsStrokes
     /**
      * @param array{id: string, name: string, arguments: array<string, mixed>} $call
      */
-    private static function stroke(array $call): ?GridStroke
+    public static function stroke(array $call): ?GridStroke
     {
         ['name' => $name, 'arguments' => $arguments] = $call;
         if ('draw_stroke' !== $name || !\is_string($arguments['cells'] ?? null)) {

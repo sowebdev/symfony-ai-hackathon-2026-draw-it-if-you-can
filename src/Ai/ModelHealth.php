@@ -34,7 +34,7 @@ final readonly class ModelHealth
         $report = [];
         foreach (Role::cases() as $role) {
             $model = $this->models->describe($role);
-            $key = 'model_health.'.$role->value.'.'.hash('xxh3', $model);
+            $key = 'model_health.'.$role->value.'.'.hash('xxh3', $this->models->fingerprint($role));
             if ($fresh) {
                 $this->cache->delete($key);
             }
