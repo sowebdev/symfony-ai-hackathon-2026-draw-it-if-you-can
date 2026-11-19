@@ -1629,8 +1629,51 @@ button.link:hover {
 .long-list summary {
     cursor: pointer;
     min-height: 2.75rem;
-    display: flex;
+    display: inline-flex;
     align-items: center;
+    gap: 0.5rem;
+    padding: 0.2rem 1rem;
+    list-style: none;
+    font-weight: bold;
+    color: var(--ink);
+    background: #fff;
+    border: 2px solid var(--pencil);
+    border-radius: 6px 10px 7px 12px;
+    text-decoration: underline var(--pencil);
+    text-underline-offset: 0.2em;
+}
+
+.long-list summary::-webkit-details-marker {
+    display: none;
+}
+
+.long-list summary::after {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-right: 3px solid var(--pencil);
+    border-bottom: 3px solid var(--pencil);
+    transform: translateY(-0.15rem) rotate(45deg);
+    transition: transform 0.15s;
+}
+
+.long-list[open] summary::after {
+    transform: translateY(0.1rem) rotate(-135deg);
+}
+
+.long-list summary:hover,
+.long-list summary:focus-visible {
+    background: #fff8d6;
+}
+
+.unknown-mark {
+    font-style: normal;
+    font-size: 0.85rem;
+    padding: 0.05rem 0.5rem;
+    color: var(--ink);
+    background: #f1f1f1;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
 }
 
 .long-list select {
@@ -1728,36 +1771,6 @@ button.link:hover {
     color: #b42318;
 }
 
-.test {
-    display: flex;
-    align-items: center;
-    gap: 0.9rem;
-    margin-top: 0.7rem;
-}
-
-.test-image,
-.test-stroke {
-    flex: none;
-    width: 6rem;
-    height: 6rem;
-    background: #fff;
-    border: 2px solid var(--ink);
-    border-radius: 4px 8px 5px 9px;
-    transform: rotate(-1.5deg);
-}
-
-.test-stroke path {
-    fill: none;
-    stroke: #2b2b2b;
-    stroke-width: 18;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-.test-answer {
-    font-size: 1.15rem;
-}
-
 .check-results .verdict {
     color: var(--found);
 }
@@ -1802,4 +1815,8 @@ button.link:hover {
 
 .health.no-model p {
     margin: 0 0 0.6rem;
+}
+
+.check-results .where {
+    white-space: nowrap;
 }

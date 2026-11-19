@@ -16,7 +16,6 @@ use App\Ai\ModelSettings;
 use App\Ai\Problem;
 use App\Ai\Provider;
 use App\Ai\Role;
-use App\Drawing\StrokeRenderer;
 use App\Form\ModelsStep;
 use App\Form\ModelsStepType;
 use App\Form\ProviderStep;
@@ -55,7 +54,6 @@ final class ModelsController extends AbstractController
         private readonly Models $models,
         private readonly ModelHealth $health,
         private readonly TranslatorInterface $translator,
-        private readonly StrokeRenderer $renderer,
     ) {
     }
 
@@ -143,6 +141,7 @@ final class ModelsController extends AbstractController
                 'cards' => $long ? [] : $names($arranged['cards']),
                 'others' => $long ? $names($listed) : $names($arranged['others']),
                 'cheapest' => ModelFamilies::cheapest($draft->provider, $listed)?->name,
+                'unknown' => $list->hasCapabilities() ? $names(array_filter($listed, static fn (ModelChoice $choice): bool => !$choice->isKnown())) : [],
                 'long' => $long,
             ];
         }
@@ -205,7 +204,6 @@ final class ModelsController extends AbstractController
         $models = $this->models->with($drawer, $guesser);
         $check = $this->modelCheck->with($models);
         $results = [];
-        $circle = 'data:image/png;base64,'.base64_encode($this->renderer->toPng([ModelCheck::circle()]));
         foreach ([Role::Guesser, Role::Drawer] as $role) {
             $setup = $models->setup($role);
             $started = microtime(true);
@@ -222,10 +220,6 @@ final class ModelsController extends AbstractController
                 'provider' => $setup->provider->value,
                 'ok' => null === $problem,
                 'problem' => $problem?->trans($this->translator),
-                // What was asked and what came back: the circle the guesser was sent and its answer, the stroke the drawer drew.
-                'circle' => Role::Guesser === $role ? $circle : null,
-                'answer' => Role::Guesser === $role ? $outcome->answer : null,
-                'path' => null === $outcome->stroke ? null : self::path($outcome->stroke),
                 'seconds' => $seconds,
                 'slow' => null === $problem && $seconds >= self::SLOW_S ? $this->slowNote($seconds, $setup->provider->hasReasoningSwitch(), $setup->reasoningOff) : null,
             ];
@@ -289,16 +283,6 @@ final class ModelsController extends AbstractController
         }
 
         return new ModelDraft($provider, $address, $sealedKey, reasoningOff: $provider->reasoningOffByDefault($address));
-    }
-
-    /**
-     * The points of a stroke as the path of an SVG on the canvas of the game (1000 x 1000).
-     *
-     * @param list<array{int, int, int}> $points
-     */
-    private static function path(array $points): string
-    {
-        return implode(' ', array_map(static fn (array $point, int $i): string => \sprintf('%s%d %d', 0 === $i ? 'M' : 'L', $point[0], $point[1]), $points, array_keys($points)));
     }
 
     /**

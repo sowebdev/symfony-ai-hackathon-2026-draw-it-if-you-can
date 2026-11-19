@@ -16,25 +16,15 @@
         <ul class="check-results">
             {% for result in results %}
                 <li class="{{ result.ok ? 'ok' : 'failed' }}">
-                    <strong>{{ ('role.' ~ result.role)|trans }}</strong>
-                    <code>{{ result.model }}</code>
                     {% if result.ok %}
-                        <span class="verdict">{{ 'models.checked'|trans }}, {{ result.provider == 'openai_compatible' ? 'models.checked_own'|trans : 'models.checked_at'|trans({'%provider%': ('provider.' ~ result.provider)|trans}) }}</span>
+                        <strong class="verdict">{{ ('models.ok_' ~ result.role)|trans }}</strong>
+                        <code>{{ result.model }}</code>
+                        <span class="where">{{ result.provider == 'openai_compatible' ? 'models.checked_own'|trans : 'models.checked_at'|trans({'%provider%': ('provider.' ~ result.provider)|trans}) }}</span>
                         {% if result.slow %}<p class="hint">{{ result.slow }}</p>{% endif %}
                     {% else %}
+                        <strong>{{ ('role.' ~ result.role)|trans }}</strong>
+                        <code>{{ result.model }}</code>
                         <p class="why">{{ result.problem }}</p>
-                    {% endif %}
-                    {# What was asked and what came back. #}
-                    {% if result.circle or result.path %}
-                        <div class="test">
-                            {% if result.circle %}
-                                <img class="test-image" src="{{ result.circle }}" width="96" height="96" alt="{{ 'models.sent_circle'|trans }}">
-                                {% if result.answer %}<span class="test-answer">{{ 'models.answered'|trans({'%answer%': result.answer}) }}</span>{% endif %}
-                            {% elseif result.path %}
-                                <svg class="test-stroke" viewBox="0 0 1000 1000" width="96" height="96" role="img" aria-label="{{ 'models.drew'|trans }}"><path d="{{ result.path }}"/></svg>
-                                <span class="test-answer">{{ 'models.drew'|trans }}</span>
-                            {% endif %}
-                        </div>
                     {% endif %}
                 </li>
             {% endfor %}

@@ -833,11 +833,6 @@
                 <target>Vérification des modèles</target>
                 <note>Title of step 3</note>
             </trans-unit>
-            <trans-unit id="models.checked" resname="models.checked">
-                <source>models.checked</source>
-                <target>vérifié</target>
-                <note>Step 3, after a model passed its check</note>
-            </trans-unit>
             <trans-unit id="models.nothing_saved" resname="models.nothing_saved">
                 <source>models.nothing_saved</source>
                 <target>Rien n’a été enregistré. Reviens en arrière pour changer de modèle, ou vérifie de nouveau.</target>
@@ -993,6 +988,21 @@
                 <target>Voir tous les modèles</target>
                 <note>Step 2, summary of the folded list</note>
             </trans-unit>
+            <trans-unit id="models.ok_guesser" resname="models.ok_guesser">
+                <source>models.ok_guesser</source>
+                <target>Il devine</target>
+                <note>Step 3, the guesser passed its check</note>
+            </trans-unit>
+            <trans-unit id="models.ok_drawer" resname="models.ok_drawer">
+                <source>models.ok_drawer</source>
+                <target>Il dessine</target>
+                <note>Step 3, the drawer passed its check</note>
+            </trans-unit>
+            <trans-unit id="models.unknown_capabilities" resname="models.unknown_capabilities">
+                <source>models.unknown_capabilities</source>
+                <target>capacités inconnues</target>
+                <note>Step 2, mark of a model neither the list nor the catalog describes</note>
+            </trans-unit>
             <trans-unit id="models.checked_at" resname="models.checked_at">
                 <source>models.checked_at</source>
                 <target>chez %provider%</target>
@@ -1002,21 +1012,6 @@
                 <source>models.checked_own</source>
                 <target>sur ton serveur</target>
                 <note>Step 3, where a model of an OpenAI-compatible service runs</note>
-            </trans-unit>
-            <trans-unit id="models.sent_circle" resname="models.sent_circle">
-                <source>models.sent_circle</source>
-                <target>L’image qu’il a reçue</target>
-                <note>Step 3, alt text of the circle</note>
-            </trans-unit>
-            <trans-unit id="models.answered" resname="models.answered">
-                <source>models.answered</source>
-                <target>Il a répondu : %answer%</target>
-                <note>Step 3, the answer of the guesser</note>
-            </trans-unit>
-            <trans-unit id="models.drew" resname="models.drew">
-                <source>models.drew</source>
-                <target>Le trait qu’il a tracé</target>
-                <note>Step 3, alt text of the stroke of the drawer</note>
             </trans-unit>
             <trans-unit id="label.thousands_separator" resname="label.thousands_separator">
                 <source>label.thousands_separator</source>

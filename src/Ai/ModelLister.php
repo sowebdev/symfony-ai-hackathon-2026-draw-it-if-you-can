@@ -13,7 +13,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * The models of a provider, from its GET /v1/models, crossed with the catalog of its bridge, or with
- * the capabilities the answer carries: only the models that can play are offered.
+ * the capabilities the answer carries: only the models that cannot play are left out.
  */
 final readonly class ModelLister
 {
@@ -38,7 +38,7 @@ final readonly class ModelLister
     public function list(Provider $provider, ?string $address, #[\SensitiveParameter] ?string $apiKey, bool $fresh = false): ModelList
     {
         // The key is a hash in the key of the cache: a list is for a key, never the key itself.
-        $cacheKey = \sprintf('model_list.v3.%s.%s', $provider->value, substr(hash('sha256', $provider->addressOr($address)."\0".$apiKey), 0, 32));
+        $cacheKey = \sprintf('model_list.v4.%s.%s', $provider->value, substr(hash('sha256', $provider->addressOr($address)."\0".$apiKey), 0, 32));
         if ($fresh) {
             $this->cache->delete($cacheKey);
         }
@@ -67,8 +67,9 @@ final readonly class ModelLister
      *
      * - A provider with a catalog (Anthropic, OpenAI, Mistral): only the models that can play. The
      *   answer of Mistral carries capabilities (vision, function calling): when present they decide,
-     *   else the catalog of the bridge; a model neither knows (embeddings, audio, images, a model
-     *   too new) is not listed.
+     *   else the catalog of the bridge. A model neither knows is listed, capabilities unknown (the
+     *   check will tell), when its name belongs to a family of ModelFamilies (a model too new);
+     *   else it is not (embeddings, audio, images).
      * - The Generic case has no catalog: its entries are filtered when they carry capabilities in a
      *   known shape (OpenRouter, the Hugging Face router: `architecture.input_modalities`,
      *   `supported_parameters`), else listed as they are, capabilities unknown.
@@ -86,7 +87,7 @@ final readonly class ModelLister
             if (!\is_string($name) || '' === $name || isset($choices[$name])) {
                 continue;
             }
-            $choice = null === $known ? self::advertised($name, $entry) : (self::stated($name, $entry, $provider) ?? self::catalogued($name, $known));
+            $choice = null === $known ? self::advertised($name, $entry) : (self::stated($name, $entry, $provider) ?? self::catalogued($name, $known) ?? self::unknown($provider, $name));
             if (null !== $choice && $choice->canPlay(Role::Guesser)) {
                 $choices[$name] = $choice->created(self::created($entry));
             }
@@ -128,6 +129,15 @@ final readonly class ModelLister
         $capabilities = $known[$name]['capabilities'];
 
         return new ModelChoice($name, Capability::INPUT_IMAGE->equalsOneOf($capabilities), Capability::TOOL_CALLING->equalsOneOf($capabilities));
+    }
+
+    /**
+     * A model neither the answer nor the catalog describes: kept, capabilities unknown, only when its
+     * name is of a family the provider has in ModelFamilies. No code specific to a provider.
+     */
+    private static function unknown(Provider $provider, string $name): ?ModelChoice
+    {
+        return ModelFamilies::hasFamily($provider, $name) ? new ModelChoice($name) : null;
     }
 
     /**

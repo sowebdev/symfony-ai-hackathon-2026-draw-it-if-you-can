@@ -7,11 +7,12 @@
     {% endfor %}
 {% endif %}
 
-{% macro option(radio, cheapest) %}
+{% macro option(radio, cheapest, unknown) %}
     <label class="model-option{{ cheapest ? ' cheapest' : '' }}">
         {{ form_widget(radio) }}
         <code>{{ radio.vars.value }}</code>
         {% if cheapest %}<em class="cheapest-mark">{{ 'models.cheapest'|trans }}</em>{% endif %}
+        {% if unknown %}<em class="unknown-mark">{{ 'models.unknown_capabilities'|trans }}</em>{% endif %}
     </label>
 {% endmacro %}
 
@@ -19,7 +20,7 @@
     {% if layout.cards %}
         <div class="model-cards">
             {% for name in layout.cards %}
-                {{ _self.option(radios[name], name == layout.cheapest) }}
+                {{ _self.option(radios[name], name == layout.cheapest, name in layout.unknown) }}
             {% endfor %}
         </div>
     {% endif %}
@@ -29,7 +30,7 @@
         {% if unfold %}
             <div class="model-list">
                 {% for name in layout.others %}
-                    {{ _self.option(radios[name], false) }}
+                    {{ _self.option(radios[name], false, name in layout.unknown) }}
                 {% endfor %}
             </div>
         {% endif %}
@@ -49,7 +50,7 @@
         <summary>{{ layout.long ? 'models.pick_from'|trans({'%count%': layout.count}) : 'models.all_models'|trans }}</summary>
         <div class="model-list">
             {% for name in layout.others %}
-                {{ _self.option(radios[name], false) }}
+                {{ _self.option(radios[name], false, name in layout.unknown) }}
             {% endfor %}
         </div>
     </details>

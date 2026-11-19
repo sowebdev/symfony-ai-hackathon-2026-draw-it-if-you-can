@@ -160,13 +160,14 @@ final class ModelsControllerTest extends WebTestCase
         $crawler = $this->get($client, '/en/models/check');
         self::assertResponseIsSuccessful();
         self::assertCount(2, $crawler->filter('.check-results li.ok'));
-        self::assertSelectorTextContains('.check-results', 'checked, at Anthropic');
+        self::assertSelectorTextContains('.check-results', 'at Anthropic');
         self::assertStringNotContainsString('on this machine', (string) $client->getResponse()->getContent());
         self::assertSelectorTextContains('.check-results', 'claude-brand-new-9');
-        // What was asked and what came back: the circle sent to the guesser and its answer, the stroke of the drawer.
-        self::assertCount(1, $crawler->filter('.check-results li:first-child img.test-image[src^="data:image/png;base64,"]'));
-        self::assertSelectorTextContains('.check-results li:first-child .test-answer', 'It answered: circle');
-        self::assertCount(1, $crawler->filter('.check-results li:last-child svg.test-stroke path[d^="M"]'));
+        // One line per role, no image, no answer, no stroke.
+        self::assertSelectorTextContains('.check-results li:first-child', 'It guesses');
+        self::assertSelectorTextContains('.check-results li:last-child', 'It draws');
+        self::assertCount(0, $crawler->filter('.check-results img, .check-results svg, .test-answer'));
+        self::assertStringNotContainsString('data:image', (string) $client->getResponse()->getContent());
         self::assertFalse(self::getContainer()->get(ModelSettings::class)->isStored());
         $client->submit($crawler->selectButton('Save and play')->form());
         self::assertResponseRedirects('/en');
@@ -357,6 +358,19 @@ final class ModelsControllerTest extends WebTestCase
         self::assertCount(0, $crawler->filter('details.long-list[open]'));
     }
 
+    public function testAModelOfUnknownCapabilitiesIsAmongTheOthersMarkedAndNeverACard(): void
+    {
+        $client = $this->client(['data' => [['id' => 'claude-haiku-5-5'], ['id' => 'claude-fable-5-2']], 'has_more' => false]);
+        $this->step1($client);
+
+        $crawler = $this->get($client, '/en/models/choose');
+
+        self::assertSame(['claude-haiku-5-5'], $crawler->filter('.model-cards')->first()->filter('input[type=radio]')->each(static fn (Crawler $radio): string => (string) $radio->attr('value')));
+        self::assertSame(['claude-fable-5-2'], $crawler->filter('details.long-list')->first()->filter('input[type=radio]')->each(static fn (Crawler $radio): string => (string) $radio->attr('value')));
+        self::assertSelectorTextContains('details.long-list .unknown-mark', 'capabilities unknown');
+        self::assertCount(0, $crawler->filter('.model-cards .unknown-mark'));
+    }
+
     public function testInFrenchTheGuesserDoesNotChooseTheWordAndTheCheckSaysWhereItRan(): void
     {
         $client = $this->client(self::anthropicList());
@@ -368,7 +382,7 @@ final class ModelsControllerTest extends WebTestCase
 
         $client->submit($crawler->selectButton('Vérifier les modèles')->form());
         $crawler = $client->request('GET', '/fr/models/check');
-        self::assertSelectorTextContains('.check-results', 'vérifié, chez Anthropic');
+        self::assertSelectorTextContains('.check-results', 'Il devine');
         self::assertCount(2, $crawler->filter('.check-results li.ok'));
 
         // A server of your own: "sur ton serveur", not "sur cette machine".
@@ -378,7 +392,7 @@ final class ModelsControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/fr/models/choose');
         $client->submit($crawler->selectButton('Vérifier les modèles')->form(['models_step[drawerChoice]' => 'qwen']));
         $client->request('GET', '/fr/models/check');
-        self::assertSelectorTextContains('.check-results', 'vérifié, sur ton serveur');
+        self::assertSelectorTextContains('.check-results', 'sur ton serveur');
     }
 
     public function testTheWaitForTheModelsShowsTheLoadingScreen(): void

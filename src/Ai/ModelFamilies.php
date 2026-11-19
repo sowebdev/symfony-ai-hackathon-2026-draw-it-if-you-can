@@ -37,8 +37,23 @@ final class ModelFamilies
     }
 
     /**
+     * Whether the name is of a family the provider names: not the catch-all family of everything else
+     * (the empty name), and false for a provider without a table.
+     */
+    public static function hasFamily(Provider $provider, string $name): bool
+    {
+        foreach (self::TABLE[$provider->value] ?? [] as $family) {
+            if ('' !== $family && 1 === preg_match('/(?<![a-z])'.$family.'(?![a-z])/i', $name)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * One card per family, its most recent version, from the cheapest family; every other model
-     * apart, sorted by name.
+     * apart, sorted by name. A model of unknown capabilities is never a card.
      *
      * @param list<ModelChoice> $choices
      *
@@ -49,7 +64,8 @@ final class ModelFamilies
         /** @var array<int, ModelChoice> $newest */
         $newest = [];
         foreach ($choices as $choice) {
-            $rank = self::rank($provider, $choice->name);
+            // A model whose capabilities are unknown gets no card: it is never the first choice.
+            $rank = $choice->isKnown() ? self::rank($provider, $choice->name) : null;
             if (null !== $rank && (!isset($newest[$rank]) || self::newer($choice, $newest[$rank]))) {
                 $newest[$rank] = $choice;
             }

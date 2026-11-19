@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Ai;
 
+use App\Ai\ModelFamilies;
 use App\Ai\ModelList;
 use App\Ai\ModelLister;
 use App\Ai\Provider;
@@ -103,6 +104,36 @@ final class ModelListerTest extends TestCase
         self::assertSame(['gpt-4o'], self::names($list->choices), 'Embeddings, audio, a model without images and one the catalog does not know are not listed');
         self::assertSame('https://api.openai.com/v1/models', $this->requests[0][1]);
         self::assertSame('Bearer sk-openai', $this->requests[0][2]['authorization']);
+    }
+
+    public function testAModelOfAKnownFamilyThatTheCatalogDoesNotKnowIsListedAsUnknownAndNeverPreselected(): void
+    {
+        $lister = $this->lister(static fn (): MockResponse => self::json(['data' => [
+            ['id' => 'claude-fable-5-2', 'created_at' => '2026-11-09T00:00:00Z'],
+            ['id' => 'claude-haiku-5-5'],
+            ['id' => 'claude-brand-new-9'],
+        ], 'has_more' => false]));
+
+        $list = $lister->list(Provider::Anthropic, null, 'sk-ant');
+
+        self::assertSame(['claude-fable-5-2', 'claude-haiku-5-5'], self::names($list->for(Role::Drawer)));
+        $fable = $list->choices[0];
+        self::assertFalse($fable->isKnown());
+        self::assertTrue($list->choices[1]->isKnown());
+        $arranged = ModelFamilies::arrange(Provider::Anthropic, $list->for(Role::Drawer));
+        self::assertSame(['claude-haiku-5-5'], self::names($arranged['cards']));
+        self::assertSame(['claude-fable-5-2'], self::names($arranged['others']));
+        self::assertSame('claude-haiku-5-5', ModelFamilies::cheapest(Provider::Anthropic, $list->for(Role::Drawer))?->name);
+    }
+
+    public function testOpenAiModelsOfNoFamilyAreStillLeftOut(): void
+    {
+        $lister = $this->lister(static fn (): MockResponse => self::json(['data' => [
+            ['id' => 'tts-1-hd'], ['id' => 'whisper-1'], ['id' => 'dall-e-3'], ['id' => 'text-embedding-3-small'],
+            ['id' => 'gpt-9-mini'], ['id' => 'gpt-4o'],
+        ]]));
+
+        self::assertSame(['gpt-4o', 'gpt-9-mini'], self::names($lister->list(Provider::OpenAi, null, 'sk')->choices));
     }
 
     public function testAModelWithoutToolsCanGuessButNotDraw(): void
