@@ -24,9 +24,15 @@
 
             <section class="side guesses" aria-live="polite">
                 {{ include('round/_gauge.html.twig') }}
+                {# Olaf says each word in a bubble, with a hop and his beak open (guesses_controller); he
+                   thinks between two words, and jumps for joy when he finds. #}
+                {% set last_guess = guesses is empty ? null : guesses|last %}
                 <div class="ai-voice">
-                    {{ include('_olaf.html.twig', {speaking: not round.over}) }}
-                    <h2>{{ (round.game.duel ? 'heading.your_ai_guesses' : 'heading.ai_guesses')|trans }}</h2>
+                    <span class="olaf-wrap{{ not round.over ? ' is-thinking' }}{{ last_guess and last_guess.accepted ? ' is-cheering' }}" data-guesses-target="olaf">{{ include('_olaf.html.twig') }}</span>
+                    <div class="ai-words">
+                        <h2>{{ (round.game.duel ? 'heading.your_ai_guesses' : 'heading.ai_guesses')|trans }}</h2>
+                        <p class="olaf-bubble{{ last_guess and last_guess.accepted ? ' found' }}" data-guesses-target="bubble" {{ last_guess ? '' : 'hidden' }}>{{ last_guess ? last_guess.word }}</p>
+                    </div>
                 </div>
                 <ol data-guesses-target="list"{% if round.game.duel %} class="team-words"{% endif %}>
                     {% for guess in guesses %}

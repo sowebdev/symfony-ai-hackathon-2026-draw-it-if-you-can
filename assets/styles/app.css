@@ -1965,3 +1965,99 @@ button.link:hover {
         animation: none;
     }
 }
+
+/* Olaf guesses: each word pops in his bubble while he hops and opens his beak; between two words he
+   thinks (a slow sway); when he finds, the bubble turns green and he jumps for joy. */
+.ai-words {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+}
+
+.olaf-wrap {
+    display: inline-block;
+    line-height: 0;
+}
+
+.olaf-bubble {
+    position: relative;
+    margin: 0 0 0 0.6rem;
+    padding: 0.2rem 0.8rem;
+    background: #fff;
+    border: 2px solid #2b2b2b;
+    border-radius: 14px 16px 13px 15px;
+    transform-origin: left center;
+    font-size: 1.5rem;
+}
+
+.olaf-bubble::before {
+    content: '';
+    position: absolute;
+    left: -11px;
+    top: 50%;
+    margin-top: -6px;
+    border: 6px solid transparent;
+    border-right: 9px solid #2b2b2b;
+    border-left: 0;
+}
+
+.olaf-bubble.found {
+    color: var(--found);
+    border-color: var(--found);
+}
+
+.olaf-bubble.found::before {
+    border-right-color: var(--found);
+}
+
+.olaf-wrap.is-thinking .olaf {
+    animation: olaf-think 2.4s ease-in-out infinite;
+}
+
+.olaf-wrap.is-saying .olaf {
+    animation: olaf-hop 0.45s ease-out;
+}
+
+.olaf-wrap.is-saying .olaf .beak {
+    animation: olaf-beak 0.3s ease-in-out 3;
+}
+
+.olaf-wrap.is-cheering .olaf {
+    animation: olaf-cheer 0.5s ease-in-out 4;
+}
+
+.olaf-bubble.pop {
+    animation: bubble-pop 0.35s ease-out;
+}
+
+@keyframes olaf-think {
+    0%, 100% { transform: rotate(0deg); }
+    30% { transform: rotate(-5deg); }
+    60% { transform: rotate(3deg); }
+}
+
+@keyframes olaf-hop {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-9px) rotate(-4deg); }
+}
+
+@keyframes olaf-cheer {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-12px) rotate(-8deg); }
+    75% { transform: translateY(-12px) rotate(8deg); }
+}
+
+@keyframes bubble-pop {
+    0% { transform: scale(0.3); opacity: 0; }
+    70% { transform: scale(1.12); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .olaf-wrap .olaf,
+    .olaf-wrap .olaf .beak,
+    .olaf-bubble.pop {
+        animation: none;
+    }
+}
