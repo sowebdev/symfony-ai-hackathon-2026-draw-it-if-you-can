@@ -813,6 +813,11 @@
                 <target>Ce modèle ne sait pas dessiner (il n’appelle pas d’outils). Choisis-en un autre.</target>
                 <note>The drawer did not call its tool</note>
             </trans-unit>
+            <trans-unit id="problem.no_stroke_this_time" resname="problem.no_stroke_this_time">
+                <source>problem.no_stroke_this_time</source>
+                <target>Il n’a pas tracé de trait cette fois. Réessaie, ou choisis un autre modèle.</target>
+                <note>The drawer, which the catalog says calls tools, drew no stroke this time</note>
+            </trans-unit>
             <trans-unit id="problem.no_image_answer" resname="problem.no_image_answer">
                 <source>problem.no_image_answer</source>
                 <target>Ce modèle ne répond pas quand on lui montre une image : il ne lit sans doute pas les images.</target>

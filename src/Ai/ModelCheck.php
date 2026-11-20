@@ -10,6 +10,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\AI\Agent\Exception\MaxIterationsExceededException;
 use Symfony\AI\Agent\Execution\Update\Progress;
+use Symfony\AI\Platform\Capability;
 use Symfony\AI\Platform\Message\Content\Image;
 use Symfony\AI\Platform\Message\Message;
 use Symfony\AI\Platform\Message\MessageBag;
@@ -146,7 +147,21 @@ final readonly class ModelCheck
             }
         }
 
-        return new ModelCheckResult(new Problem('problem.no_stroke', advice: $this->reasoningAdvice(Role::Drawer)));
+        return new ModelCheckResult($this->noStroke());
+    }
+
+    /**
+     * No readable stroke. A model the catalog says calls tools may just have missed this time: it is
+     * told to try again, without the reasoning advice. Any other is told it cannot draw.
+     */
+    private function noStroke(): Problem
+    {
+        $setup = $this->models->setup(Role::Drawer);
+        if ($setup->provider->knows($setup->model)?->supports(Capability::TOOL_CALLING) ?? false) {
+            return new Problem('problem.no_stroke_this_time');
+        }
+
+        return new Problem('problem.no_stroke', advice: $this->reasoningAdvice(Role::Drawer));
     }
 
     private function drawn(GridStroke $stroke): ModelCheckResult

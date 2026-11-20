@@ -77,6 +77,17 @@ final class ModelCheckToolsTest extends KernelTestCase
         self::assertSame('advice.reasoning_choose', $problem->advice, 'The environment has its own switch on: another model');
     }
 
+    public function testAModelTheCatalogSaysCallsToolsIsToldToTryAgain(): void
+    {
+        $check = $this->check(static fn (): string => 'Here is a circle: O');
+        self::getContainer()->get(ModelSettings::class)->choose(Role::Drawer, Provider::Anthropic, null, 'claude-sonnet-4-6', true, 'key');
+
+        $problem = $check->check(Role::Drawer);
+
+        self::assertSame('problem.no_stroke_this_time', $problem?->id);
+        self::assertNull($problem->advice);
+    }
+
     public function testACallWithoutReadableCellsIsNotAStroke(): void
     {
         $check = $this->check(static fn (): StreamResult => self::call('{"part":"ring","cells":"a circle"}'));

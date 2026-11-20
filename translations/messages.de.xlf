@@ -813,6 +813,11 @@
                 <target>Dieses Modell kann nicht zeichnen (es ruft keine Werkzeuge auf). Wähle ein anderes.</target>
                 <note>The drawer did not call its tool</note>
             </trans-unit>
+            <trans-unit id="problem.no_stroke_this_time" resname="problem.no_stroke_this_time">
+                <source>problem.no_stroke_this_time</source>
+                <target>Diesmal hat es keinen Strich gezeichnet. Versuche es noch einmal oder wähle ein anderes Modell.</target>
+                <note>The drawer, which the catalog says calls tools, drew no stroke this time</note>
+            </trans-unit>
             <trans-unit id="problem.no_image_answer" resname="problem.no_image_answer">
                 <source>problem.no_image_answer</source>
                 <target>Dieses Modell antwortet nicht auf ein Bild: Es liest wohl keine Bilder.</target>
