@@ -1867,3 +1867,39 @@ button.link:hover {
 .long-list[open] > :not(summary) {
     margin-top: 0.7rem;
 }
+
+/* The settings of the game, on the home page and on their own screen. */
+.game-settings {
+    margin: 0;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.settings-choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.2rem;
+}
+
+.settings-choice {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    cursor: pointer;
+}
+
+.settings-turns .settings-choices {
+    flex-direction: column;
+    gap: 0;
+}
+
+.settings-form label[for$='_rounds'] {
+    font-size: 1.3rem;
+}
+
+@media (min-width: 40rem) {
+    .game-settings {
+        white-space: nowrap;
+    }
+}

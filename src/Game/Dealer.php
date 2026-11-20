@@ -21,11 +21,17 @@ final readonly class Dealer
     }
 
     /**
-     * @param Theme|null $previous The theme of the round before, never dealt twice in a row
+     * @param Theme|null       $previous The theme of the round before, never dealt twice in a row
+     * @param list<Theme>|null $among    The themes of the game, all of them by default; with a single one,
+     *                                   the rule cannot hold and it is dealt every round
      */
-    public function theme(?Theme $previous = null): Theme
+    public function theme(?Theme $previous = null, ?array $among = null): Theme
     {
-        $themes = array_values(array_filter(Theme::cases(), static fn (Theme $theme): bool => $theme !== $previous));
+        $among ??= Theme::cases();
+        $themes = array_values(array_filter($among, static fn (Theme $theme): bool => $theme !== $previous));
+        if ([] === $themes) {
+            $themes = $among;
+        }
 
         return $themes[$this->randomizer->getInt(0, \count($themes) - 1)] ?? throw new \LogicException('No theme left to deal.');
     }

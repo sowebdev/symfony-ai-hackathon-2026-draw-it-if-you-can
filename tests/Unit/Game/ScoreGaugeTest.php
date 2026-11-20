@@ -65,4 +65,22 @@ final class ScoreGaugeTest extends TestCase
         self::assertSame(1000, $gauge->points(2500, 5000));
         self::assertSame(100, $gauge->points(5000, 5000));
     }
+
+    public function testTheGaugeFollowsTheLengthOfTheRound(): void
+    {
+        $gauge = new ScoreGauge(1000, 10, 100);
+
+        self::assertSame([[0, 1000], [10_000, 1000], [30_000, 100]], $gauge->steps(30_000));
+        self::assertSame(1000, $gauge->points(10_000, 30_000));
+        self::assertSame(550, $gauge->points(20_000, 30_000));
+        self::assertSame(100, $gauge->points(30_000, 30_000));
+        self::assertSame(0, $gauge->points(31_001, 30_000));
+
+        self::assertSame([[0, 1000], [10_000, 1000], [120_000, 100]], $gauge->steps(120_000));
+        self::assertSame(1000, $gauge->points(10_000, 120_000));
+        self::assertSame(550, $gauge->points(65_000, 120_000));
+        self::assertSame(100, $gauge->points(120_000, 120_000));
+        self::assertSame(100, $gauge->points(121_000, 120_000));
+        self::assertSame(0, $gauge->points(121_001, 120_000));
+    }
 }

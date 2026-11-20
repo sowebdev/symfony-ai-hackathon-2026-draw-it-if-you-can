@@ -1038,6 +1038,91 @@
                 <target>Ein Anbieter, den eine KI benutzt, kann nicht vergessen werden.</target>
                 <note>Flash when a stored key is used by a role</note>
             </trans-unit>
+            <trans-unit id="settings.title" resname="settings.title">
+                <source>settings.title</source>
+                <target>Spieleinstellungen</target>
+                <note>Title of the settings screen</note>
+            </trans-unit>
+            <trans-unit id="settings.themes" resname="settings.themes">
+                <source>settings.themes</source>
+                <target>Themen</target>
+                <note>Question of the themes on the settings screen</note>
+            </trans-unit>
+            <trans-unit id="settings.turns" resname="settings.turns">
+                <source>settings.turns</source>
+                <target>Wer zeichnet?</target>
+                <note>Question of who draws on the settings screen</note>
+            </trans-unit>
+            <trans-unit id="settings.turns_alternate" resname="settings.turns_alternate">
+                <source>settings.turns_alternate</source>
+                <target>Wir wechseln uns ab</target>
+                <note>Choice of who draws: take turns</note>
+            </trans-unit>
+            <trans-unit id="settings.turns_player" resname="settings.turns_player">
+                <source>settings.turns_player</source>
+                <target>Ich zeichne nur</target>
+                <note>Choice of who draws: the player always draws</note>
+            </trans-unit>
+            <trans-unit id="settings.turns_ai" resname="settings.turns_ai">
+                <source>settings.turns_ai</source>
+                <target>Ich rate nur</target>
+                <note>Choice of who draws: the AI always draws</note>
+            </trans-unit>
+            <trans-unit id="settings.rounds" resname="settings.rounds">
+                <source>settings.rounds</source>
+                <target>Anzahl der Runden</target>
+                <note>Question of the number of rounds on the settings screen</note>
+            </trans-unit>
+            <trans-unit id="settings.round_seconds" resname="settings.round_seconds">
+                <source>settings.round_seconds</source>
+                <target>Dauer einer Runde</target>
+                <note>Question of the length of a round on the settings screen</note>
+            </trans-unit>
+            <trans-unit id="error.no_theme" resname="error.no_theme">
+                <source>error.no_theme</source>
+                <target>Behalte mindestens ein Thema: ohne Thema gibt es nichts zu zeichnen.</target>
+                <note>Shown when no theme is left on</note>
+            </trans-unit>
+            <trans-unit id="action.save_settings" resname="action.save_settings">
+                <source>action.save_settings</source>
+                <target>Speichern</target>
+                <note>Button that saves the settings</note>
+            </trans-unit>
+            <trans-unit id="settings.line_rounds" resname="settings.line_rounds">
+                <source>settings.line_rounds</source>
+                <target>{1}%count% Runde à %seconds% s|]1,Inf[%count% Runden à %seconds% s</target>
+                <note>Home page summary: number and length of the rounds</note>
+            </trans-unit>
+            <trans-unit id="settings.line_turns_alternate" resname="settings.line_turns_alternate">
+                <source>settings.line_turns_alternate</source>
+                <target>abwechselnd</target>
+                <note>Home page summary: who draws</note>
+            </trans-unit>
+            <trans-unit id="settings.line_turns_player" resname="settings.line_turns_player">
+                <source>settings.line_turns_player</source>
+                <target>ich zeichne nur</target>
+                <note>Home page summary: who draws</note>
+            </trans-unit>
+            <trans-unit id="settings.line_turns_ai" resname="settings.line_turns_ai">
+                <source>settings.line_turns_ai</source>
+                <target>ich rate nur</target>
+                <note>Home page summary: who draws</note>
+            </trans-unit>
+            <trans-unit id="settings.line_themes_all" resname="settings.line_themes_all">
+                <source>settings.line_themes_all</source>
+                <target>%count% Themen</target>
+                <note>Home page summary: all the themes are on</note>
+            </trans-unit>
+            <trans-unit id="settings.line_themes_some" resname="settings.line_themes_some">
+                <source>settings.line_themes_some</source>
+                <target>{1}%count% Thema von %total%|]1,Inf[%count% Themen von %total%</target>
+                <note>Home page summary: some themes are off</note>
+            </trans-unit>
+            <trans-unit id="settings.change" resname="settings.change">
+                <source>settings.change</source>
+                <target>Ändern</target>
+                <note>Link from the home page summary to the settings screen</note>
+            </trans-unit>
         </body>
     </file>
 </xliff>

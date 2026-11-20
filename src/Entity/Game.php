@@ -7,6 +7,7 @@ use App\Game\DrawnBy;
 use App\Game\Language;
 use App\Game\Mode;
 use App\Game\Theme;
+use App\Game\Turns;
 use App\Repository\GameRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -49,6 +50,13 @@ class Game
     #[ORM\Column(enumType: Theme::class, nullable: true)]
     private ?Theme $nextTheme = null;
 
+    /** @var list<string> The values of the themes dealt, kept with the game: changing the settings changes nothing in it */
+    #[ORM\Column(type: 'json', options: ['default' => '[]'])]
+    private array $themes;
+
+    /**
+     * @param list<Theme>|null $themes The themes dealt in this game, as the settings said when it started; null for all of them
+     */
     public function __construct(
         #[ORM\Column(enumType: Language::class)]
         private Language $language,
@@ -59,10 +67,23 @@ class Game
         /** With an agent connected over MCP, copilot or rival, the game waits for it in a lobby. */
         #[ORM\Column(length: 10, enumType: Mode::class, options: ['default' => 'solo'])]
         private Mode $mode = Mode::Solo,
+        /** Who draws, as the settings said when the game started. */
+        #[ORM\Column(length: 10, enumType: Turns::class, options: ['default' => 'alternate'])]
+        private Turns $turns = Turns::Alternate,
+        #[ORM\Column(options: ['default' => 60])]
+        private int $roundSeconds = 60,
+        ?array $themes = null,
     ) {
         if ($roundCount < 1) {
             throw new \InvalidArgumentException('A game has at least one round.');
         }
+        if ($roundSeconds < 1) {
+            throw new \InvalidArgumentException('A round lasts at least a second.');
+        }
+        if ([] === $themes) {
+            throw new \InvalidArgumentException('A game has at least one theme.');
+        }
+        $this->themes = array_map(static fn (Theme $theme): string => $theme->value, $themes ?? Theme::cases());
         $this->id = Uuid::v7();
         $this->createdAt = new \DateTimeImmutable();
         $this->openedAt = $this->createdAt;
@@ -103,12 +124,33 @@ class Game
         return $this->firstDrawnBy;
     }
 
+    public function getTurns(): Turns
+    {
+        return $this->turns;
+    }
+
+    public function getRoundSeconds(): int
+    {
+        return $this->roundSeconds;
+    }
+
     /**
-     * Who draws round $number, from 1: the one who starts draws the odd rounds.
+     * The themes dealt in this game.
+     *
+     * @return list<Theme>
+     */
+    public function getThemes(): array
+    {
+        return array_values(array_filter(Theme::cases(), fn (Theme $theme): bool => \in_array($theme->value, $this->themes, true)));
+    }
+
+    /**
+     * Who draws round $number, from 1: with turns, the one who starts draws the odd rounds; else
+     * the same side draws every round.
      */
     public function drawnByInRound(int $number): DrawnBy
     {
-        return 1 === $number % 2 ? $this->firstDrawnBy : $this->firstDrawnBy->other();
+        return $this->turns->drawnByInRound($number, $this->firstDrawnBy);
     }
 
     public function getMode(): Mode

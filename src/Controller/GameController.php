@@ -8,15 +8,18 @@ use App\Ai\Models;
 use App\Ai\ModelSettings;
 use App\Entity\Game;
 use App\Game\Dealer;
+use App\Game\DrawnBy;
+use App\Game\GameSettings;
 use App\Game\Language;
 use App\Game\RoundStarter;
 use App\Game\ScoreGauge;
+use App\Game\Theme;
+use App\Game\Turns;
 use App\Repository\RoundRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Clock\DatePoint;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,8 +39,7 @@ final class GameController extends AbstractController
         private readonly ScoreGauge $gauge,
         private readonly LocaleSwitcher $localeSwitcher,
         private readonly LoggerInterface $logger,
-        #[Autowire('%game.rounds%')]
-        private readonly int $roundCount,
+        private readonly GameSettings $gameSettings,
     ) {
     }
 
@@ -84,7 +86,14 @@ final class GameController extends AbstractController
         if (!$this->settings->isStored()) {
             return $this->redirectToRoute('models');
         }
-        $game = new Game(Language::from($request->getLocale()), $this->roundCount, $payload->drawnBy ?? $dealer->firstDrawer(), $payload->mode);
+        // The game keeps the settings it starts with: changing them later changes nothing in it.
+        $settings = $this->gameSettings->get();
+        $first = match ($settings->turns) {
+            Turns::PlayerDraws => DrawnBy::Player,
+            Turns::AiDraws => DrawnBy::Ai,
+            Turns::Alternate => $payload->drawnBy ?? $dealer->firstDrawer(),
+        };
+        $game = new Game(Language::from($request->getLocale()), $settings->rounds, $first, $payload->mode, $settings->turns, $settings->roundSeconds, $settings->themes);
         $this->starter->open($game);
 
         return $this->redirectToRoute($game->isWithAgent() ? 'game_lobby' : 'game_show', ['id' => $game->getId()]);
@@ -212,6 +221,8 @@ final class GameController extends AbstractController
             'languages' => Language::cases(),
             'error' => $error,
             'has_model' => $this->settings->isStored(),
+            'settings' => $this->gameSettings->get(),
+            'theme_count' => \count(Theme::cases()),
         ], new Response(status: $status));
     }
 }

@@ -10,7 +10,6 @@ use App\Repository\RoundRepository;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Starts the rounds of a game, one after the other: the AI picks the word, and the clock starts.
@@ -23,8 +22,6 @@ final readonly class RoundStarter
         private RoundRepository $rounds,
         private WordPicker $wordPicker,
         private Dealer $dealer,
-        #[Autowire('%game.round_seconds%')]
-        private int $roundSeconds,
     ) {
     }
 
@@ -34,7 +31,7 @@ final readonly class RoundStarter
      */
     public function open(Game $game): void
     {
-        $game->dealNextTheme($this->dealer->theme());
+        $game->dealNextTheme($this->dealer->theme(among: $game->getThemes()));
         $this->entityManager->persist($game);
         $this->entityManager->flush();
     }
@@ -72,12 +69,12 @@ final readonly class RoundStarter
 
     private function newRound(Game $game, int $number, ?Round $previous): Round
     {
-        $theme = $game->getNextTheme() ?? $this->dealer->theme($previous?->getTheme());
+        $theme = $game->getNextTheme() ?? $this->dealer->theme($previous?->getTheme(), $game->getThemes());
         // The AI that does not guess picks the word: the guesser when the player draws, the drawer otherwise.
         $role = DrawnBy::Ai === $game->drawnByInRound($number) ? Role::Drawer : Role::Guesser;
         $word = $this->wordPicker->pick($theme, $game->getLanguage(), $role);
-        $game->dealNextTheme($this->dealer->theme($theme));
+        $game->dealNextTheme($this->dealer->theme($theme, $game->getThemes()));
 
-        return new Round($game, $number, $word->word, $this->roundSeconds * 1000, $theme, $word->article);
+        return new Round($game, $number, $word->word, $game->getRoundSeconds() * 1000, $theme, $word->article);
     }
 }

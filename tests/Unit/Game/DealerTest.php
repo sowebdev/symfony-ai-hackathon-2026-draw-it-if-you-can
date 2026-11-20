@@ -33,4 +33,26 @@ class DealerTest extends TestCase
 
         self::assertEqualsCanonicalizing(Theme::cases(), array_values(array_unique($themes, \SORT_REGULAR)));
     }
+
+    public function testOnlyTheThemesOfTheGameAreDealt(): void
+    {
+        $dealer = new Dealer(new Randomizer(new Mt19937(1)));
+        $among = [Theme::Animals, Theme::Nature, Theme::Transport];
+
+        $themes = [$dealer->theme(among: $among)];
+        for ($i = 1; $i < 100; ++$i) {
+            $themes[] = $dealer->theme($themes[$i - 1], $among);
+            self::assertNotSame($themes[$i - 1], $themes[$i]);
+        }
+
+        self::assertEqualsCanonicalizing($among, array_values(array_unique($themes, \SORT_REGULAR)));
+    }
+
+    public function testAGameWithASingleThemeDealsItEveryRound(): void
+    {
+        $dealer = new Dealer(new Randomizer(new Mt19937(1)));
+
+        self::assertSame(Theme::Places, $dealer->theme(among: [Theme::Places]));
+        self::assertSame(Theme::Places, $dealer->theme(Theme::Places, [Theme::Places]));
+    }
 }

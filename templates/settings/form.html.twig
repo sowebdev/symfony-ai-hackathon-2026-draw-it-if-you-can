@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'settings.title'|trans }} · Draw It If You Can{% endblock %}
+
+{# The settings of the game, one form without JavaScript: "Save" goes back to the home page. #}
+{% block body %}
+    <main class="models settings">
+        <a class="models-home" href="{{ path('home') }}">← {{ 'action.back'|trans }}</a>
+        <h1>{{ 'settings.title'|trans }}</h1>
+
+        {{ form_start(form, {attr: {class: 'models-form settings-form', novalidate: 'novalidate'}}) }}
+            <fieldset class="settings-themes">
+                <legend>{{ 'settings.themes'|trans }}</legend>
+                <div class="settings-choices">
+                    {% for choice in form.themes %}
+                        <label class="settings-choice">{{ form_widget(choice) }} {{ choice.vars.label|trans }}</label>
+                    {% endfor %}
+                </div>
+                {{ form_errors(form.themes) }}
+            </fieldset>
+
+            <fieldset class="settings-turns">
+                <legend>{{ 'settings.turns'|trans }}</legend>
+                <div class="settings-choices">
+                    {% for choice in form.turns %}
+                        <label class="settings-choice">{{ form_widget(choice) }} {{ choice.vars.label|trans }}</label>
+                    {% endfor %}
+                </div>
+                {{ form_errors(form.turns) }}
+            </fieldset>
+
+            <div class="field">
+                {{ form_label(form.rounds) }}
+                {{ form_widget(form.rounds) }}
+                {{ form_errors(form.rounds) }}
+            </div>
+
+            <fieldset class="settings-seconds">
+                <legend>{{ 'settings.round_seconds'|trans }}</legend>
+                <div class="settings-choices">
+                    {% for choice in form.roundSeconds %}
+                        <label class="settings-choice">{{ form_widget(choice) }} {{ choice.vars.label }}</label>
+                    {% endfor %}
+                </div>
+                {{ form_errors(form.roundSeconds) }}
+            </fieldset>
+
+            <div class="models-actions">
+                {{ form_widget(form.save) }}
+            </div>
+            {{ form_rest(form) }}
+        {{ form_end(form, {render_rest: false}) }}
+    </main>
+{% endblock %}

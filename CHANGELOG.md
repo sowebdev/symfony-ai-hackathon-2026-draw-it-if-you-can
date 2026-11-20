@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- The game settings, on a screen of their own and without JavaScript, in the five languages: themes on or off (at least one stays on), who draws (we take turns, I only draw, I only guess), the number of rounds (1 to 12) and the length of a round (30, 45, 60, 90 or 120 s), saved and summed up in one line on the home page. A game keeps the settings it started with; `GAME_ROUNDS` and `GAME_ROUND_SECONDS` stay the defaults.
+
 ## [0.3.0] - 2026-11-20
 
 ### Added

@@ -1038,6 +1038,91 @@
                 <target>Un fornitore usato da un’IA non può essere dimenticato.</target>
                 <note>Flash when a stored key is used by a role</note>
             </trans-unit>
+            <trans-unit id="settings.title" resname="settings.title">
+                <source>settings.title</source>
+                <target>Impostazioni del gioco</target>
+                <note>Title of the settings screen</note>
+            </trans-unit>
+            <trans-unit id="settings.themes" resname="settings.themes">
+                <source>settings.themes</source>
+                <target>Temi</target>
+                <note>Question of the themes on the settings screen</note>
+            </trans-unit>
+            <trans-unit id="settings.turns" resname="settings.turns">
+                <source>settings.turns</source>
+                <target>Chi disegna?</target>
+                <note>Question of who draws on the settings screen</note>
+            </trans-unit>
+            <trans-unit id="settings.turns_alternate" resname="settings.turns_alternate">
+                <source>settings.turns_alternate</source>
+                <target>A turno</target>
+                <note>Choice of who draws: take turns</note>
+            </trans-unit>
+            <trans-unit id="settings.turns_player" resname="settings.turns_player">
+                <source>settings.turns_player</source>
+                <target>Disegno solo io</target>
+                <note>Choice of who draws: the player always draws</note>
+            </trans-unit>
+            <trans-unit id="settings.turns_ai" resname="settings.turns_ai">
+                <source>settings.turns_ai</source>
+                <target>Indovino solo io</target>
+                <note>Choice of who draws: the AI always draws</note>
+            </trans-unit>
+            <trans-unit id="settings.rounds" resname="settings.rounds">
+                <source>settings.rounds</source>
+                <target>Numero di round</target>
+                <note>Question of the number of rounds on the settings screen</note>
+            </trans-unit>
+            <trans-unit id="settings.round_seconds" resname="settings.round_seconds">
+                <source>settings.round_seconds</source>
+                <target>Durata di un round</target>
+                <note>Question of the length of a round on the settings screen</note>
+            </trans-unit>
+            <trans-unit id="error.no_theme" resname="error.no_theme">
+                <source>error.no_theme</source>
+                <target>Tieni almeno un tema: senza tema non c’è nulla da disegnare.</target>
+                <note>Shown when no theme is left on</note>
+            </trans-unit>
+            <trans-unit id="action.save_settings" resname="action.save_settings">
+                <source>action.save_settings</source>
+                <target>Salva</target>
+                <note>Button that saves the settings</note>
+            </trans-unit>
+            <trans-unit id="settings.line_rounds" resname="settings.line_rounds">
+                <source>settings.line_rounds</source>
+                <target>{1}%count% round da %seconds% s|]1,Inf[%count% round da %seconds% s</target>
+                <note>Home page summary: number and length of the rounds</note>
+            </trans-unit>
+            <trans-unit id="settings.line_turns_alternate" resname="settings.line_turns_alternate">
+                <source>settings.line_turns_alternate</source>
+                <target>a turno</target>
+                <note>Home page summary: who draws</note>
+            </trans-unit>
+            <trans-unit id="settings.line_turns_player" resname="settings.line_turns_player">
+                <source>settings.line_turns_player</source>
+                <target>disegno solo io</target>
+                <note>Home page summary: who draws</note>
+            </trans-unit>
+            <trans-unit id="settings.line_turns_ai" resname="settings.line_turns_ai">
+                <source>settings.line_turns_ai</source>
+                <target>indovino solo io</target>
+                <note>Home page summary: who draws</note>
+            </trans-unit>
+            <trans-unit id="settings.line_themes_all" resname="settings.line_themes_all">
+                <source>settings.line_themes_all</source>
+                <target>%count% temi</target>
+                <note>Home page summary: all the themes are on</note>
+            </trans-unit>
+            <trans-unit id="settings.line_themes_some" resname="settings.line_themes_some">
+                <source>settings.line_themes_some</source>
+                <target>{1}%count% tema su %total%|]1,Inf[%count% temi su %total%</target>
+                <note>Home page summary: some themes are off</note>
+            </trans-unit>
+            <trans-unit id="settings.change" resname="settings.change">
+                <source>settings.change</source>
+                <target>Cambia</target>
+                <note>Link from the home page summary to the settings screen</note>
+            </trans-unit>
         </body>
     </file>
 </xliff>
