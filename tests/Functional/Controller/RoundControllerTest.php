@@ -111,7 +111,7 @@ final class RoundControllerTest extends WebTestCase
         $round = $this->startRound(['Cats']);
 
         $this->client->request('GET', $round);
-        self::assertSelectorExists('section.guesses .referee');
+        self::assertSelectorExists('main.round .referee');
         self::assertSelectorNotExists('.referee.is-accepted');
 
         $this->addStroke($round, [[10, 10, 0], [500, 500, 300]]);

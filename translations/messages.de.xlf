@@ -1148,6 +1148,14 @@
                 <target>Tuuut tuuut! Richtig!</target>
                 <note>The walrus referee's bubble for the right answer</note>
             </trans-unit>
+            <trans-unit id="heading.our_words" resname="heading.our_words">
+                <source>heading.our_words</source>
+                <target>Unsere Vorschläge</target>
+            </trans-unit>
+            <trans-unit id="agent.watching" resname="agent.watching">
+                <source>agent.watching</source>
+                <target>ich schaue mir die Zeichnung an…</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

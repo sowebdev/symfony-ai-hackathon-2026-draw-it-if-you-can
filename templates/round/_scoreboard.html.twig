@@ -1,25 +1,28 @@
-{# The bar above a round: its number and theme, the team score (in a duel, the score of each
-   side), and the clock while it is played.
-   The round-timer controller is on the main element (round/_timer.html.twig), so that the other
-   controllers of the round can act on it. #}
-<header class="scoreboard">
-    <p class="round-number">{{ 'label.round'|trans({'%number%': round.number, '%count%': round.game.roundCount}) }}</p>
-    <p class="theme-tag theme-{{ round.theme.value }}">{{ round.theme|trans }}</p>
-    {% if round.game.withCopilot %}
-        <p class="copilot-badge {{ round.game.agentConnected ? 'connected' }}">
-            {{ include('game/_mode_sketch.html.twig', {mode: 'agent'}) }}
-            {% if not round.game.agentConnected %}{{ 'status.copilot_absent'|trans }}
-            {% elseif round.game.agentDisplayName %}{{ 'label.copilot_named'|trans({'%name%': round.game.agentDisplayName}) }}
-            {% else %}{{ 'label.copilot_unknown'|trans }}{% endif %}
-        </p>
-    {% endif %}
-    {% if round.game.duel %}
-        <p class="duel-score"><span class="side-score side-team">{{ 'label.you'|trans }} {{ include('_olaf.html.twig') }} <strong>{{ team_score }}</strong></span>
-            <span class="rival-score side-rival">{{ include('game/_mode_sketch.html.twig', {mode: 'agent'}) }}{{ round.game.agentDisplayName ?? 'label.rival_unknown'|trans }} <strong>{{ rival_score }}</strong></span></p>
-    {% else %}
-        <p class="team-score">{{ 'label.team_score'|trans }} <strong>{{ team_score }}</strong></p>
-    {% endif %}
-    {% if not round.over %}
-        <p class="clock" aria-label="{{ 'label.time_left'|trans }}">⏱ <strong data-round-timer-target="seconds">{{ (round.remainingMs / 1000)|round(0, 'ceil') }}</strong> s</p>
-    {% endif %}
+{# The bar above a round, on a grid of three zones that never push each other:
+   the way out, the round and its theme on the left; the scores in the middle, ours in yellow, the agent's in
+   orange; the clock and what the word is worth on the right, in boxes of a fixed width.
+   The round-timer controller is on the main element (round/_timer.html.twig). #}
+<header class="scoreboard topbar">
+    <div class="topbar-left">
+        <form method="post" action="{{ path('game_leave', {id: round.game.id}) }}" class="leave"><button type="submit" class="leave-button">← {{ 'action.leave_game'|trans }}</button></form>
+        <p class="round-number">{{ 'label.round'|trans({'%number%': round.number, '%count%': round.game.roundCount}) }}</p>
+        <p class="theme-tag theme-{{ round.theme.value }}">{{ round.theme|trans }}</p>
+    </div>
+    <div class="topbar-scores{{ round.game.duel ? ' duel-score' }}">
+        <p class="score-box score-team team-score">{{ include('_olaf.html.twig') }} {{ 'label.you'|trans }} <strong>{{ team_score }}</strong></p>
+        {% if round.game.duel %}
+            <p class="score-box score-rival rival-score">{{ include('_robot.html.twig', {size: 26}) }} {{ round.game.agentDisplayName ?? 'label.rival_unknown'|trans }} <strong>{{ rival_score }}</strong></p>
+        {% elseif round.game.withCopilot %}
+            <p class="copilot-badge {{ round.game.agentConnected ? 'connected' }}">{{ include('_robot.html.twig', {size: 24}) }}
+                {% if not round.game.agentConnected %}{{ 'status.copilot_absent'|trans }}
+                {% elseif round.game.agentDisplayName %}{{ 'label.copilot_named'|trans({'%name%': round.game.agentDisplayName}) }}
+                {% else %}{{ 'label.copilot_unknown'|trans }}{% endif %}</p>
+        {% endif %}
+    </div>
+    <div class="topbar-time">
+        {% if not round.over %}
+            <p class="clock" aria-label="{{ 'label.time_left'|trans }}">⏱ <strong data-round-timer-target="seconds">{{ (round.remainingMs / 1000)|round(0, 'ceil') }}</strong> s</p>
+            {{ include('round/_gauge.html.twig') }}
+        {% endif %}
+    </div>
 </header>

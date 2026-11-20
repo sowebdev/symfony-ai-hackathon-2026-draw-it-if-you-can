@@ -38,6 +38,8 @@ final class GameFlowTest extends WebTestCase
         self::assertSelectorTextContains('.round-number', 'Round 1 of 6');
         self::assertSelectorTextContains('.team-score strong', '0');
         self::assertSelectorTextContains('.clock strong', '60');
+        self::assertSelectorExists('.topbar .leave-button');
+        self::assertSelectorExists('.umpire .referee.on-chair', 'Alone, the walrus referees from his chair');
         self::assertSelectorExists('[data-round-timer-gauge-value="[[0,1000],[10000,1000],[60000,100]]"]');
         self::assertSelectorNotExists('.round-end');
 

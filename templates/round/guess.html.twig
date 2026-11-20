@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <main class="round"
+    <main class="round round-f {{ round.game.withAgent ? 'with-agent' : 'solo' }}"
           data-controller="ai-drawing round-timer{{ round.game.withAgent ? ' agent' }}"
           {{ include('round/_timer.html.twig') }}
           data-ai-drawing-stream-url-value="{{ path('round_drawing', {id: round.id}) }}"
@@ -13,32 +13,12 @@
           {{ include('round/_agent.html.twig') }}
           data-action="ai-drawing:over->round-timer#finish round-timer:up->ai-drawing#stop agent:pick->ai-drawing#answerHint agent:found->ai-drawing#stop agent:found->round-timer#finish">
         {{ include('round/_scoreboard.html.twig') }}
-        <p class="target">{{ 'instruction.guess'|trans }}</p>
 
         <div class="board">
-            <div class="stage">
-                <canvas class="canvas locked" width="1000" height="1000" data-ai-drawing-target="canvas"></canvas>
-                {% if not round.over %}
-                    <div class="thinking" data-ai-drawing-target="thinking" aria-hidden="true">
-                        <svg class="thinking-pencil" viewBox="0 0 64 64" width="56" height="56">
-                            <g fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
-                                <path d="M14 50 L44 12 L54 20 L24 58 Z" fill="#fbf7ec"/>
-                                <path d="M44 12 L48 7 L58 15 L54 20"/>
-                                <path d="M14 50 L11 61 L24 58"/>
-                                <path d="M38 19 L48 27"/>
-                            </g>
-                            <path d="M11 61 L13 55 L17 59 Z" fill="currentColor"/>
-                        </svg>
-                        <p class="thinking-bubble">{{ 'status.ai_thinking'|trans }}<span class="thinking-dots"><span>.</span><span>.</span><span>.</span></span></p>
-                    </div>
-                {% endif %}
-                {% if round.over %}{{ include('round/_end.html.twig') }}{% endif %}
-            </div>
-
-            <section class="side guesses" aria-live="polite">
-                {{ include('round/_gauge.html.twig') }}
+            {# Our side, in yellow: Olaf drawing, our answer, what we said, our buttons. #}
+            <section class="camp camp-team guesses" aria-live="polite">
                 <div class="ai-voice">
-                    {{ include('_olaf.html.twig', {speaking: not round.over and not round.aiDrawingFinished}) }}
+                    {{ include('_olaf_body.html.twig', {speaking: not round.over and not round.aiDrawingFinished, size: 120}) }}
                     <p class="status" data-ai-drawing-target="status">{{ round.aiDrawingFinished ? 'status.ai_finished'|trans : 'status.ai_drawing'|trans }}</p>
                 </div>
                 <form class="answer" data-ai-drawing-target="form" data-action="ai-drawing#answer">
@@ -48,27 +28,7 @@
                     </label>
                     <button type="submit">{{ 'action.answer'|trans }}</button>
                 </form>
-                {% if round.game.withCopilot %}
-                    <div class="hints" {{ hints is empty ? 'hidden' }} data-agent-target="hints">
-                        <h2>{{ 'heading.copilot_hints'|trans({'%name%': round.game.agentDisplayName ?? 'label.copilot_unknown'|trans}) }}</h2>
-                        <ul data-agent-target="hintList">
-                            {% for hint in hints %}
-                                <li data-hint-id="{{ hint.id }}"><button type="button" data-action="agent#pick" {{ round.over ? 'disabled' }}>{{ hint.word }}</button></li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                {% endif %}
-                {% if round.game.duel %}
-                    <div class="rival-answers">
-                        <h2>{{ 'heading.rival_answers'|trans({'%name%': round.game.agentDisplayName ?? 'label.rival_unknown'|trans}) }}</h2>
-                        <ol data-agent-target="answers">
-                            {% for answer in rival_answers %}
-                                <li data-answer-id="{{ answer.id }}" class="{{ answer.accepted ? 'accepted' : (answer.warm ? 'warm') }}">{{ answer.word }}</li>
-                            {% endfor %}
-                        </ol>
-                    </div>
-                {% endif %}
-                <h2>{{ 'heading.player_guesses'|trans }}</h2>
+                <h2>{{ 'heading.our_words'|trans }}</h2>
                 <ol data-ai-drawing-target="list"{% if round.game.duel %} class="team-words"{% endif %}>
                     {% for guess in guesses %}
                         <li class="{{ guess.accepted ? 'accepted' : (guess.warm ? 'warm') }}">{{ guess.word }}</li>
@@ -80,15 +40,61 @@
                 <p class="reveal" data-ai-drawing-target="reveal" hidden>
                     {{ 'result.word_was'|trans({'%word%': '<strong data-ai-drawing-target="targetWord"></strong>'})|raw }}
                 </p>
-
-                {{ include('_referee.html.twig', {found: round.found}) }}
-
                 <div class="toolbar">
                     <button type="button" data-action="ai-drawing#giveUp" data-ai-drawing-target="giveUp">{{ 'action.give_up'|trans }}</button>
                 </div>
             </section>
-        </div>
 
-        {{ include('round/_leave.html.twig') }}
+            <div class="field">
+                <p class="target">{{ 'instruction.guess'|trans }}</p>
+                <div class="stage">
+                    <canvas class="canvas locked" width="1000" height="1000" data-ai-drawing-target="canvas"></canvas>
+                    {% if not round.over %}
+                        <div class="thinking" data-ai-drawing-target="thinking" aria-hidden="true">
+                            <svg class="thinking-pencil" viewBox="0 0 64 64" width="56" height="56">
+                                <g fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+                                    <path d="M14 50 L44 12 L54 20 L24 58 Z" fill="#fbf7ec"/>
+                                    <path d="M44 12 L48 7 L58 15 L54 20"/>
+                                    <path d="M14 50 L11 61 L24 58"/>
+                                    <path d="M38 19 L48 27"/>
+                                </g>
+                                <path d="M11 61 L13 55 L17 59 Z" fill="currentColor"/>
+                            </svg>
+                            <p class="thinking-bubble">{{ 'status.ai_thinking'|trans }}<span class="thinking-dots"><span>.</span><span>.</span><span>.</span></span></p>
+                        </div>
+                    {% endif %}
+                    {% if round.over %}{{ include('round/_end.html.twig') }}{% endif %}
+                </div>
+                {% if round.game.withAgent %}{{ include('_referee.html.twig', {found: round.found}) }}{% endif %}
+            </div>
+
+            {% if round.game.withAgent %}
+                <section class="camp camp-agent guesses" aria-live="polite">
+                    {{ include('round/_agent_voice.html.twig') }}
+                    {% if round.game.withCopilot %}
+                        <div class="hints" {{ hints is empty ? 'hidden' }} data-agent-target="hints">
+                            <h2>{{ 'heading.copilot_hints'|trans({'%name%': round.game.agentDisplayName ?? 'label.copilot_unknown'|trans}) }}</h2>
+                            <ul data-agent-target="hintList">
+                                {% for hint in hints %}
+                                    <li data-hint-id="{{ hint.id }}"><button type="button" data-action="agent#pick" {{ round.over ? 'disabled' }}>{{ hint.word }}</button></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    {% if round.game.duel %}
+                        <div class="rival-answers">
+                            <h2>{{ 'heading.rival_answers'|trans({'%name%': round.game.agentDisplayName ?? 'label.rival_unknown'|trans}) }}</h2>
+                            <ol data-agent-target="answers">
+                                {% for answer in rival_answers %}
+                                    <li data-answer-id="{{ answer.id }}" class="{{ answer.accepted ? 'accepted' : (answer.warm ? 'warm') }}">{{ answer.word }}</li>
+                                {% endfor %}
+                            </ol>
+                        </div>
+                    {% endif %}
+                </section>
+            {% else %}
+                <div class="umpire">{{ include('_referee.html.twig', {found: round.found, chair: true}) }}</div>
+            {% endif %}
+        </div>
     </main>
 {% endblock %}

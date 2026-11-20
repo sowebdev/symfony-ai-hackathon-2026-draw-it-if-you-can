@@ -106,7 +106,7 @@ final class AiDrawingTest extends WebTestCase
         $round = $this->startRound();
 
         $this->client->request('GET', $round);
-        self::assertSelectorExists('section.guesses .referee');
+        self::assertSelectorExists('main.round .referee');
         self::assertSelectorNotExists('.referee.is-accepted');
         self::assertSelectorExists('.referee-accepted[hidden]');
 

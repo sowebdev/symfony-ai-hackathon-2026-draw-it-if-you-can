@@ -1,0 +1,13 @@
+{# The agent's voice, at the top of his side: his robot head, his name, and his last word in a terminal bubble
+   (never like the walrus's); until his first word, a line saying he looks at the drawing. #}
+{% if round.game.duel %}
+    {% set last_said = (rival_answers|default([]))|last ?: null %}{% set last_said = last_said ? last_said.word : null %}
+{% else %}
+    {% set last_tip = (tips|default([]))|last ?: null %}{% set last_hint = (hints|default([]))|last ?: null %}
+    {% set last_said = last_tip ? last_tip.text : (last_hint ? last_hint.word : null) %}
+{% endif %}
+<div class="agent-voice">
+    {{ include('_robot.html.twig', {size: 78}) }}
+    <span class="agent-name">{{ round.game.agentDisplayName ?? (round.game.duel ? 'label.rival_unknown' : 'label.copilot_unknown')|trans }}</span>
+    <p class="agent-bubble{{ last_said ? '' : ' is-waiting' }}" data-agent-target="bubble">{{ last_said ?: 'agent.watching'|trans }}</p>
+</div>

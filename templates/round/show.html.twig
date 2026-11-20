@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <main class="round"
+    <main class="round round-f {{ round.game.withAgent ? 'with-agent' : 'solo' }}"
           data-controller="canvas guesses round-timer{{ round.game.withAgent ? ' agent' }}"
           {{ include('round/_timer.html.twig') }}
           data-canvas-elapsed-ms-value="{{ round.elapsedMs }}"
@@ -14,26 +14,16 @@
           {% if round.game.withAgent %}{{ include('round/_agent.html.twig') }}{% endif %}
           data-action="guesses:found->canvas#lock guesses:found->round-timer#finish round-timer:up->canvas#lock round-timer:up->guesses#stop agent:found->canvas#lock agent:found->guesses#stop agent:found->round-timer#finish">
         {{ include('round/_scoreboard.html.twig') }}
-        <p class="target">{{ 'instruction.draw'|trans }} <strong>{{ round.targetPhrase }}</strong></p>
 
+        {% set last_guess = guesses is empty ? null : guesses|last %}
         <div class="board">
-            <div class="stage">
-                <canvas class="canvas" width="1000" height="1000" data-canvas-target="canvas"></canvas>
-                {% if round.over %}{{ include('round/_end.html.twig') }}{% endif %}
-            </div>
-
-            <section class="side guesses" aria-live="polite">
-                {{ include('round/_gauge.html.twig') }}
-                {# Olaf says each word in a bubble, with a hop and his beak open (guesses_controller); he
-                   thinks between two words, and jumps for joy when he finds. #}
-                {% set last_guess = guesses is empty ? null : guesses|last %}
+            {# Our side, in yellow: Olaf, what we said, our buttons. #}
+            <section class="camp camp-team guesses" aria-live="polite">
                 <div class="ai-voice">
-                    <span class="olaf-wrap{{ not round.over ? ' is-thinking' }}{{ last_guess and last_guess.accepted ? ' is-cheering' }}" data-guesses-target="olaf">{{ include('_olaf.html.twig') }}</span>
-                    <div class="ai-words">
-                        <h2>{{ (round.game.duel ? 'heading.your_ai_guesses' : 'heading.ai_guesses')|trans }}</h2>
-                        <p class="olaf-bubble{{ last_guess and last_guess.accepted ? ' found' }}" data-guesses-target="bubble" {{ last_guess ? '' : 'hidden' }}>{{ last_guess ? last_guess.word }}</p>
-                    </div>
+                    <span class="olaf-wrap{{ not round.over ? ' is-thinking' }}{{ last_guess and last_guess.accepted ? ' is-cheering' }}" data-guesses-target="olaf">{{ include('_olaf_body.html.twig', {size: 120}) }}</span>
+                    <p class="olaf-bubble{{ last_guess and last_guess.accepted ? ' found' }}" data-guesses-target="bubble" {{ last_guess ? '' : 'hidden' }}>{{ last_guess ? last_guess.word }}</p>
                 </div>
+                <h2>{{ 'heading.our_words'|trans }}</h2>
                 <ol data-guesses-target="list"{% if round.game.duel %} class="team-words"{% endif %}>
                     {% for guess in guesses %}
                         <li data-guess-id="{{ guess.id }}" class="{{ guess.accepted ? 'accepted' : (guess.warm ? 'warm') }}">{{ guess.word }}</li>
@@ -42,37 +32,49 @@
                 <p class="result" data-guesses-target="result" hidden>
                     {{ 'result.found_in'|trans({'%seconds%': '<strong data-guesses-target="time"></strong>'})|raw }}
                 </p>
-
-                {% if round.game.withCopilot %}
-                    <div class="tips" {{ tips is empty ? 'hidden' }} data-agent-target="tips">
-                        <h2>{{ 'heading.copilot_tips'|trans({'%name%': round.game.agentDisplayName ?? 'label.copilot_unknown'|trans}) }}</h2>
-                        <ol data-agent-target="tipList">
-                            {% for tip in tips|reverse %}
-                                <li data-tip-id="{{ tip.id }}">{{ tip.text }}</li>
-                            {% endfor %}
-                        </ol>
-                    </div>
-                {% endif %}
-
-                {% if round.game.duel %}
-                    <div class="rival-answers">
-                        <h2>{{ 'heading.rival_answers'|trans({'%name%': round.game.agentDisplayName ?? 'label.rival_unknown'|trans}) }}</h2>
-                        <ol data-agent-target="answers">
-                            {% for answer in rival_answers %}
-                                <li data-answer-id="{{ answer.id }}" class="{{ answer.accepted ? 'accepted' : (answer.warm ? 'warm') }}">{{ answer.word }}</li>
-                            {% endfor %}
-                        </ol>
-                    </div>
-                {% endif %}
-
-                {{ include('_referee.html.twig', {found: round.found}) }}
-
                 <div class="toolbar">
                     {% if not round.over %}<button type="button" data-action="canvas#undo" data-canvas-target="undo">{{ 'action.undo'|trans }}</button>{% endif %}
                 </div>
             </section>
-        </div>
 
-        {{ include('round/_leave.html.twig') }}
+            {# The sheet, with what to draw above it; the referee under it when an agent plays. #}
+            <div class="field">
+                <p class="target">{{ 'instruction.draw'|trans }} <strong>{{ round.targetPhrase }}</strong></p>
+                <div class="stage">
+                    <canvas class="canvas" width="1000" height="1000" data-canvas-target="canvas"></canvas>
+                    {% if round.over %}{{ include('round/_end.html.twig') }}{% endif %}
+                </div>
+                {% if round.game.withAgent %}{{ include('_referee.html.twig', {found: round.found}) }}{% endif %}
+            </div>
+
+            {# Alone: the referee on his chair. With an agent: his side, in orange. #}
+            {% if round.game.withAgent %}
+                <section class="camp camp-agent guesses" aria-live="polite">
+                    {{ include('round/_agent_voice.html.twig') }}
+                    {% if round.game.withCopilot %}
+                        <div class="tips" {{ tips is empty ? 'hidden' }} data-agent-target="tips">
+                            <h2>{{ 'heading.copilot_tips'|trans({'%name%': round.game.agentDisplayName ?? 'label.copilot_unknown'|trans}) }}</h2>
+                            <ol data-agent-target="tipList">
+                                {% for tip in tips|reverse %}
+                                    <li data-tip-id="{{ tip.id }}">{{ tip.text }}</li>
+                                {% endfor %}
+                            </ol>
+                        </div>
+                    {% endif %}
+                    {% if round.game.duel %}
+                        <div class="rival-answers">
+                            <h2>{{ 'heading.rival_answers'|trans({'%name%': round.game.agentDisplayName ?? 'label.rival_unknown'|trans}) }}</h2>
+                            <ol data-agent-target="answers">
+                                {% for answer in rival_answers %}
+                                    <li data-answer-id="{{ answer.id }}" class="{{ answer.accepted ? 'accepted' : (answer.warm ? 'warm') }}">{{ answer.word }}</li>
+                                {% endfor %}
+                            </ol>
+                        </div>
+                    {% endif %}
+                </section>
+            {% else %}
+                <div class="umpire">{{ include('_referee.html.twig', {found: round.found, chair: true}) }}</div>
+            {% endif %}
+        </div>
     </main>
 {% endblock %}

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The round in three sides: our team on the left in yellow (Olaf in full, our answer, our words, our buttons), the sheet in the middle with the walrus referee under it, the agent on the right in orange when one plays (a robot head, his last word in a terminal bubble, his answers or hints); alone, the walrus referees from a high chair. A top bar that never moves: leaving the game from the top left, the scores of each side, the clock and what the word is worth in boxes of a fixed width. The agent is a robot on the home page too.
 - The game settings, on a screen of their own and without JavaScript, in the five languages: themes on or off (at least one stays on), who draws (we take turns, I only draw, I only guess), the number of rounds (1 to 12) and the length of a round (30, 45, 60, 90 or 120 s), saved and summed up in one line on the home page. A game keeps the settings it started with; `GAME_ROUNDS` and `GAME_ROUND_SECONDS` stay the defaults.
 - The AI of the game is Olaf, a penguin with a face that moves when he speaks (his head bobs and his beak opens while he draws or proposes words, still with `prefers-reduced-motion`); his name is set by `GAME_AI_NAME`, in the five languages and wherever the game speaks of him, and an empty value gives Olaf.
 

@@ -5,7 +5,7 @@ import { Controller } from '@hotwired/stimulus';
 // top; the answers of the rival in a duel, and
 // "rival_found" when it finds the word, which ends the round.
 export default class extends Controller {
-    static targets = ['hints', 'hintList', 'tips', 'tipList', 'answers'];
+    static targets = ['hints', 'hintList', 'tips', 'tipList', 'answers', 'bubble'];
     static values = { streamUrl: String, over: Boolean };
 
     connect() {
@@ -39,6 +39,7 @@ export default class extends Controller {
         button.dataset.action = 'agent#pick';
         item.append(button);
         this.hintListTarget.append(item);
+        this.say(word);
         this.hintsTarget.hidden = false;
     }
 
@@ -52,6 +53,20 @@ export default class extends Controller {
         item.textContent = text;
         this.tipListTarget.prepend(item);
         this.tipsTarget.hidden = false;
+        this.say(text);
+    }
+
+    // The agent's last word, in his terminal bubble at the top of his side.
+    say(word) {
+        if (!this.hasBubbleTarget) {
+            return;
+        }
+        this.bubbleTarget.textContent = word;
+        this.bubbleTarget.hidden = false;
+        this.bubbleTarget.classList.remove('is-waiting');
+        this.bubbleTarget.classList.remove('pop');
+        void this.bubbleTarget.offsetWidth;
+        this.bubbleTarget.classList.add('pop');
     }
 
     addAnswer({ id, word, right, verdict }) {
@@ -64,6 +79,7 @@ export default class extends Controller {
         item.classList.toggle('accepted', right);
         item.classList.toggle('warm', verdict === 'warm');
         this.answersTarget.append(item);
+        this.say(word);
         this.dispatch('verdict', { prefix: 'referee', target: window, detail: { verdict: right ? 'accepted' : verdict } });
     }
 
