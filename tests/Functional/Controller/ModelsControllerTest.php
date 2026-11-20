@@ -178,12 +178,12 @@ final class ModelsControllerTest extends WebTestCase
         self::assertResponseRedirects('/en/models/drawer/model');
         self::assertSame([], $this->asked, 'Nothing is listed before the key is given');
 
-        // Question 3: the cheapest family is preselected and tagged; the key is in the session sealed.
+        // Question 3: the middle of the range (of two, the cheaper) is preselected and tagged; the key is in the session sealed.
         $crawler = $this->get($client, '/en/models/drawer/model');
         self::assertSelectorTextContains('h1', 'Which model draws?');
         self::assertSame(['claude-haiku-5-5', 'claude-sonnet-5-5'], self::radios($crawler));
         self::assertSame('claude-haiku-5-5', $crawler->filter('input[name="model_step[choice]"]:checked')->attr('value'));
-        self::assertSelectorTextContains('.model-option.cheapest', 'the cheapest');
+        self::assertSelectorTextContains('.model-option.recommended', 'the right balance');
         self::assertSelectorNotExists('input[type=checkbox][name="model_step[reasoningOff]"]', 'Anthropic: the game decides about reasoning, no switch');
         self::assertSelectorTextContains('.follows-line', 'It guesses your drawing too.');
         self::assertSelectorTextContains('.follows-line button', 'Another AI to guess?');
@@ -633,18 +633,18 @@ final class ModelsControllerTest extends WebTestCase
         self::assertCount(0, $crawler->filter('details.long-list input[name="model_step[name]"]'), 'The only way is not folded');
     }
 
-    public function testAModelOfUnknownCapabilitiesIsAmongTheOthersMarkedAndNeverACard(): void
+    public function testAModelTooNewForTheBridgeIsACardThroughModelsDev(): void
     {
-        $client = $this->client(['data' => [['id' => 'claude-haiku-5-5'], ['id' => 'claude-fable-5-2']], 'has_more' => false]);
+        $client = $this->client(['data' => [['id' => 'claude-haiku-5-5'], ['id' => 'claude-fable-5-2'], ['id' => 'claude-brand-new-9']], 'has_more' => false]);
         $this->chooseProvider($client, 'drawer', 'anthropic');
         $this->giveAccess($client, 'drawer');
 
         $crawler = $this->get($client, '/en/models/drawer/model');
 
-        self::assertSame(['claude-haiku-5-5'], $crawler->filter('.model-cards')->first()->filter('input[type=radio]')->each(static fn (Crawler $radio): string => (string) $radio->attr('value')));
-        self::assertSame(['claude-fable-5-2'], $crawler->filter('details.long-list')->first()->filter('input[type=radio]')->each(static fn (Crawler $radio): string => (string) $radio->attr('value')));
-        self::assertSelectorTextContains('details.long-list .unknown-mark', 'capabilities unknown');
-        self::assertCount(0, $crawler->filter('.model-cards .unknown-mark'));
+        // claude-fable-5-2 is unknown to the bridge of Symfony AI 1.0.0-BETA1, known to models.dev; nobody knows claude-brand-new-9.
+        self::assertSame(['claude-haiku-5-5', 'claude-fable-5-2'], $crawler->filter('.model-cards')->first()->filter('input[type=radio]')->each(static fn (Crawler $radio): string => (string) $radio->attr('value')));
+        self::assertSelectorNotExists('.unknown-mark');
+        self::assertStringNotContainsString('claude-brand-new-9', (string) $client->getResponse()->getContent());
     }
 
     public function testTheWaitForTheCheckShowsTheLoadingScreen(): void

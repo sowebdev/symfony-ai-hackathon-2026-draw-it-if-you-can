@@ -873,10 +873,10 @@
                 <target>%provider% n’a pas répondu par une liste de modèles.</target>
                 <note>The answer is not a list of models</note>
             </trans-unit>
-            <trans-unit id="models.cheapest" resname="models.cheapest">
-                <source>models.cheapest</source>
-                <target>le moins cher</target>
-                <note>Step 2, mark of the preselected model</note>
+            <trans-unit id="models.recommended" resname="models.recommended">
+                <source>models.recommended</source>
+                <target>le bon compromis</target>
+                <note>Step 2, mark of the preselected model when the catalog of models.dev is there: the middle of the provider's range, by price</note>
             </trans-unit>
             <trans-unit id="models.all_models" resname="models.all_models">
                 <source>models.all_models</source>

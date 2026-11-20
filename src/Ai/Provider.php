@@ -101,12 +101,17 @@ enum Provider: string
      */
     public function bridgeCatalog(): ?ModelCatalogInterface
     {
-        return match ($this) {
+        $bridge = match ($this) {
             self::Anthropic => new AnthropicCatalog(),
             self::OpenAi => new OpenAiCatalog(),
             self::Mistral => new MistralCatalog(),
             self::Compatible => null,
         };
+        // models.dev first, kept fresh by the installation; the bridge's own catalog, frozen in the
+        // release of Symfony AI, for what models.dev has not got or when its file is missing.
+        $fresh = null === $bridge ? null : ModelsDev::catalog($this);
+
+        return null === $fresh ? $bridge : new CompositeModelCatalog([$fresh, $bridge]);
     }
 
     /**

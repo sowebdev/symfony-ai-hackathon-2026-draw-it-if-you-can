@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ae582f7333490f0c592a2990b28c227d",
+    "content-hash": "2dd82873837d3622cf5c40f40d8a5862",
     "packages": [
         {
             "name": "composer/semver",
@@ -2955,6 +2955,93 @@
             ],
             "support": {
                 "source": "https://github.com/symfony/ai-mistral-platform/tree/v1.0.0-BETA1"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-10-26T14:03:07+00:00"
+        },
+        {
+            "name": "symfony/ai-models-dev-platform",
+            "version": "v1.0.0-BETA1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/ai-models-dev-platform.git",
+                "reference": "86e24930c09538dd32d1b5cabadf3d302a2db4b7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/ai-models-dev-platform/zipball/86e24930c09538dd32d1b5cabadf3d302a2db4b7",
+                "reference": "86e24930c09538dd32d1b5cabadf3d302a2db4b7",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.2",
+                "symfony/ai-generic-platform": "^1.0",
+                "symfony/ai-platform": "^1.0"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^2.1",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
+                "phpunit/phpunit": "^11.5.53",
+                "symfony/ai-anthropic-platform": "^1.0",
+                "symfony/ai-bedrock-platform": "^1.0",
+                "symfony/ai-gemini-platform": "^1.0",
+                "symfony/ai-meta-platform": "^1.0",
+                "symfony/ai-vertex-ai-platform": "^1.0",
+                "symfony/models-dev": "^1.0"
+            },
+            "type": "symfony-ai-platform",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/symfony/ai",
+                    "name": "symfony/ai"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\AI\\Platform\\Bridge\\ModelsDev\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Models.dev platform bridge for Symfony AI",
+            "keywords": [
+                "Bridge",
+                "ai",
+                "models-dev",
+                "platform"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/ai-models-dev-platform/tree/v1.0.0-BETA1"
             },
             "funding": [
                 {
@@ -11943,6 +12030,7 @@
         "symfony/ai-bundle": 10,
         "symfony/ai-generic-platform": 10,
         "symfony/ai-mistral-platform": 10,
+        "symfony/ai-models-dev-platform": 10,
         "symfony/ai-open-ai-platform": 10,
         "symfony/ai-open-responses-platform": 10,
         "symfony/ai-platform": 10,

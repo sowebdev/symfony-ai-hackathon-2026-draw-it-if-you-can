@@ -1,4 +1,4 @@
-{# The choice of a model: a card per family (its newest model, the cheapest marked), the other models and the field to type a name folded away. #}
+{# The choice of a model: a card per family (its newest model, the recommended one marked: the middle of the range, from models.dev), the other models and the field to type a name folded away. #}
 {# `field` is the radio group (absent when the list is empty), `typed` the text field, `layout` what the controller arranged. #}
 {% set radios = {} %}
 {% if field %}
@@ -7,11 +7,11 @@
     {% endfor %}
 {% endif %}
 
-{% macro option(radio, cheapest, unknown) %}
-    <label class="model-option{{ cheapest ? ' cheapest' : '' }}">
+{% macro option(radio, recommended, unknown) %}
+    <label class="model-option{{ recommended ? ' recommended' : '' }}">
         {{ form_widget(radio) }}
         <code>{{ radio.vars.value }}</code>
-        {% if cheapest %}<em class="cheapest-mark">{{ 'models.cheapest'|trans }}</em>{% endif %}
+        {% if recommended %}<em class="recommended-mark">{{ 'models.recommended'|trans }}</em>{% endif %}
         {% if unknown %}<em class="unknown-mark">{{ 'models.unknown_capabilities'|trans }}</em>{% endif %}
     </label>
 {% endmacro %}
@@ -19,7 +19,7 @@
 {% if field and layout.cards %}
     <div class="model-cards">
         {% for name in layout.cards %}
-            {{ _self.option(radios[name], name == layout.cheapest, name in layout.unknown) }}
+            {{ _self.option(radios[name], name == layout.preselected, name in layout.unknown) }}
         {% endfor %}
     </div>
 {% endif %}

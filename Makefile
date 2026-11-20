@@ -2,7 +2,7 @@
 # The image is built with the machine's user, so that the files it writes belong to them.
 
 .DEFAULT_GOAL := help
-.PHONY: help install encryption-key start up stop shell db check test test-unit test-functional lint schema cs cs-fix phpstan audit ci
+.PHONY: help install models-dev encryption-key start up stop shell db check test test-unit test-functional lint schema cs cs-fix phpstan audit ci
 
 export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
@@ -19,11 +19,15 @@ install: ## Build the image, install the dependencies and the database; the mode
 	@$(EXEC) composer install --no-progress --quiet
 	@$(CONSOLE) importmap:install --quiet
 	@$(MAKE) --no-print-directory encryption-key
+	@$(CONSOLE) app:models-dev
 	@$(CONSOLE) doctrine:migrations:migrate -n --quiet
 	@echo
 	@echo "Ready: open http://127.0.0.1:$$(cat .app-port) and choose your model"
 
 # The key that seals the API key kept in the database: made once, in .env.local, never replaced.
+models-dev: ## Download the catalog of models.dev again and show the model recommended for each provider
+	@$(CONSOLE) app:models-dev
+
 encryption-key:
 	@$(CONSOLE) app:encryption-key
 

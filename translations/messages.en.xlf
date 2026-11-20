@@ -873,10 +873,10 @@
                 <target>%provider% did not answer with a list of models.</target>
                 <note>The answer is not a list of models</note>
             </trans-unit>
-            <trans-unit id="models.cheapest" resname="models.cheapest">
-                <source>models.cheapest</source>
-                <target>the cheapest</target>
-                <note>Step 2, mark of the preselected model</note>
+            <trans-unit id="models.recommended" resname="models.recommended">
+                <source>models.recommended</source>
+                <target>the right balance</target>
+                <note>Step 2, mark of the preselected model when the catalog of models.dev is there: the middle of the provider's range, by price</note>
             </trans-unit>
             <trans-unit id="models.all_models" resname="models.all_models">
                 <source>models.all_models</source>

@@ -8,12 +8,12 @@ use App\Ai\ModelCheck;
 use App\Ai\ModelCheckResult;
 use App\Ai\ModelChoice;
 use App\Ai\ModelDraft;
-use App\Ai\ModelFamilies;
 use App\Ai\ModelHealth;
 use App\Ai\ModelList;
 use App\Ai\ModelLister;
 use App\Ai\ModelPlan;
 use App\Ai\Models;
+use App\Ai\ModelsDev;
 use App\Ai\ModelSettings;
 use App\Ai\NoModelException;
 use App\Ai\Problem;
@@ -67,6 +67,7 @@ final class ModelsController extends AbstractController
         private readonly ModelHealth $health,
         private readonly TranslatorInterface $translator,
         private readonly FormFactoryInterface $forms,
+        private readonly ModelsDev $modelsDev,
     ) {
     }
 
@@ -186,13 +187,14 @@ final class ModelsController extends AbstractController
             return $this->redirectToRoute('models');
         }
 
+        $this->modelsDev->ensure();
         $list = $this->lister->list($provider, $edit->address, $key, fresh: $request->query->getBoolean('fresh'));
         [$choices, $layout] = $this->layout($provider, $list, $role);
 
-        // What the role has at this place stays; else the cheapest, and the switch the address suggests.
+        // What the role has at this place stays; else the recommended one, and the switch the address suggests.
         $current = $this->plan->current($role, $draft);
         $kept = null !== $current && $current->isAt($provider, $edit->address) ? $current : null;
-        $model = '' !== $edit->model ? $edit->model : ($kept->model ?? $layout['cheapest'] ?? '');
+        $model = '' !== $edit->model ? $edit->model : ($kept->model ?? $layout['preselected'] ?? '');
         $reasoningOff = '' !== $edit->model ? $edit->reasoningOff : ($kept->reasoningOff ?? $provider->reasoningOffByDefault($edit->address));
         $step = new ModelStep(reasoningOff: $reasoningOff);
         [$step->choice, $step->name] = isset($choices[$model]) ? [$model, null] : [null, '' === $model ? null : $model];
@@ -411,22 +413,30 @@ final class ModelsController extends AbstractController
     /**
      * The models offered for a role, as the names the form accepts, and how the page arranges them.
      *
-     * @return array{array<string, string>, array{count: int, cards: list<string>, others: list<string>, cheapest: ?string, unknown: list<string>, long: bool}}
+     * @return array{array<string, string>, array{count: int, cards: list<string>, others: list<string>, preselected: ?string, unknown: list<string>, long: bool}}
      */
     private function layout(Provider $provider, ModelList $list, Role $role): array
     {
         $names = static fn (array $models): array => array_values(array_map(static fn (ModelChoice $choice): string => $choice->name, $models));
         $listed = $list->for($role);
-        $arranged = ModelFamilies::arrange($provider, $listed);
+        $arranged = ModelsDev::arrange($provider, $listed);
         $long = \count($listed) > self::LONG_LIST;
+        // The middle of the provider's range, from models.dev; without the catalog, nothing is preselected.
+        $recommended = ModelsDev::recommended($provider, $names($listed));
+        $cards = $names($arranged['cards']);
+        $others = $names($arranged['others']);
+        if (null !== $recommended && !\in_array($recommended, $cards, true)) {
+            $cards[] = $recommended;
+            $others = array_values(array_diff($others, [$recommended]));
+        }
 
         return [
             array_combine($names($listed), $names($listed)),
             [
                 'count' => \count($listed),
-                'cards' => $long ? [] : $names($arranged['cards']),
-                'others' => $long ? $names($listed) : $names($arranged['others']),
-                'cheapest' => ModelFamilies::cheapest($provider, $listed)?->name,
+                'cards' => $long ? [] : $cards,
+                'others' => $long ? $names($listed) : $others,
+                'preselected' => $recommended,
                 'unknown' => $list->hasCapabilities() ? $names(array_filter($listed, static fn (ModelChoice $choice): bool => !$choice->isKnown())) : [],
                 'long' => $long,
             ],
