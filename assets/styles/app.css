@@ -287,15 +287,9 @@ button:focus-visible,
     transform: translateX(-50%) rotate(3deg);
 }
 
-
 .clock {
     color: var(--rust);
     transform: rotate(-3deg);
-}
-
-.round-footer {
-    margin-top: 1.2rem;
-    font-size: 1rem;
 }
 
 .clock strong {
@@ -904,9 +898,8 @@ button:focus-visible,
     content: '✓ ';
 }
 
-/* The agent is in orange everywhere, the side of the player in green: who is who at a glance. */
-.copilot-badge,
-.rival-score {
+/* The agent is in orange everywhere, the side of the player in yellow: who is who at a glance. */
+.copilot-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
@@ -920,18 +913,6 @@ button:focus-visible,
     color: var(--pencil);
 }
 
-.agent-sketch {
-    height: 2.2rem;
-    width: auto;
-}
-
-/* Both sides on one line, centred: the sketch of the agent is taller than the text. */
-.duel-score {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-}
-
 /* One colour per side, everywhere: the player's team in the yellow of the game, the rival agent in
    its orange. Always dark ink on a light fill (contrast above 8:1), never coloured text. */
 .side-team {
@@ -942,19 +923,6 @@ button:focus-visible,
 .side-rival {
     background: #ffa94d;
     color: var(--ink);
-}
-
-.side-score,
-.rival-score {
-    padding: 0.1rem 0.7rem;
-    border: 2px solid var(--ink);
-    border-radius: 8px 12px 9px 11px;
-}
-
-.side-score strong,
-.rival-score strong {
-    font-size: 1.3em;
-    font-weight: normal;
 }
 
 span.side-team,
@@ -1908,18 +1876,13 @@ button.link:hover {
     }
 }
 
-/* Olaf, the penguin who is the AI of the game: his head beside his words. He bobs and opens his beak
+/* Olaf, the penguin who is the AI of the game: in full on our side, his head in the score. He bobs and opens his beak
    while he thinks or proposes (class "speaking", set by the server, and the round's own state
    attributes, which Stimulus keeps up to date); still otherwise. */
 .ai-voice {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-}
-
-.ai-voice > h2,
-.ai-voice > .status {
-    margin: 0;
 }
 
 .olaf {
@@ -1930,12 +1893,6 @@ button.link:hover {
 .olaf .beak {
     transform-box: fill-box;
     transform-origin: 50% 0;
-}
-
-.duel-score .olaf {
-    width: 42px;
-    height: auto;
-    vertical-align: middle;
 }
 
 .olaf.speaking {
@@ -1968,15 +1925,6 @@ button.link:hover {
     .olaf.speaking .beak {
         animation: none;
     }
-}
-
-/* Olaf guesses: each word pops in his bubble while he hops and opens his beak; between two words he
-   thinks (a slow sway); when he finds, the bubble turns green and he jumps for joy. */
-.ai-words {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.3rem;
 }
 
 .olaf-wrap {
@@ -2188,13 +2136,13 @@ button.link:hover {
     cursor: pointer;
 }
 
+/* The scores, on the colours of the sides (.side-team, .side-rival): dark ink on a light fill. */
 .score-box {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
     padding: 0.1rem 0.7rem;
-    background: var(--marker);
-    border: 2px solid #2b2b2b;
+    border: 2px solid var(--ink);
     border-radius: 9px 7px 10px 8px;
     white-space: nowrap;
 }
@@ -2211,17 +2159,12 @@ button.link:hover {
     font-size: 1.4rem;
 }
 
-.score-rival {
-    background: #ffe8cc;
-    border-color: var(--pencil);
-    color: #a33b00;
-}
-
 .topbar .copilot-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    color: var(--pencil);
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .topbar .clock {
@@ -2448,11 +2391,6 @@ button.link:hover {
 .topbar button,
 .topbar .worth {
     white-space: nowrap;
-}
-
-.topbar .copilot-badge {
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 /* The copilot's tips: his last one is in his bubble; the list keeps the two before, short. */

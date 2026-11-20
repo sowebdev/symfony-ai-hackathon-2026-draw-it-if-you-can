@@ -1,15 +1,11 @@
 {# A small sketch of who plays in a mode: the player (round head), Olaf, the AI of the game (a penguin, in ink:
    orange is for the agent), an agent connected over MCP (a robot head, in orange). Alone with the
-   AI, the player holds its hand. "agent" draws
-   the agent alone, for the bar of a round. #}
+   AI, the player holds its hand. #}
 {% set ink = 'fill="none" stroke="#2b2b2b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"' %}
 {% set pen = 'fill="none" stroke="#e8590c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"' %}
 {% macro player(x, ink) %}<g transform="translate({{ x }} 0)" {{ ink|raw }}><circle cx="0" cy="-30" r="10"/><path d="M0 -20 L0 6 M0 6 L-9 26 M0 6 L9 26 M0 -12 L-13 -1 M0 -12 L13 -2"/></g>{% endmacro %}
 {% macro ai(x) %}<g transform="translate({{ x - 30.6 }} -40.6) scale(0.34)" fill="none" stroke="#2b2b2b" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><line x1="90" y1="30" x2="90" y2="14"/><circle cx="90" cy="9" r="6" fill="#2b2b2b"/><path d="M50 80 C48 45 70 30 90 30 C112 30 133 45 130 80 L136 150 C138 178 115 190 90 190 C64 190 42 178 44 150 Z" fill="#fffdf6"/><path d="M68 95 C66 130 70 170 90 176 C110 170 114 130 112 95" stroke-width="6"/><rect x="58" y="55" width="64" height="22" rx="11" fill="#e4ecf5" stroke-width="7"/><circle cx="76" cy="66" r="5" fill="#2b2b2b" stroke="none"/><circle cx="104" cy="66" r="5" fill="#2b2b2b" stroke="none"/><path d="M82 85 L90 93 L98 85 Z" fill="#2b2b2b" stroke-width="5"/><path d="M46 105 C30 120 28 140 36 150 M134 105 C150 120 152 140 144 150"/></g>{% endmacro %}
 {% macro agent(x, pen) %}<g transform="translate({{ x }} 0)" {{ pen|raw }}><g transform="translate(-14 -50) scale(0.28)" stroke-width="9"><path d="M50 24 l-5 -4 l10 -4 l-10 -4 l5 -4"/><circle cx="50" cy="6" r="5" fill="#e8590c"/><rect x="8" y="40" width="8" height="18" rx="2" fill="#e8590c"/><rect x="84" y="40" width="8" height="18" rx="2" fill="#e8590c"/><rect x="15" y="24" width="70" height="60" rx="12" fill="#fff4e6"/><circle cx="36" cy="48" r="11" fill="#fff"/><circle cx="38" cy="49" r="5" fill="#e8590c" stroke="none"/><circle cx="66" cy="46" r="7" fill="#fff"/><circle cx="67" cy="47" r="3.5" fill="#e8590c" stroke="none"/><path d="M33 68 h34"/></g><path d="M0 -26 L0 6 M0 6 L-9 26 M0 6 L9 26 M0 -14 L-13 -4 M0 -14 L13 -4"/></g>{% endmacro %}
-{% if mode == 'agent' %}
-<svg class="agent-sketch" width="30" height="40" viewBox="-18 -56 52 86" aria-hidden="true">{{ _self.agent(0, pen) }}</svg>
-{% else %}
 <svg class="mode-sketch" width="150" height="90" viewBox="-75 -60 150 90" aria-hidden="true">
     {% if mode == 'solo' %}
         {{ _self.player(-28, ink) }}{{ _self.ai(28) }}
@@ -24,4 +20,3 @@
         {{ _self.agent(38, pen) }}
     {% endif %}
 </svg>
-{% endif %}

@@ -20,7 +20,7 @@ Inside the game, the controllers stay thin; the rules (`src/Game`) decide, the A
 
 ## The principles
 
-- **The model plays, the code judges.** A model never decides what counts. `WordMatcher` tells whether an answer is the word, `OneWordModel` checks that a model said one word, `ModelCheck` tries each model on a task whose answer is known. Points, time and the end of a round are the game's.
+- **The model plays, the code judges.** A model never decides what counts. `WordMatcher` accepts the word, or one typo of it, without asking anyone; otherwise `Judge` asks the guessing model for one label from a closed list (same word, synonym, very close, related, unrelated), keeps it, and `Verdict` turns it into accepted, warm or refused, by a table in the code ([ADR 0006](adr/0006-the-judge-is-the-guessing-model-with-a-strict-label-and-a-cache.md)). `OneWordModel` checks that a model said one word, `ModelCheck` tries each model on a task whose answer is known. Points, time and the end of a round are the game's.
 - **Two roles, any model.** The drawer and the guesser each have a provider, a model and a key (`Models`, from the accounts and role models stored by the models screen; a guesser without a model of its own uses the drawer's), on the platform bridge of that provider in Symfony AI, or on the Generic one for any OpenAI-compatible endpoint: Ollama, LM Studio, llama.cpp or OpenRouter. Both must see images; the drawer must call tools.
 - **The model draws with a tool.** `Pen` is a Symfony AI tool (`#[AsTool]`), `draw_stroke`, on the 50 x 50 grid of SketchAgent. The answer is streamed, and each stroke goes to the browser as soon as its call is written, without waiting for the end of the answer (`ToolCallAssembler`, see [Contributions to Symfony AI](../README.md#contributions-to-symfony-ai)).
 - **The hand is code.** The model writes grid cells; `StrokeTracer` turns them into a line that wobbles, overshoots and speeds up like a pen, deterministically. `StrokeRenderer` draws strokes into a PNG with GD, which is what the guesser, and the drawer adding details, look at.
@@ -51,8 +51,8 @@ sequenceDiagram
         G-->>B: stroke
     end
     B->>G: an answer (HTTP)
-    G->>G: WordMatcher, the code judges
-    G-->>B: found, or a crossed-out word
+    G->>G: Judge: WordMatcher, else one label from the guesser, kept
+    G-->>B: accepted, warm or refused
 ```
 
 ## You draw, the AI guesses
@@ -68,8 +68,8 @@ sequenceDiagram
         G->>G: StrokeRenderer, drawing to PNG
         G->>M: the image and the words said so far: one new word
         M-->>G: a word
-        G->>G: OneWordModel and WordMatcher check it
-        G-->>B: the word (SSE), or "found"
+        G->>G: OneWordModel checks it, Judge gives its verdict
+        G-->>B: the word and its verdict (SSE), or "found"
     end
 ```
 

@@ -1,6 +1,6 @@
 {# The bar above a round, on a grid of three zones that never push each other:
-   the way out, the round and its theme on the left; the scores in the middle, ours in yellow, the agent's in
-   orange; the clock and what the word is worth on the right, in boxes of a fixed width.
+   the way out, the round and its theme on the left; the scores in the middle, on the colours of
+   the sides (.side-team, .side-rival); the clock and what the word is worth on the right, in boxes of a fixed width.
    The round-timer controller is on the main element (round/_timer.html.twig). #}
 <header class="scoreboard topbar">
     <div class="topbar-left">
@@ -9,9 +9,9 @@
         <p class="theme-tag theme-{{ round.theme.value }}">{{ round.theme|trans }}</p>
     </div>
     <div class="topbar-scores{{ round.game.duel ? ' duel-score' }}">
-        <p class="score-box score-team team-score">{{ include('_olaf.html.twig') }} {{ 'label.you'|trans }} <strong>{{ team_score }}</strong></p>
+        <p class="score-box side-team team-score">{{ include('_olaf.html.twig') }} {{ 'label.you'|trans }} <strong>{{ team_score }}</strong></p>
         {% if round.game.duel %}
-            <p class="score-box score-rival rival-score">{{ include('_robot.html.twig', {size: 26}) }} {{ round.game.agentDisplayName ?? 'label.rival_unknown'|trans }} <strong>{{ rival_score }}</strong></p>
+            <p class="score-box side-rival rival-score">{{ include('_robot.html.twig', {size: 26}) }} {{ round.game.agentDisplayName ?? 'label.rival_unknown'|trans }} <strong>{{ rival_score }}</strong></p>
         {% elseif round.game.withCopilot %}
             <p class="copilot-badge {{ round.game.agentConnected ? 'connected' }}">{{ include('_robot.html.twig', {size: 24}) }}
                 {% if not round.game.agentConnected %}{{ 'status.copilot_absent'|trans }}

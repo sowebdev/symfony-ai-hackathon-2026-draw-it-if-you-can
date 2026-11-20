@@ -4,7 +4,7 @@
 
 AI doesn't always have to be about productivity. It can also be fun.
 
-Draw It If You Can is a drawing and guessing game you play with an AI, taking turns. When you draw, the AI watches your sketch grow and shouts out one word at a time, like a friend around the table. When the AI draws, you guess: it picks up the pencil and draws live, stroke by stroke, with the wobble of a human hand.
+Draw It If You Can is a drawing and guessing game you play with an AI, taking turns. When you draw, the AI watches your sketch grow and shouts out one word at a time, like a friend around the table. When the AI draws, you guess: it picks up the pencil and draws live, stroke by stroke, with the wobble of a human hand. The AI is Olaf, a penguin, and a walrus with a whistle referees everyone: « ça chauffe » when an answer is close, « c'est juste » when it is the word, more forgiving in the easy mode.
 
 Bring your own agent along over MCP: Claude Code, Mistral Vibe or any client whose model sees images joins from the lobby, picks itself a funny nickname, and plays as your copilot or races you to the answer in a duel.
 

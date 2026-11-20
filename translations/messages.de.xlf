@@ -38,11 +38,6 @@
                 <target>Zeichne:</target>
                 <note>Before the word the player must draw</note>
             </trans-unit>
-            <trans-unit id="heading.ai_guesses" resname="heading.ai_guesses">
-                <source>heading.ai_guesses</source>
-                <target>%ai% sagt…</target>
-                <note>Above the words the AI calls out</note>
-            </trans-unit>
             <trans-unit id="result.found_in" resname="result.found_in">
                 <source>result.found_in</source>
                 <target>Gefunden in %seconds% s</target>
@@ -108,11 +103,6 @@
                 <target>Raten</target>
                 <note>Sends the guess of the player</note>
             </trans-unit>
-            <trans-unit id="heading.player_guesses" resname="heading.player_guesses">
-                <source>heading.player_guesses</source>
-                <target>Deine Tipps</target>
-                <note>Above the words the player tried</note>
-            </trans-unit>
             <trans-unit id="action.give_up" resname="action.give_up">
                 <source>action.give_up</source>
                 <target>Ich gebe auf</target>
@@ -147,11 +137,6 @@
                 <source>label.round</source>
                 <target>Runde %number% von %count%</target>
                 <note>Number of the round being played</note>
-            </trans-unit>
-            <trans-unit id="label.team_score" resname="label.team_score">
-                <source>label.team_score</source>
-                <target>Punkte</target>
-                <note>Points of the player and the AI together</note>
             </trans-unit>
             <trans-unit id="label.time_left" resname="label.time_left">
                 <source>label.time_left</source>
@@ -483,11 +468,6 @@
                 <target>+%points% Punkte für dich und %ai%</target>
                 <note>End of a round of a duel, when the side of the player found the word</note>
             </trans-unit>
-            <trans-unit id="heading.your_ai_guesses" resname="heading.your_ai_guesses">
-                <source>heading.your_ai_guesses</source>
-                <target>%ai% sagt…</target>
-                <note>In a duel, above the words of the AI of the player while the player draws</note>
-            </trans-unit>
             <trans-unit id="mode.solo_hint" resname="mode.solo_hint">
                 <source>mode.solo_hint</source>
                 <target>Du zeichnest für ihn, du errätst seine Zeichnungen, ihr punktet zusammen.</target>
@@ -607,11 +587,6 @@
                 <source>action.configure_model</source>
                 <target>Modell konfigurieren</target>
                 <note>Permanent link at the bottom of the home page</note>
-            </trans-unit>
-            <trans-unit id="models.title" resname="models.title">
-                <source>models.title</source>
-                <target>Das Modell wählen</target>
-                <note>Title of the model screen, step 1</note>
             </trans-unit>
             <trans-unit id="models.api_key" resname="models.api_key">
                 <source>models.api_key</source>
