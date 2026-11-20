@@ -19,7 +19,7 @@ final readonly class OneWordModel
      * Ceilings, not budgets: a model stops by itself after its word, a cloud model that reasons
      * spends a few hundred tokens first, and a local model that loops is cut here.
      */
-    private const int MAX_TOKENS_FOR_A_WORD = 1000;
+    public const int MAX_TOKENS_FOR_A_WORD = 1000;
 
     private const int MAX_TOKENS_FOR_A_LIST = 2000;
 

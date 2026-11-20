@@ -22,9 +22,6 @@ final readonly class Judge
     /** Well below the other calls: the player waits for the verdict. */
     public const int MAX_DURATION_S = 8;
 
-    /** A label is a few tokens: a few dozen leave room for a model that opens with a short thought. */
-    private const int MAX_TOKENS = 48;
-
     public function __construct(
         private WordMatcher $matcher,
         private Models $models,
@@ -72,8 +69,10 @@ final readonly class Judge
             Message::ofUser(\sprintf('Word drawn: "%s". Answer of the player: "%s". Which label?', $target, $answer)),
         );
 
+        // The ceiling of a word, not a budget: a cloud model that reasons spends a few hundred tokens
+        // before its label, and a lower one would leave it without any.
         try {
-            $text = $this->models->invoke(Role::Guesser, $messages, maxTokens: self::MAX_TOKENS, maxDurationS: self::MAX_DURATION_S)->asText();
+            $text = $this->models->invoke(Role::Guesser, $messages, maxTokens: OneWordModel::MAX_TOKENS_FOR_A_WORD, maxDurationS: self::MAX_DURATION_S)->asText();
         } catch (\Throwable $exception) {
             $this->logger->warning('The judge could not tell: {message}', ['message' => $exception->getMessage(), 'exception' => $exception]);
 
