@@ -21,10 +21,10 @@ Click the whale to watch the 90-second video.
 You need Docker, make, and a model: a cloud API key, or a model server of your own.
 
 1. `make install`: it builds the image, installs the dependencies and the database, and asks nothing.
-2. Open the address it ends with, http://127.0.0.1:8040 unless that port is taken (`make start` gives it again), and **choose your models** on the page, one question at a time: which AI draws (Anthropic, OpenAI, Mistral, or your own server or another OpenAI-compatible service such as Ollama, LM Studio or OpenRouter), your API key, its model; the guesser uses the same AI unless you give it another one, at any provider. "Check and play" tries them and saves them when they pass. Your keys are kept encrypted in the game's database.
+2. Open the address it ends with, http://127.0.0.1:8040 unless that port is taken (`make start` gives it again), and **choose your models** on the page, one question at a time: which AI draws (Anthropic, OpenAI, Mistral, or your own server or another OpenAI-compatible service such as Ollama, LM Studio or OpenRouter), your API key, its model (the middle of the provider's range is preselected, from [models.dev](https://models.dev)); the guesser uses the same AI unless you give it another one, at any provider. "Check and play" tries them and saves them when they pass. Your keys are kept encrypted in the game's database.
 3. Draw, guess, laugh.
 
-"Change the model" at the bottom of the home page opens the same screen later, and `make check` tells you in a terminal whether the model can play.
+"Configure the model" at the bottom of the home page opens the same screen later, and `make check` tells you in a terminal whether the model can play.
 
 **The game listens on 127.0.0.1 only, and the model screen has no login: do not expose it to a network.** Whoever reaches it can change the model and make the game call any address.
 
