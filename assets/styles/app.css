@@ -1329,7 +1329,7 @@ button.link:hover {
 }
 
 /* The link that leaves the home page for the model screen. */
-.change-model {
+.configure-model {
     margin: 0;
     font-size: 1rem;
 }

@@ -608,9 +608,9 @@
                 <target>Elegir el modelo</target>
                 <note>Button of the health card of the home page, when no model answers: opens the model screen</note>
             </trans-unit>
-            <trans-unit id="action.change_model" resname="action.change_model">
-                <source>action.change_model</source>
-                <target>Cambiar de modelo</target>
+            <trans-unit id="action.configure_model" resname="action.configure_model">
+                <source>action.configure_model</source>
+                <target>Configurar el modelo</target>
                 <note>Permanent link at the bottom of the home page</note>
             </trans-unit>
             <trans-unit id="models.title" resname="models.title">

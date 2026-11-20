@@ -828,8 +828,8 @@ final class ModelsControllerTest extends WebTestCase
 
         // A permanent link at the bottom of the home page...
         $crawler = $client->request('GET', '/fr');
-        self::assertSame('/fr/models', $crawler->filter('.change-model a')->attr('href'));
-        self::assertSelectorTextContains('.change-model a', 'Changer de modèle');
+        self::assertSame('/fr/models', $crawler->filter('.configure-model a')->attr('href'));
+        self::assertSelectorTextContains('.configure-model a', 'Configurer le modèle');
 
         // ...and, when no model answers, the health card leads there instead of telling to edit .env.local.
         self::assertSame('/fr/models', $crawler->filter('.health-help a.button')->attr('href'));

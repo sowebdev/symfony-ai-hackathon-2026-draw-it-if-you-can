@@ -46,7 +46,8 @@ final readonly class WordPicker
                 Theme: {$theme->description()}.
                 Each word is a concrete noun in {$language->nameInEnglish()}, something one can draw in less than a minute with a black pen, known to everyone.
                 Choose words with one obvious meaning for a child, under the name everyone uses: "château fort" rather than "fort", which could be an adjective. A short phrase of up to three words is fine.
-                List {$candidates} different words, varied, not only the most obvious ones: one per line, in lower case, each with its indefinite article in {$language->nameInEnglish()} (for example "un château fort", "une souris", "ein Schloss", "a mouse"), nothing else.{$avoid}
+                Every word must be known to a child of eight and easy to recognise in a quick drawing: no rare animal, no technical or regional word ("quokka" is too rare, "kangaroo" is fine).
+                List {$candidates} different words, varied within those: one per line, in lower case, each with its indefinite article in {$language->nameInEnglish()} (for example "un château fort", "une souris", "ein Schloss", "a mouse"), nothing else.{$avoid}
                 PROMPT),
             Message::ofUser('List the words.'),
         );
