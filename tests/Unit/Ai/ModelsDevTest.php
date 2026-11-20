@@ -56,6 +56,17 @@ final class ModelsDevTest extends TestCase
         self::assertSame(['claude-brand-new-9', 'claude-haiku-4-5-20251001'], array_map(static fn (ModelChoice $c): string => $c->name, $arranged['others']));
     }
 
+    public function testTheCardsAreTheCurrentRangeWithoutModelsForAnotherUse(): void
+    {
+        $names = ['gpt-4o', 'gpt-5.4-nano', 'gpt-6-luna', 'gpt-6.2-sol', 'gpt-realtime-2.1', 'gpt-6.2-astra'];
+        $arranged = ModelsDev::arrange(Provider::OpenAi, array_map(static fn (string $name): ModelChoice => new ModelChoice($name, true, true), $names));
+
+        // gpt-realtime-2.1 says `type: realtime`; gpt-4o is more than a year behind gpt-6.2-astra.
+        self::assertSame(['gpt-6-luna', 'gpt-5.4-nano', 'gpt-6.2-sol', 'gpt-6.2-astra'], array_map(static fn (ModelChoice $c): string => $c->name, $arranged['cards']));
+        self::assertSame(['gpt-4o', 'gpt-realtime-2.1'], array_map(static fn (ModelChoice $c): string => $c->name, $arranged['others']));
+        self::assertSame('gpt-5.4-nano', ModelsDev::recommended(Provider::OpenAi, $names), 'The cheaper of the two middles, the one preselected is a card');
+    }
+
     public function testTheCatalogOfModelsDevUsesTheModelClassOfEachBridge(): void
     {
         self::assertInstanceOf(Claude::class, ModelsDev::catalog(Provider::Anthropic)?->getModel('claude-fable-5-2'));

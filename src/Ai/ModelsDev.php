@@ -127,9 +127,9 @@ final class ModelsDev
     }
 
     /**
-     * One card per family, its newest model, from the cheapest family; every other model apart,
-     * sorted by name. A model of unknown capabilities, that models.dev does not know, deprecated or of
-     * another maker, is never a card.
+     * One card per family of the current range (see range()), from the cheapest; every other model
+     * apart, sorted by name: older versions, specialised models (realtime), families more than a year
+     * behind, models of another maker or of unknown capabilities.
      *
      * @param list<ModelChoice> $choices
      *
@@ -137,18 +137,14 @@ final class ModelsDev
      */
     public static function arrange(Provider $provider, array $choices): array
     {
-        $models = self::models($provider);
-        /** @var array<string, ModelChoice> $newest */
-        $newest = [];
+        // The cards are the current range itself, so the one preselected is always among them.
+        $byName = [];
         foreach ($choices as $choice) {
-            $model = $models[$choice->name] ?? null;
-            $family = $model['family'] ?? null;
-            if ($choice->isKnown() && null !== $model && \is_string($family) && self::ownCurrent($provider, $model) && (!isset($newest[$family]) || self::newer($models, $choice->name, $newest[$family]->name))) {
-                $newest[$family] = $choice;
+            if ($choice->isKnown()) {
+                $byName[$choice->name] = $choice;
             }
         }
-        $cards = array_values($newest);
-        usort($cards, static fn (ModelChoice $a, ModelChoice $b): int => [self::price($models[$a->name]), $a->name] <=> [self::price($models[$b->name]), $b->name]);
+        $cards = array_map(static fn (string $name): ModelChoice => $byName[$name], self::range($provider, array_keys($byName)));
         $others = array_values(array_filter($choices, static fn (ModelChoice $choice): bool => !\in_array($choice, $cards, true)));
         usort($others, static fn (ModelChoice $a, ModelChoice $b): int => strnatcasecmp($a->name, $b->name));
 
@@ -170,7 +166,7 @@ final class ModelsDev
 
     /**
      * The current range of the provider, from the cheapest: per family, its newest listed model that
-     * reads images and calls tools, is not deprecated, is not of another maker (Mistral also serves
+     * reads images and calls tools, is not deprecated nor for another use (realtime), is not of another maker (Mistral also serves
      * DeepSeek and GLM; many entries name no maker), and is less than a year older than the newest model of the provider (not
      * today: an old file still gives the same answer).
      *
@@ -232,15 +228,18 @@ final class ModelsDev
     }
 
     /**
-     * Not deprecated, and made by the provider: Mistral also serves DeepSeek and GLM (many entries name no maker).
+     * Not deprecated, a chat model (not realtime, image or speech), and made by the provider: Mistral also
+     * serves DeepSeek and GLM (many entries name no maker).
      *
      * @param array<string, mixed> $model
      */
     private static function ownCurrent(Provider $provider, array $model): bool
     {
         $maker = explode('/', (string) ($model['canonical_model_id'] ?? ''))[0];
+        // A model for another use (realtime, image, transcription, speech) says so; a chat model says nothing.
+        $type = $model['type'] ?? null;
 
-        return 'deprecated' !== ($model['status'] ?? null) && \in_array($maker, ['', $provider->value], true);
+        return 'deprecated' !== ($model['status'] ?? null) && \in_array($maker, ['', $provider->value], true) && \in_array($type, [null, 'chat'], true);
     }
 
     /**

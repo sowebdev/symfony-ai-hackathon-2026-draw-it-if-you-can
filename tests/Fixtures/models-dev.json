@@ -733,6 +733,120 @@
      }
     },
     "canonical_model_id": "openai/gpt-6.2-astra"
+   },
+   "gpt-realtime-2.1": {
+    "id": "gpt-realtime-2.1",
+    "type": "realtime",
+    "name": "GPT-Realtime-2.1",
+    "description": "Realtime speech-to-speech model with configurable reasoning, tool use, and robust voice-agent behavior",
+    "family": "gpt",
+    "attachment": true,
+    "reasoning": true,
+    "reasoning_options": [
+     {
+      "type": "effort",
+      "values": [
+       "minimal",
+       "low",
+       "medium",
+       "high",
+       "xhigh"
+      ]
+     }
+    ],
+    "tool_call": true,
+    "structured_output": false,
+    "temperature": false,
+    "knowledge": "2024-09-30",
+    "release_date": "2026-07-06",
+    "last_updated": "2026-07-06",
+    "modalities": {
+     "input": [
+      "text",
+      "audio",
+      "image"
+     ],
+     "output": [
+      "text",
+      "audio"
+     ]
+    },
+    "open_weights": false,
+    "limit": {
+     "context": 128000,
+     "input": 96000,
+     "output": 32000
+    },
+    "cost": {
+     "input": 4,
+     "output": 24,
+     "cache_read": 0.4,
+     "input_audio": 32,
+     "output_audio": 64
+    },
+    "canonical_model_id": "openai/gpt-realtime-2.1"
+   },
+   "gpt-5.4-nano": {
+    "id": "gpt-5.4-nano",
+    "name": "GPT-5.4 nano",
+    "description": "Cheapest GPT-5.4 lane for simple routing, extraction, and bulk automation",
+    "family": "gpt-nano",
+    "attachment": true,
+    "reasoning": true,
+    "reasoning_options": [
+     {
+      "type": "effort",
+      "values": [
+       "none",
+       "low",
+       "medium",
+       "high",
+       "xhigh"
+      ]
+     }
+    ],
+    "tool_call": true,
+    "structured_output": true,
+    "temperature": true,
+    "knowledge": "2025-08-31",
+    "release_date": "2026-03-17",
+    "last_updated": "2026-03-17",
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "open_weights": false,
+    "limit": {
+     "context": 400000,
+     "input": 272000,
+     "output": 128000
+    },
+    "experimental": {
+     "modes": {
+      "flex": {
+       "cost": {
+        "input": 0.1,
+        "output": 0.625,
+        "cache_read": 0.01
+       },
+       "provider": {
+        "body": {
+         "service_tier": "flex"
+        }
+       }
+      }
+     }
+    },
+    "cost": {
+     "input": 0.2,
+     "output": 1.25,
+     "cache_read": 0.02
+    }
    }
   }
  },
