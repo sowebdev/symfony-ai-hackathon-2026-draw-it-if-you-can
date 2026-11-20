@@ -12,9 +12,9 @@ Plug in the model you like, from a cloud API or on your own machine: this may be
 
 Built with Symfony AI for the Symfony AI hackathon (November 2026). The game speaks English, French, German, Spanish and Italian.
 
-[![The AI draws a whale](docs/demo.gif)](https://youtu.be/XdfOClg2UO0)
+[![The AI draws an octopus](docs/demo.gif)](https://youtu.be/oz9XYaZwmiU)
 
-Click the whale to watch the 90-second video.
+Click the animation to watch the 90-second video on YouTube.
 
 ## Play in three steps
 
