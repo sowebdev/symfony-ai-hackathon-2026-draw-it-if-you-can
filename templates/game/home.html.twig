@@ -35,7 +35,6 @@
                     {% endfor %}
                 </div>
             </fieldset>
-            <p class="who-starts">{{ 'label.dealt'|trans }}</p>
             <p class="game-settings">
                 {{- 'settings.line_rounds'|trans({'%count%': settings.rounds, '%seconds%': settings.roundSeconds}) }} ·
                 {{ ('settings.line_turns_' ~ settings.turns.value)|trans }} ·

@@ -71,7 +71,7 @@ final class GameControllerTest extends WebTestCase
         $client->request('GET', '/fr');
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('html[lang="fr"] h1 + p', 'Dessine pour Olaf, ou devine ses dessins.');
-        self::assertSelectorTextContains('.who-starts', 'tirés au hasard');
+        self::assertSelectorTextContains('.game-settings', 'on alterne');
 
         $client->request('POST', '/fr/games', ['drawnBy' => 'player']);
         self::assertResponseRedirects();

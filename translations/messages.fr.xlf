@@ -8,11 +8,6 @@
                 <target>Dessine pour %ai%, ou devine ses dessins.</target>
                 <note>Under the title of the home page</note>
             </trans-unit>
-            <trans-unit id="label.dealt" resname="label.dealt">
-                <source>label.dealt</source>
-                <target>Qui dessine en premier et le thème de chaque manche sont tirés au hasard.</target>
-                <note>Above the button that starts a game</note>
-            </trans-unit>
             <trans-unit id="label.language" resname="label.language">
                 <source>label.language</source>
                 <target>Langue</target>

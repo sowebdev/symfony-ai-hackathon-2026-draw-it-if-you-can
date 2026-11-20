@@ -8,11 +8,6 @@
                 <target>Draw for %ai%, or guess %ai%'s drawings.</target>
                 <note>Under the title of the home page</note>
             </trans-unit>
-            <trans-unit id="label.dealt" resname="label.dealt">
-                <source>label.dealt</source>
-                <target>Who draws first and the theme of each round are dealt at random.</target>
-                <note>Above the button that starts a game</note>
-            </trans-unit>
             <trans-unit id="label.language" resname="label.language">
                 <source>label.language</source>
                 <target>Language</target>

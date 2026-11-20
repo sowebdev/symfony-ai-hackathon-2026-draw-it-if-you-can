@@ -214,11 +214,6 @@ button:focus-visible,
     gap: 1rem;
 }
 
-.who-starts {
-    margin: 0;
-    text-align: center;
-}
-
 .modes {
     display: flex;
     gap: 0.8rem;

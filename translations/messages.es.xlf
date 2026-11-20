@@ -8,11 +8,6 @@
                 <target>Dibuja para %ai%, o adivina sus dibujos.</target>
                 <note>Under the title of the home page</note>
             </trans-unit>
-            <trans-unit id="label.dealt" resname="label.dealt">
-                <source>label.dealt</source>
-                <target>Quién dibuja primero y el tema de cada ronda se eligen al azar.</target>
-                <note>Above the button that starts a game</note>
-            </trans-unit>
             <trans-unit id="label.language" resname="label.language">
                 <source>label.language</source>
                 <target>Idioma</target>
