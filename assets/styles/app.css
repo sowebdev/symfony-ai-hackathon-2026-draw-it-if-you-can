@@ -2072,3 +2072,71 @@ button.link:hover {
     font-size: 0.95rem;
     color: #555;
 }
+
+/* The walrus referee, at the bottom of the right panel: pale and still at rest, in full colour and swaying
+   when he whistles a warm or a right answer (referee_controller.js). */
+.referee {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 1rem;
+    opacity: 0.55;
+}
+
+.referee.is-speaking {
+    opacity: 1;
+}
+
+.referee.is-speaking .referee-walrus {
+    animation: referee-sway 0.6s ease-in-out 3;
+    transform-origin: 50% 100%;
+}
+
+.referee-bubble {
+    position: relative;
+    margin: 0 0 0 0.4rem;
+    padding: 0.2rem 0.8rem;
+    background: #fff;
+    border: 2px solid var(--pencil);
+    border-radius: 14px 16px 13px 15px;
+    color: var(--pencil);
+    font-size: 1.15rem;
+    transform-origin: left center;
+}
+
+.referee-bubble::before {
+    content: '';
+    position: absolute;
+    left: -11px;
+    top: 50%;
+    margin-top: -6px;
+    border: 6px solid transparent;
+    border-right: 9px solid var(--pencil);
+    border-left: 0;
+}
+
+.referee-bubble.referee-accepted {
+    color: var(--found);
+    border-color: var(--found);
+}
+
+.referee-bubble.referee-accepted::before {
+    border-right-color: var(--found);
+}
+
+.referee.is-speaking .referee-bubble {
+    animation: bubble-pop 0.35s ease-out;
+}
+
+@keyframes referee-sway {
+    0%, 100% { transform: rotate(0deg); }
+    30% { transform: rotate(-6deg); }
+    70% { transform: rotate(6deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .referee.is-speaking .referee-walrus,
+    .referee.is-speaking .referee-bubble {
+        animation: none;
+    }
+}

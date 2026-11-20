@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - A judge for every answer, whoever gives it (the player, Olaf, the agent of a duel): accepted, warm (« ça chauffe ») or refused. The code decides first and asks nobody: the word, or one typo of it when it has six letters or more (« elephent » finds « elephant »; « chut » never finds « chat »), is accepted. Otherwise the model that guesses names the link between the answer and the word with one label (same word, synonym, very close, related, unrelated), and the code turns the label into a verdict; a pair already judged is kept and never asked again, and an answer the judge cannot judge in 8 s is refused. A warm word is shown in orange in the lists of words and told to the agent by `submit_answer`.
 - The « Mode facile » setting, off by default, in the five languages: the judge then accepts the synonyms and the very close words, and says warm for the related ones. A game keeps the mode it started with, and the home page says « mode facile » when it is on.
+- The walrus referee, who whistles « ça chauffe » and « c'est juste » for everyone: a walrus with a whistle sits, pale and still, at the bottom of the right panel on both round screens, and speaks in a bubble (orange for a warm word, green for the right one, which he keeps after a reload) for the answers of the player, of Olaf and of the rival of a duel; never for a refused word. In the five languages, still with `prefers-reduced-motion`.
 
 ### Fixed
 

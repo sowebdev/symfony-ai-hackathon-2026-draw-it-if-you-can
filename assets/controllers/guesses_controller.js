@@ -28,6 +28,7 @@ export default class extends Controller {
         // A warm word ("ça chauffe") is in orange: close, but not the word.
         item.classList.toggle('warm', verdict === 'warm');
         this.listTarget.append(item);
+        this.dispatch('verdict', { prefix: 'referee', target: window, detail: { verdict } });
         this.say(word);
     }
 

@@ -101,6 +101,22 @@ final class AiDrawingTest extends WebTestCase
         self::assertSelectorTextContains('li.accepted', 'Girafes');
     }
 
+    public function testTheWalrusRefereeIsAtRestThenOnTheRightAnswerAfterAReload(): void
+    {
+        $round = $this->startRound();
+
+        $this->client->request('GET', $round);
+        self::assertSelectorExists('section.guesses .referee');
+        self::assertSelectorNotExists('.referee.is-accepted');
+        self::assertSelectorExists('.referee-accepted[hidden]');
+
+        $this->answer($round, 'girafe');
+        $this->client->request('GET', $round);
+        self::assertSelectorExists('.referee.is-accepted');
+        self::assertSelectorNotExists('.referee-accepted[hidden]');
+        self::assertSelectorTextContains('.referee-accepted', "C'est juste");
+    }
+
     public function testGivingUpRevealsTheWordAndStopsTheDrawing(): void
     {
         $round = $this->startRound();

@@ -64,6 +64,7 @@ export default class extends Controller {
         item.classList.toggle('accepted', right);
         item.classList.toggle('warm', verdict === 'warm');
         this.answersTarget.append(item);
+        this.dispatch('verdict', { prefix: 'referee', target: window, detail: { verdict: right ? 'accepted' : verdict } });
     }
 
     // A click answers the hint: once only.

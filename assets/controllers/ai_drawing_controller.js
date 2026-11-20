@@ -140,6 +140,7 @@ export default class extends Controller {
         item.classList.toggle('accepted', result.found);
         item.classList.toggle('warm', result.verdict === 'warm');
         this.listTarget.append(item);
+        this.dispatch('verdict', { prefix: 'referee', target: window, detail: { verdict: result.found ? 'accepted' : result.verdict } });
         if (result.found) {
             this.timeTarget.textContent = seconds(result.foundAfterMs);
             this.resultTarget.hidden = false;

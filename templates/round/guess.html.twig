@@ -81,6 +81,8 @@
                     {{ 'result.word_was'|trans({'%word%': '<strong data-ai-drawing-target="targetWord"></strong>'})|raw }}
                 </p>
 
+                {{ include('_referee.html.twig', {found: round.found}) }}
+
                 <div class="toolbar">
                     <button type="button" data-action="ai-drawing#giveUp" data-ai-drawing-target="giveUp">{{ 'action.give_up'|trans }}</button>
                 </div>

@@ -106,6 +106,21 @@ final class RoundControllerTest extends WebTestCase
         self::assertSame([['found', null]], array_map(static fn (array $event): array => [$event['type'], $event['data']['word'] ?? null], $this->streamGuesses($round)));
     }
 
+    public function testTheWalrusRefereeIsAtRestThenOnTheRightAnswerAfterAReload(): void
+    {
+        $round = $this->startRound(['Cats']);
+
+        $this->client->request('GET', $round);
+        self::assertSelectorExists('section.guesses .referee');
+        self::assertSelectorNotExists('.referee.is-accepted');
+
+        $this->addStroke($round, [[10, 10, 0], [500, 500, 300]]);
+        $this->streamGuesses($round);
+        $this->client->request('GET', $round);
+        self::assertSelectorExists('.referee.is-accepted');
+        self::assertSelectorTextContains('.referee-accepted', "That's right");
+    }
+
     public function testTheAiDoesNotRepeatAWordAndWaitsForTheDrawingToChange(): void
     {
         $round = $this->startRound(['dog', 'Dogs', 'mouse', 'bird']);

@@ -1138,6 +1138,16 @@
                 <target>easy mode</target>
                 <note>Home page summary: the easy mode is on</note>
             </trans-unit>
+            <trans-unit id="referee.warm" resname="referee.warm">
+                <source>referee.warm</source>
+                <target>Toot! Getting warm!</target>
+                <note>The walrus referee's bubble for a warm answer</note>
+            </trans-unit>
+            <trans-unit id="referee.accepted" resname="referee.accepted">
+                <source>referee.accepted</source>
+                <target>Toot toot! That's right!</target>
+                <note>The walrus referee's bubble for the right answer</note>
+            </trans-unit>
         </body>
     </file>
 </xliff>
