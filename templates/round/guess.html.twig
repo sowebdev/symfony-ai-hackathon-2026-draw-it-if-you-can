@@ -37,7 +37,10 @@
 
             <section class="side guesses" aria-live="polite">
                 {{ include('round/_gauge.html.twig') }}
-                <p class="status" data-ai-drawing-target="status">{{ round.aiDrawingFinished ? 'status.ai_finished'|trans : 'status.ai_drawing'|trans }}</p>
+                <div class="ai-voice">
+                    {{ include('_olaf.html.twig', {speaking: not round.over and not round.aiDrawingFinished}) }}
+                    <p class="status" data-ai-drawing-target="status">{{ round.aiDrawingFinished ? 'status.ai_finished'|trans : 'status.ai_drawing'|trans }}</p>
+                </div>
                 <form class="answer" data-ai-drawing-target="form" data-action="ai-drawing#answer">
                     <label>
                         {{ 'label.answer'|trans }}

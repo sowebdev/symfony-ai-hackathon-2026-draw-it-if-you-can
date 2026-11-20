@@ -7,6 +7,9 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    # The name of the AI of the game, a penguin; an empty GAME_AI_NAME gives Olaf. User text: always escaped.
+    game.ai_name: '%env(default:game.ai_name_default:GAME_AI_NAME)%'
+    game.ai_name_default: Olaf
     # A game: rounds where the player and the AI take turns to draw (6 and 60 s, decided on 11/11/2026).
     game.rounds: '%env(int:GAME_ROUNDS)%'
     game.round_seconds: '%env(int:GAME_ROUND_SECONDS)%'

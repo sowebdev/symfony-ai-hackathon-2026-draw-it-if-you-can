@@ -24,7 +24,10 @@
 
             <section class="side guesses" aria-live="polite">
                 {{ include('round/_gauge.html.twig') }}
-                <h2>{{ (round.game.duel ? 'heading.your_ai_guesses' : 'heading.ai_guesses')|trans }}</h2>
+                <div class="ai-voice">
+                    {{ include('_olaf.html.twig', {speaking: not round.over}) }}
+                    <h2>{{ (round.game.duel ? 'heading.your_ai_guesses' : 'heading.ai_guesses')|trans }}</h2>
+                </div>
                 <ol data-guesses-target="list"{% if round.game.duel %} class="team-words"{% endif %}>
                     {% for guess in guesses %}
                         <li data-guess-id="{{ guess.id }}" class="{{ guess.accepted ? 'accepted' }}">{{ guess.word }}</li>

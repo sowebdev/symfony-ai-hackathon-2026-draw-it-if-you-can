@@ -34,7 +34,7 @@ final class AiDrawingTest extends WebTestCase
         $this->client->followRedirect();
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('.target', "Que dessine l'IA ?");
+        self::assertSelectorTextContains('.target', 'Que dessine Olaf ?');
         self::assertStringNotContainsString('girafe', (string) $this->client->getResponse()->getContent());
     }
 

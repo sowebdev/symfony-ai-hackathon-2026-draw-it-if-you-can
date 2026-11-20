@@ -44,7 +44,7 @@ final class GameFlowTest extends WebTestCase
         for ($number = 1; $number <= 6; ++$number) {
             if (1 === $number % 2) {
                 // The AI draws: the player finds the word after 35 s.
-                self::assertSelectorTextContains('.target', 'What is the AI drawing?');
+                self::assertSelectorTextContains('.target', 'What is Olaf drawing?');
                 self::wait(35);
                 $this->answer($round, 'cat');
                 self::assertResponseStatusCodeSame(201);
@@ -61,8 +61,8 @@ final class GameFlowTest extends WebTestCase
             self::assertSelectorNotExists('.clock');
 
             if ($number < 6) {
-                self::assertSelectorTextContains('.round-end button', 1 === $number % 2 ? 'your turn to draw' : 'the AI draws');
-                $this->client->submitForm(1 === $number % 2 ? 'Next round: your turn to draw' : 'Next round: the AI draws');
+                self::assertSelectorTextContains('.round-end button', 1 === $number % 2 ? 'your turn to draw' : 'Olaf draws');
+                $this->client->submitForm(1 === $number % 2 ? 'Next round: your turn to draw' : 'Next round: Olaf draws');
                 $round = (string) $this->client->getResponse()->headers->get('Location');
                 $this->client->request('GET', $round);
                 self::assertSelectorTextContains('.round-number', 'Round '.($number + 1).' of 6');

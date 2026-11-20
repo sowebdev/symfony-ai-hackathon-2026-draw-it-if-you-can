@@ -1,5 +1,8 @@
 framework:
     default_locale: en
     translator:
+        # %ai% in a message: the name of the AI of the game (GAME_AI_NAME), escaped by Twig like any text.
+        globals:
+            '%%ai%%': '%game.ai_name%'
         default_path: '%kernel.project_dir%/translations'
         providers:

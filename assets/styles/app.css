@@ -1903,3 +1903,63 @@ button.link:hover {
         white-space: nowrap;
     }
 }
+
+/* Olaf, the penguin who is the AI of the game: his head beside his words. He bobs and opens his beak
+   while he thinks or proposes (class "speaking", set by the server, and the round's own state
+   attributes, which Stimulus keeps up to date); still otherwise. */
+.ai-voice {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.ai-voice > h2,
+.ai-voice > .status {
+    margin: 0;
+}
+
+.olaf {
+    flex: none;
+    overflow: visible;
+}
+
+.olaf .beak {
+    transform-box: fill-box;
+    transform-origin: 50% 0;
+}
+
+.duel-score .olaf {
+    vertical-align: middle;
+}
+
+.olaf.speaking {
+    animation: olaf-bob 1.4s ease-in-out infinite;
+}
+
+.olaf.speaking .beak {
+    animation: olaf-beak 0.6s ease-in-out infinite;
+}
+
+[data-guesses-over-value='true'] .olaf,
+[data-guesses-over-value='true'] .olaf .beak,
+[data-ai-drawing-over-value='true'] .olaf,
+[data-ai-drawing-over-value='true'] .olaf .beak {
+    animation: none;
+}
+
+@keyframes olaf-bob {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-3px) rotate(-3deg); }
+}
+
+@keyframes olaf-beak {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(1.45); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .olaf.speaking,
+    .olaf.speaking .beak {
+        animation: none;
+    }
+}

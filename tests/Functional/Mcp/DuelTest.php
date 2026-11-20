@@ -83,7 +83,7 @@ final class DuelTest extends WebTestCase
         $this->client->request('GET', $round);
         self::assertSelectorTextContains('.round-end h2', 'Test a trouvé !');
         self::assertSelectorTextContains('.round-end-points', 'points pour Test');
-        self::assertSelectorTextContains('.duel-score', "Toi et l'IA du jeu 0");
+        self::assertSelectorTextContains('.duel-score', 'Toi et Olaf 0');
         self::assertSelectorTextContains('.rival-score strong', '1000');
         self::assertSelectorTextContains('.rival-answers', 'zèbre');
 
@@ -183,9 +183,9 @@ final class DuelTest extends WebTestCase
         }
 
         $this->client->request('GET', $round);
-        self::assertSelectorTextContains('.guesses h2', "L'IA du jeu propose");
-        self::assertSelectorTextContains('.round-end h2', "L'IA du jeu a trouvé !");
-        self::assertSelectorTextContains('.round-end-points', "pour toi et l'IA du jeu");
+        self::assertSelectorTextContains('.guesses h2', 'Olaf propose');
+        self::assertSelectorTextContains('.round-end h2', 'Olaf a trouvé !');
+        self::assertSelectorTextContains('.round-end-points', 'pour toi et Olaf');
     }
 
     public function testACopilotDoesNotAnswerAndARivalDoesNotWhisper(): void

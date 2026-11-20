@@ -35,7 +35,7 @@ final class DuelEndScreenTest extends WebTestCase
         $this->client->request('GET', $this->duel([Author::Player, Author::Ai]));
 
         self::assertSelectorExists('.duel-banner.side-team');
-        self::assertSelectorTextContains('.duel-banner-title', "Toi et l'IA du jeu gagnent !");
+        self::assertSelectorTextContains('.duel-banner-title', 'Toi et Olaf gagnent !');
         self::assertSelectorTextContains('.duel-banner-score', "2\u{202F}000 à 0");
         self::assertSelectorExists('table .side-team');
         self::assertSelectorNotExists('table .side-rival');

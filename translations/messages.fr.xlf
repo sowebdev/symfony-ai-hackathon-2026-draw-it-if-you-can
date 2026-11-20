@@ -5,7 +5,7 @@
         <body>
             <trans-unit id="tagline" resname="tagline">
                 <source>tagline</source>
-                <target>Dessine pour l'IA, ou devine ses dessins.</target>
+                <target>Dessine pour %ai%, ou devine ses dessins.</target>
                 <note>Under the title of the home page</note>
             </trans-unit>
             <trans-unit id="label.dealt" resname="label.dealt">
@@ -45,7 +45,7 @@
             </trans-unit>
             <trans-unit id="heading.ai_guesses" resname="heading.ai_guesses">
                 <source>heading.ai_guesses</source>
-                <target>L'IA propose…</target>
+                <target>%ai% propose…</target>
                 <note>Above the words the AI calls out</note>
             </trans-unit>
             <trans-unit id="result.found_in" resname="result.found_in">
@@ -100,7 +100,7 @@
             </trans-unit>
             <trans-unit id="instruction.guess" resname="instruction.guess">
                 <source>instruction.guess</source>
-                <target>Que dessine l'IA ?</target>
+                <target>Que dessine %ai% ?</target>
                 <note>Above the drawing of the AI</note>
             </trans-unit>
             <trans-unit id="label.answer" resname="label.answer">
@@ -135,12 +135,12 @@
             </trans-unit>
             <trans-unit id="status.ai_drawing" resname="status.ai_drawing">
                 <source>status.ai_drawing</source>
-                <target>L'IA dessine…</target>
+                <target>%ai% dessine…</target>
                 <note>While the AI draws</note>
             </trans-unit>
             <trans-unit id="status.ai_finished" resname="status.ai_finished">
                 <source>status.ai_finished</source>
-                <target>L'IA a fini son dessin.</target>
+                <target>%ai% a fini son dessin.</target>
                 <note>When the AI has drawn its last stroke</note>
             </trans-unit>
             <trans-unit id="error.ai_drawing" resname="error.ai_drawing">
@@ -195,7 +195,7 @@
             </trans-unit>
             <trans-unit id="action.next_round_ai" resname="action.next_round_ai">
                 <source>action.next_round_ai</source>
-                <target>Manche suivante : l'IA dessine</target>
+                <target>Manche suivante : %ai% dessine</target>
                 <note>Starts the next round, drawn by the AI</note>
             </trans-unit>
             <trans-unit id="action.final_score" resname="action.final_score">
@@ -255,7 +255,7 @@
             </trans-unit>
             <trans-unit id="drawer.ai" resname="drawer.ai">
                 <source>drawer.ai</source>
-                <target>l'IA</target>
+                <target>%ai%</target>
                 <note>Who drew a round: the AI</note>
             </trans-unit>
             <trans-unit id="label.decimal_separator" resname="label.decimal_separator">
@@ -380,7 +380,7 @@
             </trans-unit>
             <trans-unit id="mode.solo" resname="mode.solo">
                 <source>mode.solo</source>
-                <target>En équipe avec l'IA</target>
+                <target>En équipe avec %ai%</target>
                 <note>Home page, a mode of the game</note>
             </trans-unit>
             <trans-unit id="mode.copilot" resname="mode.copilot">
@@ -410,7 +410,7 @@
             </trans-unit>
             <trans-unit id="label.you" resname="label.you">
                 <source>label.you</source>
-                <target>Toi et l'IA du jeu</target>
+                <target>Toi et %ai%</target>
                 <note>In the bar of a duel, before the score of the player</note>
             </trans-unit>
             <trans-unit id="label.rival_unknown" resname="label.rival_unknown">
@@ -440,7 +440,7 @@
             </trans-unit>
             <trans-unit id="result.duel_won" resname="result.duel_won">
                 <source>result.duel_won</source>
-                <target>Toi et l'IA du jeu gagnent !</target>
+                <target>Toi et %ai% gagnent !</target>
                 <note>Final screen of a duel</note>
             </trans-unit>
             <trans-unit id="result.duel_lost" resname="result.duel_lost">
@@ -465,7 +465,7 @@
             </trans-unit>
             <trans-unit id="found_by.ai" resname="found_by.ai">
                 <source>found_by.ai</source>
-                <target>l'IA du jeu</target>
+                <target>%ai%</target>
                 <note>Who found the word of a round: the AI of the player</note>
             </trans-unit>
             <trans-unit id="label.copilot_unknown" resname="label.copilot_unknown">
@@ -480,17 +480,17 @@
             </trans-unit>
             <trans-unit id="heading.round_found_by_your_ai" resname="heading.round_found_by_your_ai">
                 <source>heading.round_found_by_your_ai</source>
-                <target>L'IA du jeu a trouvé !</target>
+                <target>%ai% a trouvé !</target>
                 <note>End of a round of a duel, when the AI of the player found the word</note>
             </trans-unit>
             <trans-unit id="result.points_won_by_you" resname="result.points_won_by_you">
                 <source>result.points_won_by_you</source>
-                <target>+%points% points pour toi et l'IA du jeu</target>
+                <target>+%points% points pour toi et %ai%</target>
                 <note>End of a round of a duel, when the side of the player found the word</note>
             </trans-unit>
             <trans-unit id="heading.your_ai_guesses" resname="heading.your_ai_guesses">
                 <source>heading.your_ai_guesses</source>
-                <target>L'IA du jeu propose…</target>
+                <target>%ai% propose…</target>
                 <note>In a duel, above the words of the AI of the player while the player draws</note>
             </trans-unit>
             <trans-unit id="mode.solo_hint" resname="mode.solo_hint">
@@ -505,7 +505,7 @@
             </trans-unit>
             <trans-unit id="mode.duel_hint" resname="mode.duel_hint">
                 <source>mode.duel_hint</source>
-                <target>Un agent comme Claude Code ou Vibe joue contre toi et ton IA.</target>
+                <target>Un agent comme Claude Code ou Vibe joue contre toi et %ai%.</target>
                 <note>Home page, under a mode of the game</note>
             </trans-unit>
             <trans-unit id="mode.via_mcp" resname="mode.via_mcp">
@@ -520,7 +520,7 @@
             </trans-unit>
             <trans-unit id="lobby.copilot_does_1" resname="lobby.copilot_does_1">
                 <source>lobby.copilot_does_1</source>
-                <target>Quand l'IA dessine, il regarde le dessin, comme toi.</target>
+                <target>Quand %ai% dessine, il regarde le dessin, comme toi.</target>
                 <note>Lobby, what the copilot does</note>
             </trans-unit>
             <trans-unit id="lobby.copilot_does_2" resname="lobby.copilot_does_2">
@@ -535,7 +535,7 @@
             </trans-unit>
             <trans-unit id="lobby.copilot_does_4" resname="lobby.copilot_does_4">
                 <source>lobby.copilot_does_4</source>
-                <target>Quand tu dessines, il te donne des conseils pour que l'IA trouve le mot.</target>
+                <target>Quand tu dessines, il te donne des conseils pour que %ai% trouve le mot.</target>
                 <note>Lobby, what the copilot does</note>
             </trans-unit>
             <trans-unit id="lobby.duel_does" resname="lobby.duel_does">
@@ -545,12 +545,12 @@
             </trans-unit>
             <trans-unit id="lobby.duel_does_1" resname="lobby.duel_does_1">
                 <source>lobby.duel_does_1</source>
-                <target>Il devine les mêmes dessins que toi, ceux de l'IA comme les tiens.</target>
+                <target>Il devine les mêmes dessins que toi, ceux de %ai% comme les tiens.</target>
                 <note>Lobby, what the rival does</note>
             </trans-unit>
             <trans-unit id="lobby.duel_does_2" resname="lobby.duel_does_2">
                 <source>lobby.duel_does_2</source>
-                <target>Quand tu dessines, ton IA devine pour toi.</target>
+                <target>Quand tu dessines, %ai% devine pour toi.</target>
                 <note>Lobby, what the rival does</note>
             </trans-unit>
             <trans-unit id="lobby.duel_does_3" resname="lobby.duel_does_3">
