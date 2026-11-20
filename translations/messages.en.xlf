@@ -495,7 +495,7 @@
             </trans-unit>
             <trans-unit id="mode.solo_hint" resname="mode.solo_hint">
                 <source>mode.solo_hint</source>
-                <target>You draw for it, you guess its drawings, you score together.</target>
+                <target>You draw for him, you guess his drawings, you score together.</target>
                 <note>Home page, under a mode of the game</note>
             </trans-unit>
             <trans-unit id="mode.copilot_hint" resname="mode.copilot_hint">

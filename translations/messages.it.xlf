@@ -495,7 +495,7 @@
             </trans-unit>
             <trans-unit id="mode.solo_hint" resname="mode.solo_hint">
                 <source>mode.solo_hint</source>
-                <target>Disegni per lei, indovini i suoi disegni, fate punti insieme.</target>
+                <target>Disegni per lui, indovini i suoi disegni, fate punti insieme.</target>
                 <note>Home page, under a mode of the game</note>
             </trans-unit>
             <trans-unit id="mode.copilot_hint" resname="mode.copilot_hint">

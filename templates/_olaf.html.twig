@@ -1,9 +1,9 @@
 {# The head of Olaf, the penguin who is the AI of the game. `speaking` (default false): his head bobs and
    his beak opens, in CSS only (app.css, .olaf.speaking). Decorative: his name is always in the text next to it. #}
-<svg class="olaf{{ speaking|default(false) ? ' speaking' }}" viewBox="0 0 180 105" width="70" height="42" fill="none" stroke="#2b2b2b" stroke-width="5" stroke-linecap="round" aria-hidden="true">
+<svg class="olaf{{ speaking|default(false) ? ' speaking' }}" viewBox="0 0 180 105" width="100" height="58" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round" aria-hidden="true">
     <path d="M50 80 C48 45 70 30 90 30 C112 30 133 45 130 80" fill="#fffdf6"/>
     <line x1="90" y1="30" x2="90" y2="12"/><circle cx="90" cy="9" r="5" fill="#e8590c"/>
     <rect x="58" y="55" width="64" height="22" rx="11" fill="#e4ecf5"/>
     <circle cx="76" cy="66" r="6" fill="#2b2b2b"/><circle cx="104" cy="66" r="6" fill="#2b2b2b"/>
-    <path class="beak" d="M82 84 L90 94 L98 84 Z" fill="#e8590c"/>
+    <path class="beak" d="M80 84 L90 96 L100 84 Z" fill="#e8590c" stroke-width="2"/>
 </svg>

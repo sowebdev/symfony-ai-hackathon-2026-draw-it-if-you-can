@@ -495,7 +495,7 @@
             </trans-unit>
             <trans-unit id="mode.solo_hint" resname="mode.solo_hint">
                 <source>mode.solo_hint</source>
-                <target>Du zeichnest für sie, du errätst ihre Zeichnungen, ihr punktet zusammen.</target>
+                <target>Du zeichnest für ihn, du errätst seine Zeichnungen, ihr punktet zusammen.</target>
                 <note>Home page, under a mode of the game</note>
             </trans-unit>
             <trans-unit id="mode.copilot_hint" resname="mode.copilot_hint">

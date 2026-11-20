@@ -1929,6 +1929,8 @@ button.link:hover {
 }
 
 .duel-score .olaf {
+    width: 42px;
+    height: auto;
     vertical-align: middle;
 }
 

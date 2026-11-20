@@ -1,25 +1,25 @@
-{# A small sketch of who plays in a mode: the player (round head), the AI of the game (square head,
-   antenna), an agent connected over MCP (a screen for a head, a cable, in orange). Alone with the
+{# A small sketch of who plays in a mode: the player (round head), Olaf, the AI of the game (a penguin, in ink:
+   orange is for the agent), an agent connected over MCP (a screen for a head, a cable, in orange). Alone with the
    AI, the player holds its hand. "agent" draws
    the agent alone, for the bar of a round. #}
 {% set ink = 'fill="none" stroke="#2b2b2b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"' %}
 {% set pen = 'fill="none" stroke="#e8590c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"' %}
 {% macro player(x, ink) %}<g transform="translate({{ x }} 0)" {{ ink|raw }}><circle cx="0" cy="-30" r="10"/><path d="M0 -20 L0 6 M0 6 L-9 26 M0 6 L9 26 M0 -12 L-13 -1 M0 -12 L13 -2"/></g>{% endmacro %}
-{% macro ai(x, ink) %}<g transform="translate({{ x }} 0)" {{ ink|raw }}><rect x="-11" y="-41" width="22" height="20" rx="3"/><circle cx="0" cy="-51" r="2.5"/><path d="M0 -41 L0 -48.5 M-4 -33 L-4 -32 M4 -33 L4 -32 M0 -21 L0 6 M0 6 L-9 26 M0 6 L9 26 M0 -12 L-13 -2 M0 -12 L13 -1"/></g>{% endmacro %}
+{% macro ai(x) %}<g transform="translate({{ x - 30.6 }} -40.6) scale(0.34)" fill="none" stroke="#2b2b2b" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><line x1="90" y1="30" x2="90" y2="14"/><circle cx="90" cy="9" r="6" fill="#2b2b2b"/><path d="M50 80 C48 45 70 30 90 30 C112 30 133 45 130 80 L136 150 C138 178 115 190 90 190 C64 190 42 178 44 150 Z" fill="#fffdf6"/><path d="M68 95 C66 130 70 170 90 176 C110 170 114 130 112 95" stroke-width="6"/><rect x="58" y="55" width="64" height="22" rx="11" fill="#e4ecf5" stroke-width="7"/><circle cx="76" cy="66" r="5" fill="#2b2b2b" stroke="none"/><circle cx="104" cy="66" r="5" fill="#2b2b2b" stroke="none"/><path d="M82 85 L90 93 L98 85 Z" fill="#2b2b2b" stroke-width="5"/><path d="M46 105 C30 120 28 140 36 150 M134 105 C150 120 152 140 144 150"/></g>{% endmacro %}
 {% macro agent(x, pen) %}<g transform="translate({{ x }} 0)" {{ pen|raw }}><rect x="-13" y="-42" width="26" height="20" rx="2"/><path d="M-6 -34 L-2 -30 L-6 -26 M2 -26 L7 -26 M0 -22 L0 6 M0 6 L-9 26 M0 6 L9 26 M0 -12 L-13 -2 M0 -12 L13 -2 M13 -32 C24 -32 22 -14 30 -12"/></g>{% endmacro %}
 {% if mode == 'agent' %}
 <svg class="agent-sketch" width="30" height="40" viewBox="-18 -56 52 86" aria-hidden="true">{{ _self.agent(0, pen) }}</svg>
 {% else %}
 <svg class="mode-sketch" width="150" height="90" viewBox="-75 -60 150 90" aria-hidden="true">
     {% if mode == 'solo' %}
-        {{ _self.player(-28, ink) }}{{ _self.ai(28, ink) }}
+        {{ _self.player(-28, ink) }}{{ _self.ai(28) }}
         {# Hand in hand, in ink like them: orange is for the agent only. #}
-        <path {{ ink|raw }} d="M-15 -2 C-6 5 6 5 15 -2"/>
+        <path {{ ink|raw }} d="M-15 -2 C-6 6 4 8 10 8"/>
     {% elseif mode == 'copilot' %}
         {{ _self.player(-22, ink) }}{{ _self.agent(30, pen) }}
         <path {{ pen|raw }} d="M-6 -50 C-6 -58 10 -58 10 -50 C10 -44 4 -42 2 -42 L-2 -36 L-1 -42 C-4 -43 -6 -46 -6 -50 Z"/>
     {% else %}
-        {{ _self.player(-55, ink) }}{{ _self.ai(-25, ink) }}
+        {{ _self.player(-56, ink) }}{{ _self.ai(-22) }}
         <path {{ pen|raw }} d="M8 -30 L2 -14 L10 -14 L4 2"/>
         {{ _self.agent(38, pen) }}
     {% endif %}
