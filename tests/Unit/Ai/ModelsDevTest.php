@@ -20,9 +20,17 @@ final class ModelsDevTest extends TestCase
 {
     private const array ANTHROPIC = ['claude-haiku-5-5', 'claude-sonnet-5-5', 'claude-opus-5-5', 'claude-fable-5-2', 'claude-haiku-4-5-20251001'];
 
+    /** @var array{?string, ?string} MODELS_DEV_FILE of the test environment, in and */
+    private array $file;
+
+    protected function setUp(): void
+    {
+        $this->file = [$_SERVER['MODELS_DEV_FILE'] ?? null, $_ENV['MODELS_DEV_FILE'] ?? null];
+    }
+
     protected function tearDown(): void
     {
-        unset($_SERVER['MODELS_DEV_FILE']);
+        [$_SERVER['MODELS_DEV_FILE'], $_ENV['MODELS_DEV_FILE']] = $this->file;
         ModelsDev::forget();
     }
 
@@ -68,35 +76,55 @@ final class ModelsDevTest extends TestCase
         self::assertTrue(Provider::Anthropic->knows('claude-haiku-5-5')?->supports(Capability::TOOL_CALLING));
     }
 
-    public function testDownloadsOnlyTheGameProvidersAndOnlyWhenTheFileIsMissing(): void
+    public function testTheUpdateOfTheInstallationWinsOverTheVersionedExtract(): void
+    {
+        unset($_SERVER['MODELS_DEV_FILE'], $_ENV['MODELS_DEV_FILE']);
+        $root = sys_get_temp_dir().'/models-dev-'.bin2hex(random_bytes(4));
+        mkdir($root.'/var', 0o777, true);
+        try {
+            self::assertSame($root.'/data/models-dev.json', ModelsDev::path($root), 'A fresh clone reads the versioned extract');
+            self::assertSame($root.'/var/models-dev.json', ModelsDev::updatedPath($root), 'An update never writes the versioned extract');
+            touch($root.'/var/models-dev.json');
+            self::assertSame($root.'/var/models-dev.json', ModelsDev::path($root));
+        } finally {
+            @unlink($root.'/var/models-dev.json');
+            rmdir($root.'/var');
+            rmdir($root);
+        }
+    }
+
+    public function testTheGameShipsAnExtractOfItsThreeProviders(): void
+    {
+        $extract = json_decode((string) file_get_contents(\dirname(__DIR__, 3).'/data/models-dev.json'), true);
+
+        self::assertIsArray($extract);
+        self::assertSame(['anthropic', 'openai', 'mistral'], array_keys($extract));
+    }
+
+    public function testAnUpdateKeepsOnlyTheGameProviders(): void
     {
         $_SERVER['MODELS_DEV_FILE'] = sys_get_temp_dir().'/models-dev-'.bin2hex(random_bytes(4)).'.json';
-        $calls = 0;
-        $http = new MockHttpClient(static function () use (&$calls): MockResponse {
-            ++$calls;
-
-            return new MockResponse(json_encode([
-                'anthropic' => ['id' => 'anthropic', 'models' => ['claude-haiku-5-5' => ['id' => 'claude-haiku-5-5']]],
-                'groq' => ['id' => 'groq', 'models' => ['llama' => ['id' => 'llama']]],
-            ], \JSON_THROW_ON_ERROR));
-        });
+        $http = new MockHttpClient(new MockResponse(json_encode([
+            'anthropic' => ['id' => 'anthropic', 'models' => ['claude-haiku-5-5' => ['id' => 'claude-haiku-5-5']]],
+            'groq' => ['id' => 'groq', 'models' => ['llama' => ['id' => 'llama']]],
+        ], \JSON_THROW_ON_ERROR)));
         try {
-            (new ModelsDev($http))->ensure();
-            (new ModelsDev($http))->ensure();
-
-            self::assertSame(1, $calls);
+            self::assertSame(1, (new ModelsDev($http))->update());
             self::assertSame(['anthropic'], array_keys(json_decode((string) file_get_contents($_SERVER['MODELS_DEV_FILE']), true)));
         } finally {
             @unlink($_SERVER['MODELS_DEV_FILE']);
         }
     }
 
-    public function testAFailedDownloadIsSilent(): void
+    public function testAFailedUpdateLeavesTheFileAsItWas(): void
     {
         $_SERVER['MODELS_DEV_FILE'] = '/nonexistent/models-dev.json';
 
-        (new ModelsDev(new MockHttpClient(new MockResponse('', ['http_code' => 503]))))->ensure();
-
+        try {
+            (new ModelsDev(new MockHttpClient(new MockResponse('', ['http_code' => 503]))))->update();
+            self::fail('No exception');
+        } catch (\Throwable) {
+        }
         self::assertFileDoesNotExist('/nonexistent/models-dev.json');
     }
 }

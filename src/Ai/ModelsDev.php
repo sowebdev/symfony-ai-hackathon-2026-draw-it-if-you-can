@@ -12,9 +12,10 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * The catalog of models.dev (an open registry of models: family, release date, price, capabilities),
- * for the game's three cloud providers, kept in a file of the installation and never in the
- * repository: `make install` downloads it, and the models screen downloads it when it is missing.
- * So the game knows the models released after its own version, without a new version.
+ * for the game's three cloud providers. A default extract is versioned (data/models-dev.json); an
+ * update, by `make install` or `make models-dev`, writes var/models-dev.json, which is read instead
+ * when it exists. The game never calls models.dev on its own: no request while playing (Sören,
+ * 20/11/2026). To refresh the default before a release, copy var/models-dev.json into data/.
  *
  * It serves three things:
  * - the capabilities of each model, through the models.dev catalog of Symfony AI, before the
@@ -23,11 +24,16 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * - the model preselected: the middle of the provider's current range, by price, neither the
  *   cheapest nor the most expensive (Sören, 20/11/2026: Sonnet rather than Haiku, never Opus or Fable).
  *
- * Without the file, the game plays with the catalogs of the bridges, without cards nor preselection.
+ * Without any file (MODELS_DEV_FILE pointing nowhere), the game plays with the catalogs of the
+ * bridges, without cards nor preselection.
  */
 final class ModelsDev
 {
     public const string SOURCE = 'https://models.dev/api.json';
+
+    /** The extract versioned with the game, and the update of this installation, relative to the project. */
+    private const string DEFAULT_FILE = 'data/models-dev.json';
+    private const string UPDATED_FILE = 'var/models-dev.json';
 
     /** The providers of models.dev the game uses, by their id there (the same as ours). */
     private const array PROVIDERS = [Provider::Anthropic, Provider::OpenAi, Provider::Mistral];
@@ -60,39 +66,47 @@ final class ModelsDev
         if ([] === $kept) {
             throw new \RuntimeException('models.dev answered without the providers of the game.');
         }
-        $path = self::path();
+        $path = self::updatedPath();
         if (!is_dir(\dirname($path))) {
             mkdir(\dirname($path), 0o775, true);
         }
-        file_put_contents($path, json_encode($kept, \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR));
+        // Pretty, so that the default extract, copied from it, reads well in a diff.
+        file_put_contents($path, json_encode($kept, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE | \JSON_THROW_ON_ERROR)."\n");
         self::forget();
 
         return array_sum(array_map(static fn (array $provider): int => \count($provider['models']), $kept));
     }
 
     /**
-     * Downloads the file when it is missing, briefly: on the models screen, it only completes what
-     * the bridges know. A failure is silent, the next screen tries again.
+     * The file read: MODELS_DEV_FILE when set (the tests); else the update of this installation if
+     * there is one, else the extract versioned with the game.
      */
-    public function ensure(): void
+    public static function path(?string $root = null): string
     {
-        if (is_file(self::path())) {
-            return;
+        $root ??= \dirname(__DIR__, 2);
+        $forced = $_SERVER['MODELS_DEV_FILE'] ?? $_ENV['MODELS_DEV_FILE'] ?? null;
+        if (\is_string($forced) && '' !== $forced) {
+            return self::absolute($forced, $root);
         }
-        try {
-            $this->update(5);
-        } catch (\Throwable) {
-        }
+        $updated = self::absolute(self::UPDATED_FILE, $root);
+
+        return is_file($updated) ? $updated : self::absolute(self::DEFAULT_FILE, $root);
     }
 
     /**
-     * Where the file is: MODELS_DEV_FILE (relative to the project), var/models-dev.json by default.
+     * Where an update writes: MODELS_DEV_FILE when set, else var/models-dev.json, never the versioned extract.
      */
-    public static function path(): string
+    public static function updatedPath(?string $root = null): string
     {
-        $path = $_SERVER['MODELS_DEV_FILE'] ?? $_ENV['MODELS_DEV_FILE'] ?? 'var/models-dev.json';
+        $root ??= \dirname(__DIR__, 2);
+        $forced = $_SERVER['MODELS_DEV_FILE'] ?? $_ENV['MODELS_DEV_FILE'] ?? null;
 
-        return str_starts_with((string) $path, '/') ? (string) $path : \dirname(__DIR__, 2).'/'.$path;
+        return self::absolute(\is_string($forced) && '' !== $forced ? $forced : self::UPDATED_FILE, $root);
+    }
+
+    private static function absolute(string $path, string $root): string
+    {
+        return str_starts_with($path, '/') ? $path : $root.'/'.$path;
     }
 
     /**

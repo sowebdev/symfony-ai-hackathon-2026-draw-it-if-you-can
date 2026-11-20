@@ -67,7 +67,6 @@ final class ModelsController extends AbstractController
         private readonly ModelHealth $health,
         private readonly TranslatorInterface $translator,
         private readonly FormFactoryInterface $forms,
-        private readonly ModelsDev $modelsDev,
     ) {
     }
 
@@ -187,7 +186,6 @@ final class ModelsController extends AbstractController
             return $this->redirectToRoute('models');
         }
 
-        $this->modelsDev->ensure();
         $list = $this->lister->list($provider, $edit->address, $key, fresh: $request->query->getBoolean('fresh'));
         [$choices, $layout] = $this->layout($provider, $list, $role);
 

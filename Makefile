@@ -2,7 +2,7 @@
 # The image is built with the machine's user, so that the files it writes belong to them.
 
 .DEFAULT_GOAL := help
-.PHONY: help install models-dev encryption-key start up stop shell db check test test-unit test-functional lint schema cs cs-fix phpstan audit ci
+.PHONY: help install models-dev models-dev-default encryption-key start up stop shell db check test test-unit test-functional lint schema cs cs-fix phpstan audit ci
 
 export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
@@ -27,6 +27,10 @@ install: ## Build the image, install the dependencies and the database; the mode
 # The key that seals the API key kept in the database: made once, in .env.local, never replaced.
 models-dev: ## Download the catalog of models.dev again and show the model recommended for each provider
 	@$(CONSOLE) app:models-dev
+
+models-dev-default: models-dev ## Before a release: the fresh catalog of models.dev becomes the extract shipped with the game
+	@cp var/models-dev.json data/models-dev.json
+	@echo "data/models-dev.json updated: commit it with the release"
 
 encryption-key:
 	@$(CONSOLE) app:encryption-key
