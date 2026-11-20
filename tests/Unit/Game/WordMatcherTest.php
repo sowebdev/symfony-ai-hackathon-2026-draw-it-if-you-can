@@ -34,6 +34,13 @@ final class WordMatcherTest extends TestCase
         yield 'accented phrase' => ['Père Noël', 'père noël'];
         yield 'phrase with another case' => ['PERE NOEL', 'Père Noël'];
         yield 'two words' => ['Coffee Mugs', 'coffee mug'];
+        yield 'one letter changed' => ['elephent', 'elephant'];
+        yield 'one letter missing' => ['girfe', 'girafe'];
+        yield 'one letter too many' => ['girraffe', 'giraffe'];
+        yield 'a typo of a plural' => ['elephents', 'elephant'];
+        yield 'a typo with accents' => ['Eléphent', 'éléphant'];
+        yield 'a typo in a phrase' => ['pere noal', 'père noël'];
+        yield 'a typo of a word of exactly six letters' => ['girafo', 'girafe'];
     }
 
     #[DataProvider('sameWords')]
@@ -52,6 +59,12 @@ final class WordMatcherTest extends TestCase
         yield 'an article alone is a word' => ['die', 'katze'];
         yield 'empty guess' => ['', 'cat'];
         yield 'punctuation only' => ['?!', 'cat'];
+        yield 'a short word has no typo' => ['chut', 'chat'];
+        yield 'a word of five letters has no typo' => ['zebre', 'zebra'];
+        yield 'two typos (ph and f are not one letter)' => ['elefant', 'elephant'];
+        yield 'two letters missing' => ['girf', 'girafe'];
+        yield 'a swapped pair is two edits' => ['girfae', 'girafe'];
+        yield 'a typo of the guess, not of the word' => ['lionne', 'lion'];
         yield 'short word ending in s is kept' => ['bus', 'bu'];
     }
 

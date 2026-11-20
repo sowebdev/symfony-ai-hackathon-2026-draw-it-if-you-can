@@ -73,6 +73,9 @@ class Game
         #[ORM\Column(options: ['default' => 60])]
         private int $roundSeconds = 60,
         ?array $themes = null,
+        /** The easy mode of the judge, as the settings said when the game started. */
+        #[ORM\Column(options: ['default' => false])]
+        private bool $easyMode = false,
     ) {
         if ($roundCount < 1) {
             throw new \InvalidArgumentException('A game has at least one round.');
@@ -127,6 +130,11 @@ class Game
     public function getTurns(): Turns
     {
         return $this->turns;
+    }
+
+    public function isEasyMode(): bool
+    {
+        return $this->easyMode;
     }
 
     public function getRoundSeconds(): int

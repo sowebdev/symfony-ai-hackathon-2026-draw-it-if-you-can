@@ -91,7 +91,7 @@ final readonly class OneWordModel
         return $word;
     }
 
-    private static function withoutReasoning(string $answer): string
+    public static function withoutReasoning(string $answer): string
     {
         return (string) preg_replace('/<think>.*?<\/think>/s', '', $answer);
     }

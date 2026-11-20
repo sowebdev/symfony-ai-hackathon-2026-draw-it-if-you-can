@@ -3,6 +3,7 @@
 namespace App\Game;
 
 use App\Ai\Guesser;
+use App\Ai\Judge;
 use App\Drawing\StrokeRenderer;
 use App\Entity\Guess;
 use App\Entity\Round;
@@ -38,7 +39,7 @@ final readonly class GuessLoop
         private GuessRepository $guesses,
         private StrokeRenderer $renderer,
         private Guesser $guesser,
-        private WordMatcher $matcher,
+        private Judge $judge,
         private LoggerInterface $logger,
         #[Autowire('%game.guess_pause_ms%')]
         private int $pauseMs,
@@ -86,7 +87,7 @@ final readonly class GuessLoop
             $guess = $this->guessOnce($round, $strokes);
             ++$guessesOnDrawing;
             if (null !== $guess) {
-                yield new ServerEvent((string) json_encode(['id' => $guess->getId(), 'word' => $guess->getWord()]), type: 'guess');
+                yield new ServerEvent((string) json_encode(['id' => $guess->getId(), 'word' => $guess->getWord(), 'verdict' => $guess->getVerdict()->value]), type: 'guess');
                 if ($round->isFound()) {
                     yield $this->overEvent($round);
 
@@ -119,9 +120,12 @@ final readonly class GuessLoop
             return null;
         }
 
-        $guess = new Guess($round, $word, $round->elapsedMs(), Author::Ai);
+        // The word is said now, whatever the time the judge takes.
+        $saidAfterMs = $round->elapsedMs();
+        $verdict = $this->judge->judge($word, $round->getTargetWord(), $game->getLanguage(), $game->isEasyMode());
+        $guess = new Guess($round, $word, $saidAfterMs, Author::Ai, $verdict);
         $this->entityManager->persist($guess);
-        if ($this->matcher->matches($word, $round->getTargetWord())) {
+        if ($verdict->isAccepted()) {
             $round->markFound($guess);
         }
         $this->entityManager->flush();

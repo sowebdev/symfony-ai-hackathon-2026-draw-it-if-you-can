@@ -4,7 +4,7 @@ namespace App\Game;
 
 /**
  * How a game is set up, decided once on the settings screen: the themes in play, who draws, the
- * number and the length of the rounds. A game keeps a copy of what it started with.
+ * number and the length of the rounds, and the mode of the judge. A game keeps a copy of what it started with.
  */
 final readonly class Settings
 {
@@ -21,6 +21,8 @@ final readonly class Settings
         public Turns $turns,
         public int $rounds,
         public int $roundSeconds,
+        /** The judge accepts the synonyms and the very close words, and says warm more often */
+        public bool $easyMode = false,
     ) {
         if ([] === $themes) {
             throw new \InvalidArgumentException('At least one theme must stay active.');

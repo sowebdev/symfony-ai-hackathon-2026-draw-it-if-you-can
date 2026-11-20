@@ -20,16 +20,17 @@ final class GameSettingsData
         #[Assert\Range(min: Settings::MIN_ROUNDS, max: Settings::MAX_ROUNDS)]
         public int $rounds,
         public int $roundSeconds,
+        public bool $easyMode = false,
     ) {
     }
 
     public static function from(Settings $settings): self
     {
-        return new self($settings->themes, $settings->turns, $settings->rounds, $settings->roundSeconds);
+        return new self($settings->themes, $settings->turns, $settings->rounds, $settings->roundSeconds, $settings->easyMode);
     }
 
     public function toSettings(): Settings
     {
-        return new Settings($this->themes, $this->turns, $this->rounds, $this->roundSeconds);
+        return new Settings($this->themes, $this->turns, $this->rounds, $this->roundSeconds, $this->easyMode);
     }
 }

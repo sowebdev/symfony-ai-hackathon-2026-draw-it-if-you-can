@@ -2,6 +2,7 @@
 
 namespace App\Game;
 
+use App\Ai\Judge;
 use App\Entity\Guess;
 use App\Entity\Round;
 use App\Repository\GuessRepository;
@@ -9,8 +10,10 @@ use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * The rules of the rival in a duel: an agent connected over MCP guesses the same drawing as the
- * side of the player, whoever draws, and wins the points of a word it finds first. Only the exact
- * word counts, judged by code, and it answers once every few seconds at most.
+ * side of the player, whoever draws, and wins the points of a word it finds first. Every answer gets
+ * the verdict of the judge (accepted, warm or refused): the exact word, or one typo of it, is accepted
+ * by code, the other words by what the judge says of them, in the mode the game started with. It
+ * answers once every few seconds at most.
  */
 final readonly class Duel
 {
@@ -20,7 +23,7 @@ final readonly class Duel
     public function __construct(
         private EntityManagerInterface $entityManager,
         private GuessRepository $guesses,
-        private WordMatcher $matcher,
+        private Judge $judge,
     ) {
     }
 
@@ -52,13 +55,14 @@ final readonly class Duel
         }
         foreach ($mine as $answer) {
             if (WordMatcher::normalize($answer->getWord()) === WordMatcher::normalize($word)) {
-                throw new AgentRefusal(\sprintf('You already answered "%s" in this round, and it was wrong.', $answer->getWord()));
+                throw new AgentRefusal(\sprintf('You already answered "%s" in this round, and it did not find the word.', $answer->getWord()));
             }
         }
 
-        $guess = new Guess($round, $word, $now, Author::Agent);
+        $verdict = $this->judge->judge($word, $round->getTargetWord(), $game->getLanguage(), $game->isEasyMode());
+        $guess = new Guess($round, $word, $now, Author::Agent, $verdict);
         $this->entityManager->persist($guess);
-        if ($this->matcher->matches($word, $round->getTargetWord())) {
+        if ($verdict->isAccepted()) {
             $round->markFound($guess);
         }
         $this->entityManager->flush();

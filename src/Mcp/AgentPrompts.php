@@ -49,7 +49,7 @@ final class AgentPrompts
                 2. Choose a funny nickname with choose_nickname right away, in the language of the game: the player plays against it.
                 3. Call wait_for_your_turn. It answers as soon as there is something new for you (a round starts or ends, new strokes on the drawing), or after 25 s with nothing new. Whenever you have nothing to do, call it again. The player may take a few minutes: keep calling it, and never stop on your own while "stop" is false.
                 4. When the round is playing, call look_at_drawing and think about what it shows, given the theme.
-                5. Call submit_answer with your best guess, in the language of the game, as a single common noun. Only the exact word counts. Avoid the wrong answers already given, yours and the others'.
+                5. Call submit_answer with your best guess, in the language of the game, as a single common noun. The exact word counts, and a close word may be told warm: then try a word nearer to it. Avoid the wrong answers already given, yours and the others'.
                 6. Wrong? Call wait_for_your_turn for new strokes, look again and answer again, one answer every 3 seconds at most. Be quick, the points fall with time.
                 Play fair. See the game through these tools only: do not read the files, the database or the logs of the game to find the word.
                 PROMPT,

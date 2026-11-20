@@ -138,6 +138,7 @@ export default class extends Controller {
         const item = document.createElement('li');
         item.textContent = result.word;
         item.classList.toggle('accepted', result.found);
+        item.classList.toggle('warm', result.verdict === 'warm');
         this.listTarget.append(item);
         if (result.found) {
             this.timeTarget.textContent = seconds(result.foundAfterMs);

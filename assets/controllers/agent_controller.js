@@ -54,7 +54,7 @@ export default class extends Controller {
         this.tipsTarget.hidden = false;
     }
 
-    addAnswer({ id, word, right }) {
+    addAnswer({ id, word, right, verdict }) {
         if (!this.hasAnswersTarget || this.answersTarget.querySelector(`[data-answer-id="${id}"]`)) {
             return;
         }
@@ -62,6 +62,7 @@ export default class extends Controller {
         item.dataset.answerId = id;
         item.textContent = word;
         item.classList.toggle('accepted', right);
+        item.classList.toggle('warm', verdict === 'warm');
         this.answersTarget.append(item);
     }
 

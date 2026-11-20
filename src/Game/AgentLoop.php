@@ -93,6 +93,6 @@ final readonly class AgentLoop
 
     private static function answerEvent(Guess $guess): ServerEvent
     {
-        return new ServerEvent((string) json_encode(['id' => $guess->getId(), 'word' => $guess->getWord(), 'right' => $guess->isAccepted()]), type: 'answer');
+        return new ServerEvent((string) json_encode(['id' => $guess->getId(), 'word' => $guess->getWord(), 'right' => $guess->isAccepted(), 'verdict' => $guess->getVerdict()->value]), type: 'answer');
     }
 }

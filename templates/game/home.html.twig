@@ -41,6 +41,7 @@
                 {{ settings.allThemes
                     ? 'settings.line_themes_all'|trans({'%count%': theme_count})
                     : 'settings.line_themes_some'|trans({'%count%': settings.themes|length, '%total%': theme_count}) }} ·
+                {% if settings.easyMode %}{{ 'settings.line_easy'|trans }} ·{% endif %}
                 <a href="{{ path('settings') }}">{{ 'settings.change'|trans }}</a>
             </p>
             <div class="modes">

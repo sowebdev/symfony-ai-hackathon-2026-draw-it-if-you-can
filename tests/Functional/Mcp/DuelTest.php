@@ -2,6 +2,10 @@
 
 namespace App\Tests\Functional\Mcp;
 
+use App\Game\GameSettings;
+use App\Game\Settings;
+use App\Game\Theme;
+use App\Game\Turns;
 use App\Tests\Functional\EventStream;
 use App\Tests\Functional\ScriptedModel;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -19,10 +23,14 @@ final class DuelTest extends WebTestCase
     use McpClient;
     use ScriptedModel;
 
+    /** @var \ArrayObject<string, mixed> */
+    private \ArrayObject $judgement;
+
     protected function setUp(): void
     {
         $this->client = self::createClient();
-        self::scriptModel($this->client, guesses: ['chien', 'lion', 'girafe'], word: 'girafe', strokes: [['neck', 'x25y45,x25y10']]);
+        $this->judgement = new \ArrayObject(['label' => 'unrelated']);
+        self::scriptModel($this->client, guesses: ['chien', 'lion', 'girafe'], word: 'girafe', strokes: [['neck', 'x25y45,x25y10']], judgement: $this->judgement);
         self::mockTime();
         $this->connect();
     }
@@ -94,6 +102,40 @@ final class DuelTest extends WebTestCase
 
         Clock::get()->sleep(30);
         self::assertSame(57, $this->roundStatus()['time_left_s'], 'The clock stops when the word is found');
+    }
+
+    public function testTheRivalIsToldTheVerdictOfEachAnswer(): void
+    {
+        $round = $this->startRound('ai', 'duel');
+
+        $refused = $this->call('submit_answer', ['word' => 'zèbre'])['content'][0]['text'];
+        self::assertStringStartsWith('refused:', $refused);
+
+        Clock::get()->sleep(3);
+        $this->judgement['label'] = 'synonym';
+        $warm = $this->call('submit_answer', ['word' => 'long cou']);
+        self::assertFalse($warm['isError'] ?? false);
+        self::assertStringStartsWith('warm:', $warm['content'][0]['text']);
+
+        Clock::get()->sleep(3);
+        $typo = $this->call('submit_answer', ['word' => 'girafee'])['content'][0]['text'];
+        self::assertStringStartsWith('accepted. Right!', $typo, 'One typo of a long word is forgiven by code');
+
+        $events = self::readEvents($this->client, $round.'/agent');
+        self::assertSame(['refused', 'warm', 'accepted'], array_map(static fn (array $event): ?string => $event['data']['verdict'] ?? null, array_slice($events, 0, 3)));
+        $this->client->request('GET', $round);
+        self::assertSelectorTextContains('.rival-answers li.warm', 'long cou');
+    }
+
+    public function testInEasyModeTheRivalIsAcceptedOnASynonym(): void
+    {
+        self::getContainer()->get(GameSettings::class)->save(new Settings(Theme::cases(), Turns::Alternate, 6, 60, true));
+        $round = $this->startRound('ai', 'duel');
+        $this->judgement['label'] = 'synonym';
+
+        self::assertStringStartsWith('accepted. Right!', $this->call('submit_answer', ['word' => 'long cou'])['content'][0]['text']);
+        $this->client->request('GET', $round);
+        self::assertSelectorTextContains('.round-end h2', 'Test a trouvé !');
     }
 
     public function testTheRivalAnswersOnceEveryThreeSecondsAndNeverTwiceTheSame(): void

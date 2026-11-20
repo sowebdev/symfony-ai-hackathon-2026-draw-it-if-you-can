@@ -62,6 +62,33 @@ final class SettingsControllerTest extends WebTestCase
         self::assertSelectorTextContains('.game-settings', '3 rounds of 30 s');
     }
 
+    public function testTheEasyModeIsOffByDefaultAndSaidOnTheHomePageWhenOn(): void
+    {
+        $crawler = $this->client->request('GET', '/fr/settings');
+        self::assertSelectorTextContains('.settings-easy', 'Mode facile');
+        self::assertSelectorTextContains('.settings-easy .settings-hint', 'Le juge accepte les synonymes et les mots très proches, et dit « ça chauffe » plus souvent.');
+        $form = $crawler->selectButton('Enregistrer')->form();
+        self::assertNull($crawler->filter('input[name="game_settings[easyMode]"]')->attr('checked'), 'Off by default');
+
+        $this->submit($form, ['easyMode' => '1']);
+        self::assertResponseRedirects('/fr');
+        $crawler = $this->client->followRedirect();
+        self::assertSame('6 manches de 60 s · on alterne · 7 thèmes · mode facile · Régler', preg_replace('/\s+/', ' ', trim($crawler->filter('.game-settings')->text())));
+
+        // A game keeps the mode it started with.
+        self::startFirstRound($this->client);
+        $easy = $this->lastGame();
+        self::assertTrue($easy->isEasyMode());
+        $form = $this->client->request('GET', '/fr/settings')->selectButton('Enregistrer')->form();
+        $form->remove('game_settings[easyMode]');
+        $this->client->submit($form);
+        self::assertResponseRedirects('/fr');
+        self::startFirstRound($this->client);
+        self::assertFalse($this->lastGame()->isEasyMode(), 'Saved again without the box: the next game is normal');
+        $this->client->request('GET', '/fr');
+        self::assertStringNotContainsString('mode facile', (string) $this->client->getResponse()->getContent());
+    }
+
     public function testNoThemeAtAllIsRefused(): void
     {
         $crawler = $this->client->request('GET', '/en/settings');

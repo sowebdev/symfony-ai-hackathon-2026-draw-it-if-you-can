@@ -6,6 +6,7 @@ use App\Game\Settings;
 use App\Game\Theme;
 use App\Game\Turns;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -54,6 +55,10 @@ final class GameSettingsType extends AbstractType
                 'expanded' => true,
                 'choice_translation_domain' => false,
                 'label' => 'settings.round_seconds',
+            ])
+            ->add('easyMode', CheckboxType::class, [
+                'required' => false,
+                'label' => 'settings.easy_mode',
             ])
             ->add('save', SubmitType::class, ['label' => 'action.save_settings']);
     }

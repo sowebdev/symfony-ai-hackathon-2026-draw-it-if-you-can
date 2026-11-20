@@ -45,6 +45,12 @@
                 {{ form_errors(form.roundSeconds) }}
             </fieldset>
 
+            <div class="field settings-easy">
+                <label class="settings-choice">{{ form_widget(form.easyMode) }} {{ form.easyMode.vars.label|trans }}</label>
+                <p class="settings-hint">{{ 'settings.easy_mode_hint'|trans }}</p>
+                {{ form_errors(form.easyMode) }}
+            </div>
+
             <div class="models-actions">
                 {{ form_widget(form.save) }}
             </div>

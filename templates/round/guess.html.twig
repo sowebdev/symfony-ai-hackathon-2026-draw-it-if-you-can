@@ -63,7 +63,7 @@
                         <h2>{{ 'heading.rival_answers'|trans({'%name%': round.game.agentDisplayName ?? 'label.rival_unknown'|trans}) }}</h2>
                         <ol data-agent-target="answers">
                             {% for answer in rival_answers %}
-                                <li data-answer-id="{{ answer.id }}" class="{{ answer.accepted ? 'accepted' }}">{{ answer.word }}</li>
+                                <li data-answer-id="{{ answer.id }}" class="{{ answer.accepted ? 'accepted' : (answer.warm ? 'warm') }}">{{ answer.word }}</li>
                             {% endfor %}
                         </ol>
                     </div>
@@ -71,7 +71,7 @@
                 <h2>{{ 'heading.player_guesses'|trans }}</h2>
                 <ol data-ai-drawing-target="list"{% if round.game.duel %} class="team-words"{% endif %}>
                     {% for guess in guesses %}
-                        <li class="{{ guess.accepted ? 'accepted' }}">{{ guess.word }}</li>
+                        <li class="{{ guess.accepted ? 'accepted' : (guess.warm ? 'warm') }}">{{ guess.word }}</li>
                     {% endfor %}
                 </ol>
                 <p class="result" data-ai-drawing-target="result" hidden>

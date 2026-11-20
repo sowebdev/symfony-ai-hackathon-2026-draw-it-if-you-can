@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Ai\Judge;
 use App\Drawing\InvalidStroke;
 use App\Drawing\StrokePoints;
 use App\Entity\Guess;
@@ -12,7 +13,6 @@ use App\Game\Author;
 use App\Game\DrawingLoop;
 use App\Game\GuessLoop;
 use App\Game\ScoreGauge;
-use App\Game\WordMatcher;
 use App\Repository\GuessRepository;
 use App\Repository\HintRepository;
 use App\Repository\RoundRepository;
@@ -145,25 +145,31 @@ final class RoundController extends AbstractController
     }
 
     /**
-     * A word the player types to guess the drawing of the AI, judged by code.
+     * A word the player types to guess the drawing of the AI, judged: accepted, warm or refused.
      */
     #[Route('/answers', name: 'round_answer', methods: ['POST'])]
-    public function answer(Round $round, #[MapRequestPayload] NewAnswer $payload, WordMatcher $matcher): JsonResponse
+    public function answer(Round $round, #[MapRequestPayload] NewAnswer $payload, Judge $judge): JsonResponse
     {
         $this->denyUnlessAiDraws($round);
         if ($round->isOver()) {
             return $this->roundIsOver();
         }
 
-        $guess = new Guess($round, trim($payload->word), $round->elapsedMs(), Author::Player);
+        // The word is said now, whatever the time the judge takes.
+        $saidAfterMs = $round->elapsedMs();
+        $word = trim($payload->word);
+        $game = $round->getGame();
+        $verdict = $judge->judge($word, $round->getTargetWord(), $game->getLanguage(), $game->isEasyMode());
+        $guess = new Guess($round, $word, $saidAfterMs, Author::Player, $verdict);
         $this->entityManager->persist($guess);
-        if ($matcher->matches($guess->getWord(), $round->getTargetWord())) {
+        if ($verdict->isAccepted()) {
             $round->markFound($guess);
         }
         $this->entityManager->flush();
 
         return $this->json([
             'word' => $guess->getWord(),
+            'verdict' => $guess->getVerdict()->value,
             'found' => $round->isFound(),
             'foundAfterMs' => $round->getFoundAfterMs(),
             'targetWord' => $round->isFound() ? $round->getTargetWord() : null,

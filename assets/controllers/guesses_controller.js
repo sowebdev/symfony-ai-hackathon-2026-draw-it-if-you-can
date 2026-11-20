@@ -21,10 +21,12 @@ export default class extends Controller {
         this.source?.close();
     }
 
-    add({ id, word }) {
+    add({ id, word, verdict }) {
         const item = document.createElement('li');
         item.dataset.guessId = id;
         item.textContent = word;
+        // A warm word ("ça chauffe") is in orange: close, but not the word.
+        item.classList.toggle('warm', verdict === 'warm');
         this.listTarget.append(item);
         this.say(word);
     }

@@ -33,6 +33,9 @@ class GameSetting
     #[ORM\Column]
     private int $roundSeconds;
 
+    #[ORM\Column(options: ['default' => false])]
+    private bool $easyMode = false;
+
     #[ORM\Column]
     private \DateTimeImmutable $updatedAt;
 
@@ -47,6 +50,7 @@ class GameSetting
         $this->turns = $settings->turns;
         $this->rounds = $settings->rounds;
         $this->roundSeconds = $settings->roundSeconds;
+        $this->easyMode = $settings->easyMode;
         $this->updatedAt = new \DateTimeImmutable();
     }
 
@@ -54,6 +58,6 @@ class GameSetting
     {
         $themes = array_values(array_filter(Theme::cases(), fn (Theme $theme): bool => \in_array($theme->value, $this->themes, true)));
 
-        return new Settings($themes, $this->turns, $this->rounds, $this->roundSeconds);
+        return new Settings($themes, $this->turns, $this->rounds, $this->roundSeconds, $this->easyMode);
     }
 }

@@ -93,7 +93,7 @@ final class GameController extends AbstractController
             Turns::AiDraws => DrawnBy::Ai,
             Turns::Alternate => $payload->drawnBy ?? $dealer->firstDrawer(),
         };
-        $game = new Game(Language::from($request->getLocale()), $settings->rounds, $first, $payload->mode, $settings->turns, $settings->roundSeconds, $settings->themes);
+        $game = new Game(Language::from($request->getLocale()), $settings->rounds, $first, $payload->mode, $settings->turns, $settings->roundSeconds, $settings->themes, $settings->easyMode);
         $this->starter->open($game);
 
         return $this->redirectToRoute($game->isWithAgent() ? 'game_lobby' : 'game_show', ['id' => $game->getId()]);

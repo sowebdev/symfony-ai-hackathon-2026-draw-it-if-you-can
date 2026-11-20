@@ -1123,6 +1123,21 @@
                 <target>Régler</target>
                 <note>Link from the home page summary to the settings screen</note>
             </trans-unit>
+            <trans-unit id="settings.easy_mode" resname="settings.easy_mode">
+                <source>settings.easy_mode</source>
+                <target>Mode facile</target>
+                <note>Label of the easy mode checkbox on the settings screen</note>
+            </trans-unit>
+            <trans-unit id="settings.easy_mode_hint" resname="settings.easy_mode_hint">
+                <source>settings.easy_mode_hint</source>
+                <target>Le juge accepte les synonymes et les mots très proches, et dit « ça chauffe » plus souvent.</target>
+                <note>Line under the easy mode checkbox: what the judge does in this mode</note>
+            </trans-unit>
+            <trans-unit id="settings.line_easy" resname="settings.line_easy">
+                <source>settings.line_easy</source>
+                <target>mode facile</target>
+                <note>Home page summary: the easy mode is on</note>
+            </trans-unit>
         </body>
     </file>
 </xliff>

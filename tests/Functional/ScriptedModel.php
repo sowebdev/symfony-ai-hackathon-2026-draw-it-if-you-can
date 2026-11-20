@@ -34,14 +34,15 @@ trait ScriptedModel
      * @param bool                                  $chosen         Whether a model is stored (false: the game has none yet)
      * @param \ArrayObject<string, \Throwable>|null $outage         Set its "failure" to make the model fail at each call from then on: a model that never answers
      * @param \ArrayObject<int, mixed>|null         $calls          Gets the input of each call to the model
+     * @param \ArrayObject<string, mixed>|null      $judgement      What the judge answers, in its "label" (a link, "unrelated" by default), or a \Throwable it throws; the judge's calls never take a scripted guess
      */
-    private static function scriptModel(KernelBrowser $client, array $guesses = [], string $word = 'cat', array $strokes = [], ?\Throwable $drawingFailure = null, array $details = [], bool $chosen = true, ?\ArrayObject $outage = null, ?\ArrayObject $calls = null): ScriptedDrawer
+    private static function scriptModel(KernelBrowser $client, array $guesses = [], string $word = 'cat', array $strokes = [], ?\Throwable $drawingFailure = null, array $details = [], bool $chosen = true, ?\ArrayObject $outage = null, ?\ArrayObject $calls = null, ?\ArrayObject $judgement = null): ScriptedDrawer
     {
         // The model lives in the container: it must survive from one request to the next.
         $client->disableReboot();
 
         $platform = MockPlatformFactory::createPlatform(
-            static function ($model, $input) use ($word, &$guesses, $outage, $calls): string|ResultInterface {
+            static function ($model, $input) use ($word, &$guesses, $outage, $calls, $judgement): string|ResultInterface {
                 $calls?->append($input);
                 if (($failure = $outage['failure'] ?? null) instanceof \Throwable) {
                     throw $failure;
@@ -49,6 +50,15 @@ trait ScriptedModel
                 // The check of the drawer asks for one stroke: the fake model draws it.
                 if (str_contains((string) json_encode($input), 'with one single stroke')) {
                     return self::oneStroke();
+                }
+                // The judge asks for a label: it takes no scripted guess.
+                if (str_contains((string) json_encode($input), 'which link there is')) {
+                    $label = $judgement['label'] ?? 'unrelated';
+                    if ($label instanceof \Throwable) {
+                        throw $label;
+                    }
+
+                    return (string) $label;
                 }
                 if (str_contains((string) json_encode($input), 'List words the player could draw')) {
                     return $word;

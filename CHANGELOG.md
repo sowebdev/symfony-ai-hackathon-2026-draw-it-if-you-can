@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The game settings, on a screen of their own and without JavaScript, in the five languages: themes on or off (at least one stays on), who draws (we take turns, I only draw, I only guess), the number of rounds (1 to 12) and the length of a round (30, 45, 60, 90 or 120 s), saved and summed up in one line on the home page. A game keeps the settings it started with; `GAME_ROUNDS` and `GAME_ROUND_SECONDS` stay the defaults.
 - The AI of the game is Olaf, a penguin with a face that moves when he speaks (his head bobs and his beak opens while he draws or proposes words, still with `prefers-reduced-motion`); his name is set by `GAME_AI_NAME`, in the five languages and wherever the game speaks of him, and an empty value gives Olaf.
 
+- A judge for every answer, whoever gives it (the player, Olaf, the agent of a duel): accepted, warm (« ça chauffe ») or refused. The code decides first and asks nobody: the word, or one typo of it when it has six letters or more (« elephent » finds « elephant »; « chut » never finds « chat »), is accepted. Otherwise the model that guesses names the link between the answer and the word with one label (same word, synonym, very close, related, unrelated), and the code turns the label into a verdict; a pair already judged is kept and never asked again, and an answer the judge cannot judge in 8 s is refused. A warm word is shown in orange in the lists of words and told to the agent by `submit_answer`.
+- The « Mode facile » setting, off by default, in the five languages: the judge then accepts the synonyms and the very close words, and says warm for the related ones. A game keeps the mode it started with, and the home page says « mode facile » when it is on.
+
 ### Fixed
 
 - A model that calls tools but drew no stroke during the check is told to try again, no longer that it cannot draw.

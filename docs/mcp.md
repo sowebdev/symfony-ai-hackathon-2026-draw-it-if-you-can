@@ -3,7 +3,7 @@
 The game is an MCP server (Symfony MCP Bundle). An agent connected to it plays along, in one of two modes chosen on the home page:
 
 - **With a copilot**: when the AI draws, the agent looks at the drawing and whispers words in the margin. A click on one answers it: you decide, the copilot never answers by itself. When you draw, it knows the word like you, watches your drawing and the wrong guesses of your AI, and gives you tips on post-its, e.g. "make the neck longer, the AI sees a duck".
-- **In a duel**: the agent guesses the same drawings as your side, those of the AI and yours, which your AI guesses for you. The first side to find the word wins its points. The agent answers once every 3 seconds at most, and only the exact word counts for it. Its answers show next to yours.
+- **In a duel**: the agent guesses the same drawings as your side, those of the AI and yours, which your AI guesses for you. The first side to find the word wins its points. The agent answers once every 3 seconds at most, and every answer is judged like yours: accepted, warm (close, but not the word) or refused. Its answers show next to yours.
 
 Seven tools and two prompts:
 

@@ -473,6 +473,15 @@ button:focus-visible,
     font-size: 1.3rem;
 }
 
+/* A warm word ("ça chauffe"): close to the word, in orange and not struck through. */
+.guesses ol li.warm,
+.guesses ol.team-words li.warm,
+.guesses .rival-answers ol li.warm {
+    color: var(--pencil);
+    border-color: var(--pencil);
+    text-decoration: none;
+}
+
 /* The hints of the copilot: notes in the margin, a click puts the word in the answer field. */
 .hints ul {
     display: flex;
@@ -2055,4 +2064,11 @@ button.link:hover {
     .olaf-bubble.pop {
         animation: none;
     }
+}
+
+/* The line under the easy mode: what the judge does in it. */
+.settings-hint {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #555;
 }

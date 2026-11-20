@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Game\Author;
+use App\Game\Verdict;
 use App\Repository\GuessRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -31,6 +32,9 @@ class Guess
         private int $saidAfterMs,
         #[ORM\Column(length: 10, enumType: Author::class, options: ['default' => 'player'])]
         private Author $author,
+        /** What the judge said of the word: warm is neither found nor wrong. */
+        #[ORM\Column(length: 10, enumType: Verdict::class, options: ['default' => 'refused'])]
+        private Verdict $verdict = Verdict::Refused,
     ) {
     }
 
@@ -57,6 +61,16 @@ class Guess
     public function getAuthor(): Author
     {
         return $this->author;
+    }
+
+    public function getVerdict(): Verdict
+    {
+        return $this->verdict;
+    }
+
+    public function isWarm(): bool
+    {
+        return $this->verdict->isWarm();
     }
 
     public function isAccepted(): bool

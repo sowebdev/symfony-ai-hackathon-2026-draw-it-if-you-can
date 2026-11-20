@@ -261,7 +261,7 @@ final readonly class AgentTools
         return \sprintf('The player now sees you as "%s".', $game->getAgentNickname());
     }
 
-    #[McpTool(name: 'submit_answer', description: 'For a rival in a duel only. Answer the drawing of the round, whoever draws it: the first side to find the word wins its points. Only the exact word counts, in the language of the game. One answer every 3 seconds at most.')]
+    #[McpTool(name: 'submit_answer', description: 'For a rival in a duel only. Answer the drawing of the round, whoever draws it: the first side to find the word wins its points. Every answer is judged: the exact word counts (one typo is forgiven on a long word), and a synonym or a very close word is told "warm", or accepted in easy mode. In the language of the game. One answer every 3 seconds at most.')]
     public function submitAnswer(
         #[Schema(description: 'The word you think is drawn, in the language of the game, e.g. "girafe" in French')]
         string $word,
@@ -276,9 +276,14 @@ final readonly class AgentTools
             throw new ToolCallException($refusal->getMessage(), previous: $refusal);
         }
 
-        return $current->isFound() && $answer->isAccepted()
-            ? \sprintf('Right! "%s" was the word: you win %d points. Call wait_for_your_turn for the next round.', $current->getTargetWord(), $this->gauge->pointsOf($current))
-            : \sprintf('"%s" is wrong. Look at the drawing again, and try another word in %d s.', $answer->getWord(), intdiv(Duel::ANSWER_GAP_MS, 1000));
+        $seconds = intdiv(Duel::ANSWER_GAP_MS, 1000);
+
+        return match (true) {
+            $current->isFound() && $answer->isAccepted() => \sprintf('accepted. Right! "%s" was the word: you win %d points. Call wait_for_your_turn for the next round.', $current->getTargetWord(), $this->gauge->pointsOf($current)),
+            $answer->getVerdict()->isAccepted() => \sprintf('accepted, but too late: "%s" was found first. Call wait_for_your_turn for the next round.', $answer->getWord()),
+            $answer->isWarm() => \sprintf('warm: "%s" is close to the word, but it is not the word. Look at the drawing again, and try a word nearer to it in %d s.', $answer->getWord(), $seconds),
+            default => \sprintf('refused: "%s" is wrong. Look at the drawing again, and try another word in %d s.', $answer->getWord(), $seconds),
+        };
     }
 
     /**
