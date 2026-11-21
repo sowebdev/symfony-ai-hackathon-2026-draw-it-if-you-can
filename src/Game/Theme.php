@@ -19,6 +19,30 @@ enum Theme: string implements TranslatableInterface
     case Transport = 'transport';
 
     /**
+     * The values of themes, as an entity stores them.
+     *
+     * @param list<self> $themes
+     *
+     * @return list<string>
+     */
+    public static function toValues(array $themes): array
+    {
+        return array_map(static fn (self $theme): string => $theme->value, $themes);
+    }
+
+    /**
+     * The themes of stored values, in the order of the cases; an unknown value is left out.
+     *
+     * @param list<string> $values
+     *
+     * @return list<self>
+     */
+    public static function fromValues(array $values): array
+    {
+        return array_values(array_filter(self::cases(), static fn (self $theme): bool => \in_array($theme->value, $values, true)));
+    }
+
+    /**
      * The name shown to the player, in translations/messages.*.yaml.
      */
     public function trans(TranslatorInterface $translator, ?string $locale = null): string

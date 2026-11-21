@@ -1,0 +1,39 @@
+{# The right side of a round, the same whoever draws. With an agent: its side, in orange, with its voice, then
+   the hints it whispers when the AI draws, or its tips when the player draws, as a copilot, or its answers as
+   a rival. Alone: the referee on his chair. #}
+{% if round.game.withAgent %}
+    <section class="camp camp-agent guesses" aria-live="polite">
+        {{ include('round/_agent_voice.html.twig') }}
+        {% if round.game.withCopilot and round.drawnByAi %}
+            <div class="hints" {{ hints is empty ? 'hidden' }} data-agent-target="hints">
+                <h2>{{ 'heading.copilot_hints'|trans({'%name%': round.game.agentDisplayName ?? 'label.copilot_unknown'|trans}) }}</h2>
+                <ul data-agent-target="hintList">
+                    {% for hint in hints %}
+                        <li data-hint-id="{{ hint.id }}"><button type="button" data-action="agent#pick" {{ round.over ? 'disabled' }}>{{ hint.word }}</button></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% elseif round.game.withCopilot %}
+            <div class="tips" {{ tips is empty ? 'hidden' }} data-agent-target="tips">
+                <h2>{{ 'heading.copilot_tips'|trans({'%name%': round.game.agentDisplayName ?? 'label.copilot_unknown'|trans}) }}</h2>
+                <ol data-agent-target="tipList">
+                    {% for tip in tips|reverse %}
+                        <li data-tip-id="{{ tip.id }}">{{ tip.text }}</li>
+                    {% endfor %}
+                </ol>
+            </div>
+        {% endif %}
+        {% if round.game.duel %}
+            <div class="rival-answers">
+                <h2>{{ 'heading.rival_answers'|trans({'%name%': round.game.agentDisplayName ?? 'label.rival_unknown'|trans}) }}</h2>
+                <ol data-agent-target="answers">
+                    {% for answer in rival_answers %}
+                        <li data-answer-id="{{ answer.id }}" class="{{ answer.accepted ? 'accepted' : (answer.warm ? 'warm') }}">{{ answer.word }}</li>
+                    {% endfor %}
+                </ol>
+            </div>
+        {% endif %}
+    </section>
+{% else %}
+    <div class="umpire">{{ include('_referee.html.twig', {found: round.found, chair: true}) }}</div>
+{% endif %}

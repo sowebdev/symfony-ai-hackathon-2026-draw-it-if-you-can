@@ -86,7 +86,7 @@ class Game
         if ([] === $themes) {
             throw new \InvalidArgumentException('A game has at least one theme.');
         }
-        $this->themes = array_map(static fn (Theme $theme): string => $theme->value, $themes ?? Theme::cases());
+        $this->themes = Theme::toValues($themes ?? Theme::cases());
         $this->id = Uuid::v7();
         $this->createdAt = new \DateTimeImmutable();
         $this->openedAt = $this->createdAt;
@@ -149,7 +149,7 @@ class Game
      */
     public function getThemes(): array
     {
-        return array_values(array_filter(Theme::cases(), fn (Theme $theme): bool => \in_array($theme->value, $this->themes, true)));
+        return Theme::fromValues($this->themes);
     }
 
     /**

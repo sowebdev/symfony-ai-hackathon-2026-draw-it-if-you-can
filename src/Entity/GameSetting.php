@@ -46,7 +46,7 @@ class GameSetting
 
     public function apply(Settings $settings): void
     {
-        $this->themes = array_map(static fn (Theme $theme): string => $theme->value, $settings->themes);
+        $this->themes = Theme::toValues($settings->themes);
         $this->turns = $settings->turns;
         $this->rounds = $settings->rounds;
         $this->roundSeconds = $settings->roundSeconds;
@@ -56,8 +56,6 @@ class GameSetting
 
     public function settings(): Settings
     {
-        $themes = array_values(array_filter(Theme::cases(), fn (Theme $theme): bool => \in_array($theme->value, $this->themes, true)));
-
-        return new Settings($themes, $this->turns, $this->rounds, $this->roundSeconds, $this->easyMode);
+        return new Settings(Theme::fromValues($this->themes), $this->turns, $this->rounds, $this->roundSeconds, $this->easyMode);
     }
 }
