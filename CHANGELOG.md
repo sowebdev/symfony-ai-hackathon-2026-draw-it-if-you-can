@@ -7,23 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-21
+
 ### Added
 
 - Olaf, a penguin, is the AI of the game (name set by `GAME_AI_NAME`). Each word he guesses pops in his bubble; he hops, sways and jumps for joy.
 - A judge for every answer, the player's, Olaf's and the agent's: accepted, warm or refused. The word or one typo of it is accepted by code; otherwise the guessing model names the link with one label, kept per pair, and the code decides ([ADR 0006](docs/adr/0006-the-judge-a-strict-label-a-cache-and-the-order-of-the-words.md)).
-- A walrus referee who whistles « ça chauffe » and « c'est juste » for everyone.
-- The round in three sides: our team in yellow on the left, the sheet and the walrus in the middle, the agent in orange on the right as a robot with a terminal bubble. Alone, the walrus sits on a high chair. A top bar that never moves, with « Quitter » on the left.
+- A walrus referee who whistles "Getting warm!" and "That's right!" for everyone.
+- The round in three sides: our team in yellow on the left, the sheet and the walrus in the middle, the agent in orange on the right as a robot with a terminal bubble. Alone, the walrus sits on a high chair. A top bar that never moves, with "Leave the game" on the left.
 - The game settings, on their own screen: themes, who draws, number and length of rounds, and the easy mode, where the judge accepts synonyms and very close words. A game keeps the settings it started with.
 - `make smoke` plays a solo game and a duel in a real browser, at two widths, against a scripted model; the CI runs it.
-- The walrus thinks aloud: while the judge decides on a word, he repeats it with one of ten phrases (« "chaton" ? Une seconde… »), in turn.
-- The judge has its own line on the models screen: by default it uses the guesser's model, and it can be given another one, a faster one for instance (« Une autre IA pour juger ? »).
+- The walrus thinks aloud: while the judge decides on a word, he repeats it with one of ten phrases ("'kitten'? One second…"), in turn.
+- The judge has its own line on the models screen: by default it uses the guesser's model, and it can be given another one, a faster one for instance ("Another AI to judge?").
 - [docs/bench](docs/bench/README.md): the same cat, windmill and train drawn by eleven models, with time and cost; `app:bench` draws what is missing and writes the page again.
 - In development, the Symfony profiler and its toolbar, whose AI panel shows every call to a model with its tokens, and the logs in `var/log/dev.log`.
 - Every call to a model is logged in `var/log/ai.log`, one line each: role, model, time, tokens and cost. `bin/console app:ai:usage` says what each role and model took and cost.
 
 ### Changed
 
-- `make install` installs the game in the production environment, with its own secret: faster, and no developer tools for a player. A developer writes `APP_ENV=dev` in `.env.local` first (README, « Develop »). The database is now `var/data.db`; the one of an earlier install is renamed, nothing is lost.
+- `make install` installs the game in the production environment, with its own secret: faster, and no developer tools for a player. A developer writes `APP_ENV=dev` in `.env.local` first (README, "Develop"). The database is now `var/data.db`; the one of an earlier install is renamed, nothing is lost.
+- The lobby and the docs say to allow the tools of `draw-it`, the game's only: the lobby opens Claude Code with `claude --allowedTools mcp__draw-it`, since approving each call of the agent makes it too slow to play. No mode that skips every permission is needed.
+- [docs/models.md](docs/models.md): what I tried, now with OpenAI, the bench and the judge; the labels of the screen are quoted in English.
 - The styles are split by screen (`assets/styles/`), and a round's layout is written once, without the layer that overrode the old one.
 
 ### Fixed
@@ -87,7 +91,8 @@ First public version, submitted to the Symfony AI hackathon.
 - Any model that sees images and calls tools, from a cloud API or on your own machine.
 - English and French.
 
-[Unreleased]: https://github.com/sowebdev/symfony-ai-hackathon-2026-draw-it-if-you-can/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/sowebdev/symfony-ai-hackathon-2026-draw-it-if-you-can/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/sowebdev/symfony-ai-hackathon-2026-draw-it-if-you-can/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/sowebdev/symfony-ai-hackathon-2026-draw-it-if-you-can/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/sowebdev/symfony-ai-hackathon-2026-draw-it-if-you-can/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/sowebdev/symfony-ai-hackathon-2026-draw-it-if-you-can/releases/tag/v0.1.0

@@ -12,7 +12,7 @@ Plug in the model you like, from a cloud API or on your own machine: this may be
 
 Built with Symfony AI for the Symfony AI hackathon (November 2026). The game speaks English, French, German, Spanish and Italian.
 
-Tested on real children, my own.
+**Tested on real kids, my own :)**
 
 [![The AI draws an octopus](docs/demo.gif)](https://youtu.be/oz9XYaZwmiU)
 
@@ -35,6 +35,7 @@ You need Docker, make, and a model: a cloud API key, or a model server of your o
 A poor drawer makes you laugh, a good one makes you play.
 
 - **Claude Haiku 5.5** is plenty, for drawing as for guessing.
+- **OpenAI** draws well too: GPT-6 Luna for almost nothing, GPT-6.2 Astra the cleanest drawings I got, but slowly.
 - **Qwen 3.8 27B on your own machine** is the sweet spot for fun: it draws a cat with whiskers or a snail with its shell, for free, if you have a GPU with 16 GB or a Mac with enough memory.
 - **Mistral** has its place in the game, as a provider of its own and with Mistral Vibe as an agent, but I cannot recommend it for now. In my tries, Mistral Small 4 answered in half a second yet missed a clear swan, and Mistral Medium 3.5 drew a kangaroo in 47 strokes that nobody could guess. Mistral Large 4 always reasons: it often spends its answer thinking and fails the model check, and once past it, it plays badly. Its reasoning could surely be tuned, but I chose not to tune the game for one model (sorry, Mistral).
 
@@ -50,7 +51,7 @@ The game is an MCP server. With Claude Code, while the game runs:
 claude mcp add --scope user --transport http draw-it http://127.0.0.1:8040/mcp
 ```
 
-Then pick "With a copilot" or "Duel" on the home page: the lobby tells you what to do next, and when your agent is in. Mistral Vibe, the tools and the rules: [docs/mcp.md](docs/mcp.md).
+Allow its tools when you open your agent, `claude --allowedTools mcp__draw-it` with Claude Code, or it asks you at every move. Then pick "With a copilot" or "Duel" on the home page: the lobby tells you what to do next, and when your agent is in. Mistral Vibe, the tools and the rules: [docs/mcp.md](docs/mcp.md).
 
 ## How it works
 

@@ -16,6 +16,8 @@ Seven tools and two prompts:
 - `choose_nickname`: the name you see for the agent, a funny one chosen by the agent in the lobby. Without one, the game shows the name of its client, e.g. "Claude" for `claude-code`.
 - the `copilot` and `duel` prompts tell the agent how to play. A client without prompts can start from `round_status`, which explains the rules too.
 
+Whatever the client, allow the tools of `draw-it` before you play. The agent calls them every few seconds, and a client that asks you to approve each call is too slow to play, above all in a duel. Allow this server only: a mode that skips every permission (`--dangerously-skip-permissions` in Claude Code, for instance) is not needed, and would also let the agent run commands, such as reading the word in the database.
+
 The agent needs a model that sees images, since it looks at the drawing: a text-only model fails at the first `look_at_drawing` (seen with Mistral Vibe on `zai-glm-5-3`). The game cannot check it, as MCP does not say what the model of a client reads.
 
 The game does not tell two agents apart: recent clients such as Claude Code speak the stateless protocol (2026-07-28), which has no session. Connect one agent at a time, and play one game at a time: the agent plays the game whose page you opened last, solo games included (it is told to stop if that one is solo), never a game you left. Why: [ADR 0003](adr/0003-the-agent-follows-the-game-the-player-opened-last.md).
@@ -26,7 +28,7 @@ With Claude Code, over HTTP while the game runs:
 claude mcp add --scope user --transport http draw-it http://127.0.0.1:8040/mcp
 ```
 
-Then choose the mode on the home page: the game waits in a lobby, which repeats these steps and tells you when the agent is connected. Open Claude Code in any folder, better not the folder of the game (its agent would read the code and could read the word in the database), and run the prompt of the `draw-it` server, `/mcp__draw-it__copilot` or `/mcp__draw-it__duel`, then start the game. Clients that start their servers themselves can use STDIO instead: `docker compose exec -T php php bin/console mcp:server`. The HTTP endpoint only answers on localhost.
+Then choose the mode on the home page: the game waits in a lobby, which repeats these steps and tells you when the agent is connected. Open Claude Code in any folder, better not the folder of the game (its agent would read the code and could read the word in the database), with the tools of `draw-it` allowed: `claude --allowedTools mcp__draw-it`. Then run the prompt of the `draw-it` server, `/mcp__draw-it__copilot` or `/mcp__draw-it__duel`, then start the game. Clients that start their servers themselves can use STDIO instead: `docker compose exec -T php php bin/console mcp:server`. The HTTP endpoint only answers on localhost.
 
 With Mistral Vibe, add the server by hand to `~/.vibe/config.toml` (`vibe mcp add` only adds OAuth servers, and the game asks for none):
 
@@ -37,6 +39,6 @@ url = "http://127.0.0.1:8040/mcp"
 transport = "streamable-http"
 ```
 
-Then ask it in plain words, e.g. "play the duel with draw-it, starting with round_status", and allow the tools of `draw-it` for the session: approving each call makes it too slow to play.
+Then ask it in plain words, e.g. "play the duel with draw-it, starting with round_status", and allow the tools of `draw-it` for the session.
 
 The rival of a duel is asked to play fair, and nothing more: an agent opened in the folder of the game could read the word in the SQLite database. Run it from another folder to rule that out.

@@ -273,14 +273,19 @@
                 <target>Mit Claude Code, einmalig:</target>
                 <note>First step of the lobby, before a command</note>
             </trans-unit>
+            <trans-unit id="lobby.step_open" resname="lobby.step_open">
+                <source>lobby.step_open</source>
+                <target>Öffne Claude Code mit freigegebenen Tools des Spiels, damit es nicht bei jedem Zug nachfragt:</target>
+                <note>Second step of the lobby, before the command that opens Claude Code with the game's tools allowed</note>
+            </trans-unit>
             <trans-unit id="lobby.step_prompt" resname="lobby.step_prompt">
                 <source>lobby.step_prompt</source>
-                <target>Öffne Claude Code und starte diesen Prompt:</target>
-                <note>Second step of the lobby, before a command</note>
+                <target>Starte dann diesen Prompt:</target>
+                <note>Third step of the lobby, before a command</note>
             </trans-unit>
             <trans-unit id="lobby.other_clients" resname="lobby.other_clients">
                 <source>lobby.other_clients</source>
-                <target>Ein anderer MCP-Client: Verbinde ihn mit %url% und bitte ihn dann, den Prompt %prompt% auszuführen. Wenn er keine Prompts kennt, sag ihm, er soll das Tool round_status aufrufen, das die Regeln erklärt.</target>
+                <target>Ein anderer MCP-Client: Verbinde ihn mit %url%, gib seine Tools frei, damit er nicht bei jedem Zug nachfragt, und bitte ihn dann, den Prompt %prompt% auszuführen. Wenn er keine Prompts kennt, sag ihm, er soll das Tool round_status aufrufen, das die Regeln erklärt.</target>
                 <note>Under the steps of the lobby</note>
             </trans-unit>
             <trans-unit id="status.copilot_waiting" resname="status.copilot_waiting">
