@@ -19,34 +19,36 @@
         {% else %}
             <p class="final-score">{{ 'result.final_score'|trans({'%points%': '<strong>' ~ total ~ '</strong>'})|raw }}</p>
         {% endif %}
-        <table>
-            <thead>
-                <tr>
-                    <th scope="col">{{ 'column.round'|trans }}</th>
-                    <th scope="col">{{ 'column.drawer'|trans }}</th>
-                    <th scope="col">{{ 'label.theme'|trans }}</th>
-                    <th scope="col">{{ 'column.word'|trans }}</th>
-                    <th scope="col">{{ 'column.found_in'|trans }}</th>
-                    {% if game.duel %}<th scope="col">{{ 'column.found_by'|trans }}</th>{% endif %}
-                    <th scope="col">{{ 'column.points'|trans }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in rounds %}
+        <div class="rounds-table">
+            <table>
+                <thead>
                     <tr>
-                        <td>{{ row.round.number }}</td>
-                        <td>{{ ('drawer.' ~ row.round.drawnBy.value)|trans }}</td>
-                        <td>{{ row.round.theme|trans }}</td>
-                        <td>{{ row.round.targetPhrase }}</td>
-                        <td>{{ row.round.found ? (row.round.foundAfterMs / 1000)|number_format(1, 'label.decimal_separator'|trans) ~ ' s' : 'result.not_found'|trans }}</td>
-                        {% if game.duel %}
-                            <td>{% if row.round.foundByRival %}<span class="side-rival">{{ rival }}</span>{% elseif row.round.found %}<span class="side-team">{{ ('found_by.' ~ row.round.foundBy.value)|trans }}</span>{% endif %}</td>
-                        {% endif %}
-                        <td>{{ row.points }}</td>
+                        <th scope="col">{{ 'column.round'|trans }}</th>
+                        <th scope="col">{{ 'column.drawer'|trans }}</th>
+                        <th scope="col">{{ 'label.theme'|trans }}</th>
+                        <th scope="col">{{ 'column.word'|trans }}</th>
+                        <th scope="col">{{ 'column.found_in'|trans }}</th>
+                        {% if game.duel %}<th scope="col">{{ 'column.found_by'|trans }}</th>{% endif %}
+                        <th scope="col">{{ 'column.points'|trans }}</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for row in rounds %}
+                        <tr>
+                            <td>{{ row.round.number }}</td>
+                            <td>{{ ('drawer.' ~ row.round.drawnBy.value)|trans }}</td>
+                            <td>{{ row.round.theme|trans }}</td>
+                            <td>{{ row.round.targetPhrase }}</td>
+                            <td>{{ row.round.found ? (row.round.foundAfterMs / 1000)|number_format(1, 'label.decimal_separator'|trans) ~ ' s' : 'result.not_found'|trans }}</td>
+                            {% if game.duel %}
+                                <td>{% if row.round.foundByRival %}<span class="side-rival">{{ rival }}</span>{% elseif row.round.found %}<span class="side-team">{{ ('found_by.' ~ row.round.foundBy.value)|trans }}</span>{% endif %}</td>
+                            {% endif %}
+                            <td>{{ row.points }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         <a class="button" href="{{ path('home', {_locale: app.locale}) }}">{{ 'action.new_game'|trans }}</a>
     </main>
 {% endblock %}

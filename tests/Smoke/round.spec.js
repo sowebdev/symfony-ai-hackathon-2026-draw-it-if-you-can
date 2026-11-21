@@ -223,3 +223,45 @@ test('a duel race: the word said first wins, even when its judge is slower', asy
     await expect(page.locator('.round-end h2.side-team')).toBeVisible();
     await checkLayout(page, { referee: 'field' });
 });
+
+// A phone held upright, once: the screens the rounds above do not reach at this width. The end of a round,
+// the walrus's bubble beside him, and the final table, which in a long language scrolls in its own box.
+test.describe('on a phone', () => {
+    test.use({ viewport: { width: 420, height: 900 } });
+
+    test('a duel to its final table, nothing wider than the window', async ({ page }) => {
+        test.skip(test.info().project.name !== 'narrow', 'one width is enough');
+        // Measured at rest: a screen that comes in may lean out of the window for a moment. Olaf never stops moving.
+        const fits = async (screen) => {
+            await page.waitForFunction(() => document.getAnimations().every((animation) => 'running' !== animation.playState || Infinity === animation.effect?.getComputedTiming().iterations));
+            const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+            expect(overflow, `${screen}: wider than the window`).toBeLessThanOrEqual(0);
+        };
+
+        await startGame(page, 'duel');
+        await page.waitForURL(/\/lobby$/);
+        await callTool(page.request, 'choose_nickname', { nickname: 'Smokey' });
+        await expect(page.locator('.agent-status.connected')).toContainText('Smokey');
+        await leaveFor(page, page.getByRole('button', { name: 'Start the game' }));
+        await waitForRound(page);
+        await expect(page.locator('[data-ai-drawing-target="thinking"]')).toBeHidden({ timeout: 15_000 });
+
+        await answer(page, 'cat');
+        await expect(page.locator('.pitch .referee-bubble.referee-accepted')).toBeVisible();
+        await fits('the walrus and his bubble');
+        await page.reload();
+        await expect(page.locator('.round-end')).toBeVisible();
+        await fits('the end of a round');
+
+        await leaveFor(page, page.locator('.round-end button[type="submit"]'));
+        await waitForRound(page);
+        await stroke(page, [[300, 300], [700, 300], [700, 700], [300, 700], [300, 300]]);
+        await expect(page.locator('[data-guesses-target="list"] li').nth(1)).toHaveText('kitten');
+        await stroke(page, [[350, 250], [400, 150], [450, 250]]);
+        await expect(page.locator(OVER).first()).toBeVisible();
+        await page.reload();
+        await leaveFor(page, page.locator('.round-end a.button'));
+        await expect(page.locator('.game-over table')).toBeVisible();
+        await fits('the final table');
+    });
+});

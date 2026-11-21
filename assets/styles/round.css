@@ -62,10 +62,6 @@
     .topbar .worth {
         flex-wrap: wrap;
     }
-
-    .topbar .copilot-badge {
-        white-space: normal;
-    }
 }
 
 .topbar .leave {
@@ -134,14 +130,29 @@
     font-size: 1.4rem;
 }
 
-/* The copilot in the bar: grey until it connects, then in the orange of the agent. */
+/* The copilot in the bar: grey until it connects, then in the orange of the agent. The middle of the bar is narrow
+   between a tablet and a wide screen, and German is long: the badge goes under the score, on two lines if needed,
+   rather than being cut. */
 .copilot-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
     color: #777;
+}
+
+.topbar .copilot-badge {
+    min-width: 0;
+    white-space: normal;
+    line-height: 1.15;
+    font-size: 1.1rem;
+}
+
+.copilot-badge svg {
+    flex: none;
+}
+
+.topbar-scores {
+    flex-wrap: wrap;
 }
 
 .copilot-badge.connected {
@@ -472,6 +483,15 @@
     top: 50%;
     margin-top: -1.1em;
     white-space: nowrap;
+}
+
+/* On one column the walrus stands in the middle: his bubble takes the half on his right, on two lines if needed. */
+@media (max-width: 60rem) {
+    .pitch .referee .referee-bubble {
+        width: max-content;
+        max-width: calc(50vw - 45px - 2.5rem);
+        white-space: normal;
+    }
 }
 
 /* Alone, the referee on his high chair in the third column, his bubble above him. */

@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A model that calls tools but drew no stroke during the check is told to try again, no longer that it cannot draw.
 - A round on a tablet held upright: the three sides now go one under the other, the sheet first and whole in the window, and the top bar goes to the next line instead of overlapping. The fields of the settings screen are aligned on the left again, like those of the models screen.
 - In a duel, the side that said the word first wins it, even when its word waits for the judge: a word said after it, accepted at once, no longer overtakes it.
+- On a phone, the walrus's bubble at the end of a duel round and the final table no longer make the page wider than the screen; in a long language, the table scrolls in its own box.
+- The copilot's badge in the bar is no longer cut between a tablet and a wide screen: it goes under the score, on two lines if needed.
 
 ## [0.3.0] - 2026-11-20
 

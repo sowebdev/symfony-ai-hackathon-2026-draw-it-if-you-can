@@ -90,7 +90,7 @@ flowchart LR
     script[[ScriptedPlatforms, ScriptedDrawer<br/>the word is cat]]
     db[(var/data_smoke.db)]
 
-    pw -- "plays: draws, answers, at 1280 and 760 px" --> app
+    pw -- "plays: draws, answers, at 1280 and 760 px, a duel to its end at 420 px" --> app
     pw -- "an agent over MCP, for the duel" --> app
     app <-- "instead of a model" --> script
     app <--> db

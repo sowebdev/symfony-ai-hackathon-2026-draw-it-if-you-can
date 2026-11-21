@@ -24,6 +24,14 @@
     color: var(--rust);
 }
 
+/* The rounds, one per line: on a phone the cells come closer, and in a long language the table scrolls
+   in its own box rather than widening the page. */
+.rounds-table {
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 0 6px 7px 0;
+}
+
 .game-over table {
     border-collapse: collapse;
     background: var(--sheet);
@@ -37,6 +45,14 @@
     padding: 0.4rem 1rem;
     text-align: left;
     border-bottom: 1.5px dashed #c9bfa6;
+}
+
+@media (max-width: 40rem) {
+    .game-over th,
+    .game-over td {
+        padding: 0.35rem 0.45rem;
+        font-size: 0.9rem;
+    }
 }
 
 .game-over th {
