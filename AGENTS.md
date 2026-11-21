@@ -84,6 +84,12 @@ Install `symfony/test-pack` if it isn't already. Functional/HTTP tests extend
 until it has a test that exercises it the way a caller would, an HTTP request for
 a controller or a service call for a service, not just "it didn't throw."
 
+What JavaScript and CSS do on screen is covered by the smoke test, `make smoke`:
+Playwright plays the game in the `smoke` environment, against the scripted model of
+`tests/Smoke` (the word is "cat"; the AI guesses "dog", "kitten", "cat"; the judge
+finds "kitten" warm). A change to a round's layout or to a Stimulus controller runs
+it before the commit. It is long, so it is not in the pre-commit hook.
+
 ## Code style
 
 Symfony's coding standard, the `@Symfony` php-cs-fixer ruleset (a PSR-12-derived

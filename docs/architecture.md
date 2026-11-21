@@ -85,4 +85,5 @@ sequenceDiagram
 | `src/Command` | `app:ai:check`, and `app:draw`, which makes a model draw words pass after pass and writes a page to `var/bench` |
 | `assets/controllers` | Stimulus: the canvas, the drawing of the AI, the timer, the agent, the lobby, the referee |
 | `assets/styles` | One stylesheet per screen, after the base and the characters |
+| `tests/Smoke` | The smoke test: the scripted model of the `smoke` environment, and Playwright playing in a browser (`make smoke`) |
 | `docs/adr` | The decisions and why |

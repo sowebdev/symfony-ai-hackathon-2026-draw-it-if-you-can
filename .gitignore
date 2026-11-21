@@ -2,6 +2,8 @@
 /compose.override.yaml
 # The port the game runs on, chosen by make start
 /.app-port
+# The packages of the smoke test, installed by make smoke
+/tests/Smoke/node_modules/
 
 
 ###> symfony/framework-bundle ###

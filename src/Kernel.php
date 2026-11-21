@@ -10,10 +10,10 @@ class Kernel extends BaseKernel
     use MicroKernelTrait;
 
     /**
-     * @return list<string> An array of allowed values for APP_ENV
+     * @return list<string> An array of allowed values for APP_ENV; smoke: the browser test against a scripted model (make smoke)
      */
     private function getAllowedEnvs(): array
     {
-        return ['prod', 'dev', 'test'];
+        return ['prod', 'dev', 'test', 'smoke'];
     }
 }

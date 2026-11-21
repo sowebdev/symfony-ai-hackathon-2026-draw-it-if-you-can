@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A walrus referee who whistles « ça chauffe » and « c'est juste » for everyone.
 - The round in three sides: our team in yellow on the left, the sheet and the walrus in the middle, the agent in orange on the right as a robot with a terminal bubble. Alone, the walrus sits on a high chair. A top bar that never moves, with « Quitter » on the left.
 - The game settings, on their own screen: themes, who draws, number and length of rounds, and the easy mode, where the judge accepts synonyms and very close words. A game keeps the settings it started with.
+- `make smoke` plays a solo game and a duel in a real browser, at two widths, against a scripted model; the CI runs it.
 
 ### Changed
 

@@ -1,0 +1,9 @@
+{
+  "name": "draw-it-if-you-can-smoke",
+  "private": true,
+  "description": "The smoke test: the game played in a real browser against a scripted model (make smoke)",
+  "type": "module",
+  "devDependencies": {
+    "@playwright/test": "1.60.0"
+  }
+}

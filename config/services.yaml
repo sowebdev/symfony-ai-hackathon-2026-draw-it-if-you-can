@@ -58,3 +58,30 @@ when@test:
         game.agent_wait_s: 0
         game.drawing_stream_max_s: 1
         game.pen_rhythm: false
+
+# The smoke test (make smoke): the game in a real browser, its models replaced by a script (tests/Smoke).
+when@smoke:
+    services:
+        _defaults:
+            autowire: true
+            autoconfigure: true
+
+        App\Tests\Smoke\:
+            resource: '../tests/Smoke/*.php'
+
+        App\Ai\PlatformFactory: '@App\Tests\Smoke\ScriptedPlatforms'
+        App\Ai\DrawsStrokes: '@App\Tests\Smoke\ScriptedDrawer'
+        # The same themes in the same order at each run.
+        App\Game\Dealer:
+            arguments:
+                - !service
+                    class: Random\Randomizer
+                    arguments: [!service { class: Random\Engine\Mt19937, arguments: [1] }]
+
+    parameters:
+        game.guess_pause_ms: 400
+        game.guess_stream_max_s: 30
+        game.agent_stream_max_s: 30
+        game.agent_wait_s: 1
+        game.drawing_stream_max_s: 30
+        game.pen_rhythm: false

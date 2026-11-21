@@ -72,4 +72,7 @@ The code of the game is under the [MIT license](LICENSE).
 ```bash
 make test-unit        # also run by the pre-commit hook (pre-commit install)
 make test-functional  # against a fresh SQLite test database
+make smoke            # a solo game and a duel in a real browser, at two widths (Playwright, a scripted model)
 ```
+
+`make ci` runs the first two with the linters and the static analysis. `make smoke` covers what they cannot see, the screen that moves: the game runs in its `smoke` environment, where a script replaces the models (`tests/Smoke`), and Playwright plays it in a second container, then checks the verdicts, where the walrus stands and that nothing overflows a tablet held upright. It takes a minute and downloads the Playwright image the first time, so it stays out of the pre-commit hook; the CI runs it.

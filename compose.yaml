@@ -15,3 +15,34 @@ services:
       - "127.0.0.1:${APP_PORT:-8040}:8000"
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+  # The smoke test (make smoke), never started by make up: the game served in the smoke environment,
+  # its models replaced by a script (tests/Smoke), and Playwright in a browser beside it. Playwright
+  # shares its network, so that the game is on 127.0.0.1, the only address its MCP endpoint answers on.
+  smoke-app:
+    profiles: [smoke]
+    build:
+      context: docker/php
+      args:
+        HOST_UID: ${HOST_UID:-1000}
+        HOST_GID: ${HOST_GID:-1000}
+    volumes:
+      - .:/app
+    environment:
+      APP_ENV: smoke
+
+  smoke:
+    profiles: [smoke]
+    image: mcr.microsoft.com/playwright:v1.60.0-jammy
+    network_mode: service:smoke-app
+    depends_on:
+      smoke-app:
+        condition: service_healthy
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    working_dir: /app/tests/Smoke
+    volumes:
+      - .:/app
+    environment:
+      HOME: /tmp
+      CI: ${CI:-}
+    command: sh -c "npm ci --no-audit --no-fund --loglevel=error && npx playwright test"

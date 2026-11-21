@@ -2,7 +2,7 @@
 # The image is built with the machine's user, so that the files it writes belong to them.
 
 .DEFAULT_GOAL := help
-.PHONY: help install models-dev models-dev-default encryption-key start up stop shell db check test test-unit test-functional lint schema cs cs-fix phpstan audit ci
+.PHONY: help install models-dev models-dev-default encryption-key start up stop shell db check test test-unit test-functional smoke lint schema cs cs-fix phpstan audit ci
 
 export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
@@ -62,6 +62,12 @@ test-functional: up ## Run the functional tests, against a fresh test database
 	$(EXEC) rm -f var/data_test.db
 	$(CONSOLE) doctrine:migrations:migrate --env=test -n -q
 	$(PHPUNIT) --testsuite functional
+
+smoke: up ## Play a solo game and a duel in a real browser against a scripted model, at two widths (long: not in the pre-commit hook)
+	$(EXEC) rm -f var/data_smoke.db
+	$(EXEC) env APP_ENV=smoke php bin/console doctrine:migrations:migrate -n -q
+	$(EXEC) env APP_ENV=smoke php bin/console app:smoke:choose-model
+	docker compose --profile smoke run --rm --build smoke; status=$$?; docker compose --profile smoke stop smoke-app; exit $$status
 
 cs: up ## Check the code style, without changing anything
 	$(EXEC) vendor/bin/php-cs-fixer fix --dry-run --diff
