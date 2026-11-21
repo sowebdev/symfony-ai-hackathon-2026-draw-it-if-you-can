@@ -45,6 +45,17 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
+    # The platforms are built at runtime; in development, TracedPlatforms decorates the factory for the profiler.
+    App\Ai\PlatformFactory: '@App\Ai\RuntimePlatformFactory'
+
+when@dev:
+    services:
+        # The one traceable platform the AI panel of the profiler reads (src/Ai/TracedPlatforms.php).
+        app.traced_platform:
+            class: Symfony\AI\Platform\TraceablePlatform
+            arguments: ['@App\Ai\TracedPlatforms', '@?debug.stopwatch']
+            tags: ['ai.traceable_platform']
+
 when@test:
     services:
         # Public in the tests, which replace its HTTP client: the lists of models are recorded answers.

@@ -64,7 +64,10 @@ Three specifics worth spelling out, because they are easy to get wrong:
 - Run the app with `symfony serve -d`, and commands with `symfony console ...`
   (or `bin/console` when the Symfony CLI isn't available).
 - When something fails, read `var/log/dev.log` and the web profiler
-  (`/_profiler`) before changing code.
+  (`/_profiler`) before changing code. Its AI panel shows every call to a model,
+  with its messages, options, result and tokens (`src/Ai/TracedPlatforms.php`,
+  as the platforms are built at runtime). The streams of a round and the MCP
+  requests have no toolbar: find their profile in `/_profiler` by URL.
 - If `maker-bundle` is installed, prefer `bin/console make:*` with every argument
   passed up front and `--no-interaction` where supported: makers prompt on a
   terminal by default, which hangs a non-interactive shell. If a maker still
