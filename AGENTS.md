@@ -112,7 +112,7 @@ decision records in `docs/adr/` (`NNNN-title.md`: context, options considered,
 decision, consequences). A choice that would surprise a reader of the code gets
 an ADR.
 
-Keep them short: an ADR fits in 30 lines; it points to the code that holds a rule rather than copying it.
+An ADR points to the code that holds a rule rather than copying it.
 
 A change a reader cares about adds a line under `[Unreleased]` in `CHANGELOG.md`, in the same commit: one or two sentences, saying what changes for the player.
 
