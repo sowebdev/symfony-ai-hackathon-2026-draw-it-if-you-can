@@ -73,6 +73,23 @@ sequenceDiagram
     end
 ```
 
+## The smoke test
+
+`make ci` tests the PHP; `make smoke` tests what moves on screen. Two containers of their own, started only by it (the `smoke` profile of `compose.yaml`): the game in its `smoke` environment, where a script replaces the models and the dealer always deals the same themes, and Playwright beside it, on the same network, so that the game is on 127.0.0.1 like for an agent.
+
+```mermaid
+flowchart LR
+    pw([Playwright, Chromium<br/>tests/Smoke/round.spec.js])
+    app[The game, APP_ENV=smoke]
+    script[[ScriptedPlatforms, ScriptedDrawer<br/>the word is cat]]
+    db[(var/data_smoke.db)]
+
+    pw -- "plays: draws, answers, at 1280 and 760 px" --> app
+    pw -- "an agent over MCP, for the duel" --> app
+    app <-- "instead of a model" --> script
+    app <--> db
+```
+
 ## Where things are
 
 | Folder | What it holds |

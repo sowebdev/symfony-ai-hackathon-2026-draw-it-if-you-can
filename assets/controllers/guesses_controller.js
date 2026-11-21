@@ -32,7 +32,7 @@ export default class extends Controller {
         this.say(word);
     }
 
-    // Olaf says the word: it pops in his bubble, he hops and opens his beak (app.css, .olaf-wrap.is-saying).
+    // Olaf says the word: it pops in his bubble, he hops and opens his beak (characters.css, .olaf-wrap.is-saying).
     say(word) {
         if (!this.hasBubbleTarget || !this.hasOlafTarget) {
             return;

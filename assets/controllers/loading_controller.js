@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 
 // The time the card of the theme takes to turn over, before the form leaves: as at a board game,
-// the theme is drawn, then the round starts (assets/styles/app.css, .theme-card).
+// the theme is drawn, then the round starts (assets/styles/deal.css, .theme-card).
 const DEAL_MS = 1400;
 
 // On a form that waits for the AI (the next round, a retry): the loading screen shows as soon as
