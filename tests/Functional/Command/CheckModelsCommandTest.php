@@ -65,7 +65,8 @@ final class CheckModelsCommandTest extends KernelTestCase
         $tester = $this->runCheck();
 
         self::assertStringContainsString('guesser (scripted at http://scripted:8000)', $tester->getDisplay());
-        self::assertStringNotContainsString('follows', $tester->getDisplay());
+        self::assertStringNotContainsString('guesser follows', $tester->getDisplay());
+        self::assertStringContainsString('judge follows guesser (scripted at http://scripted:8000)', $tester->getDisplay());
         self::assertStringNotContainsString('sk-ant', $tester->getDisplay());
     }
 }

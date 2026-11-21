@@ -1,27 +1,28 @@
 # The models
 
-The AI has two roles, and each can use any provider, for instance the drawer on Anthropic and the guesser on a server of your own:
+The AI has three roles, and each can use any provider, for instance the drawer on Anthropic and the guesser on a server of your own. By default one model plays them all:
 
 - **the drawer** draws while you guess, and looks at its drawing to add the details that are missing;
-- **the guesser** guesses your drawing (the word to draw is drawn at random from a list the model gives). Until you give it a model of its own, it uses the one of the drawer.
+- **the guesser** guesses your drawing (the word to draw is drawn at random from a list the model gives). Until you give it a model of its own, it uses the one of the drawer;
+- **the judge** names the link between an answer and the word, when it is not the word itself: one label, then the code decides (« ça chauffe », accepted in easy mode). Until you give it a model of its own, it uses the one of the guesser. It needs no images, and the faster it answers the less the walrus thinks aloud.
 
-Both models must read images, and the drawer must also call tools.
+The drawer and the guesser must read images, and the drawer must also call tools. The judge must answer with one of its labels.
 
 ## Choosing the models on the screen
 
 Open the game and follow the page (the home page invites you there while no model is chosen, its health card leads there when a model does not answer, and "Change the model" at the bottom of the home page always does). The screen asks **one question at a time**, with no JavaScript: each "Continue" is a round trip, and what you answered so far lives in your session.
 
-**The summary** is the entry once a drawer is stored: « Les IA du jeu », one line per role that has a model of its own (« Il dessine · `claude-haiku-5-5` chez Anthropic · changer », « Il devine · `qwen3.8-27b-vision` sur ton serveur · changer »). A guesser that follows the drawer is a muted line, « Il devine aussi ton dessin. Une autre IA pour deviner ? », the question being the link that starts the guesser's questions. "Check and play" tries the models; the stored keys are folded at the bottom.
+**The summary** is the entry once a drawer is stored: « Les IA du jeu », one line per role that has a model of its own (« Il dessine · `claude-haiku-5-5` chez Anthropic · changer », « Il devine · `qwen3.8-27b-vision` sur ton serveur · changer »). A guesser that follows the drawer is a muted line, « Il devine aussi ton dessin. Une autre IA pour deviner ? », the question being the link that starts the guesser's questions; a judge that follows the guesser, « Il juge aussi les réponses. Une autre IA pour juger ? ». "Check and play" tries the models; the stored keys are folded at the bottom.
 
 **The questions of a role** ("change", or the first visit, which starts on the drawer):
 
-1. **Which AI draws?** (or guesses): four choices, nothing else: Anthropic, OpenAI, Mistral, "your server, or another service". A provider whose key is stored is tagged « clé enregistrée ». In the guesser's questions, "the same AI as the one that draws" gives the guesser no model of its own again.
+1. **Which AI draws?** (or guesses): four choices, nothing else: Anthropic, OpenAI, Mistral, "your server, or another service". A provider whose key is stored is tagged « clé enregistrée ». In the guesser's questions, "the same AI as the one that draws" gives the guesser no model of its own again; in the judge's, "the same AI as the one that guesses".
 2. **What is missing**: your key for a provider whose key is not stored; for a server, its address, with the key folded behind "Does it need a key?" (leave it empty if your server asks for none). A stored place goes straight to the next question; its key is changed from here too ("Change the key"). The key is a password field: empty means "keep the stored key", of which only the end is shown (`…3f9a`), and a stored key is never sent to another address than the one it was stored for. The game runs in Docker, so your machine is `host.docker.internal` there, not `localhost`; the usual ports are Ollama 11434, LM Studio 1234, llama.cpp 8080, among others (`http://host.docker.internal:11434`); the address starts empty, the game names no default server.
 3. **Which model?** The list shows only what can play, as one card per family (its most recent version), from the cheapest family. The model preselected is **the middle of the provider's current range, by price**, marked « le bon compromis »: Sonnet at Anthropic, neither Haiku nor Opus or Fable. Both come from [models.dev](https://models.dev), an open catalog (MIT) of models with their family, release date, price and capabilities (`src/Ai/ModelsDev.php`). The range, which is also the cards: per family that reads images and calls tools, not deprecated, a chat model (not realtime, image or speech), not made by another company, its newest listed model, if less than a year older than the provider's newest; the family in the middle, the cheaper one of two. A server of one's own gets neither cards nor recommendation. A model stored for the role at this place stays selected. Older versions and unknown families are under "See all models". A field takes any model name: the typed name wins. For a server, the capabilities are unknown (the screen says so once), and the reasoning switch is folded behind "Advanced settings". In the drawer's questions, while the guesser follows the drawer, a muted line offers "Another AI to guess?": it saves this model and goes on with the guesser's questions.
 
 While the questions of a role run, the other role already chosen is shown on top as one summary line with "change".
 
-**The check** is on the spot, no separate page. "Check and play" tries each role (the guesser names a circle drawn in an image; the drawer also draws one stroke with its tool; a guesser that follows the drawer is not tried twice) and, when all pass, saves the setting and goes home. On a failure the summary shows ✓ or ✗ on each line, the cause and the advice under the line that failed, "change" and "Try again"; the role that passed stays visible and is not tried again. Nothing is saved until every role passes. The loading screen shows during the wait.
+**The check** is on the spot, no separate page. "Check and play" tries each role (the guesser names a circle drawn in an image; the drawer also draws one stroke with its tool; the judge gives one of its labels on « kitten » for « cat »; a role that follows another is not tried twice) and, when all pass, saves the setting and goes home. On a failure the summary shows ✓ or ✗ on each line, the cause and the advice under the line that failed, "change" and "Try again"; the role that passed stays visible and is not tried again. Nothing is saved until every role passes. The loading screen shows during the wait.
 
 **Stored providers.** Folded at the bottom of the summary, "Saved providers (n)" lists the accounts (provider and `…3f9a`, or the address) with "Forget". An account stays when no role uses it any more, so that you can switch back without typing the key again; one that a role uses cannot be forgotten (the button is disabled, with « Sert à dessiner »).
 
@@ -51,7 +52,7 @@ The limit of an answer is sent as `max_output_tokens`, which each bridge turns i
 
 The screen says only what is known now: "capabilities unknown" for a server whose list does not say. New models come out every month: nothing is "tested" by the game, and its recommendation is a rule on price and dates, not a test. The table "What I tried" below is a dated record of what I tried, not a promise.
 
-`make check` tries the model of each role on a tiny task whose answer is known (each must name a circle drawn in an image; the drawer must also draw one stroke with its tool), says where each role answers and which role follows another, and tells what is wrong.
+`make check` tries the model of each role on a tiny task whose answer is known (the drawer and the guesser must name a circle drawn in an image, the drawer must also draw one stroke with its tool, the judge must give one of its labels), says where each role answers and which role follows another, and tells what is wrong.
 
 ## Reasoning
 
@@ -90,4 +91,4 @@ The model screen, the home page and `make check` say what is wrong. The common c
 - **Nothing answers at this address**: the server is not started, or the address is wrong. From inside Docker, your machine is `host.docker.internal`, not `localhost`.
 - **The server refused the API key**: check it on the model screen. A local server may need one too, depending on how it is started.
 - **The server does not have this model**: download it first (with Ollama, `ollama pull <model>`), or check its name.
-- **The model answers, but the check fails**: it does not read images, or cannot call tools. Both roles need images, the drawer needs tools (it is asked for one stroke).
+- **The model answers, but the check fails**: it does not read images, or cannot call tools. The drawer and the guesser need images, the drawer needs tools (it is asked for one stroke); the judge must answer with one of its labels, which a model that reasons for long may not do within its tokens.

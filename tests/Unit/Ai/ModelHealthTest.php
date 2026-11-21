@@ -98,14 +98,26 @@ final class ModelHealthTest extends TestCase
         self::assertSame('problem.no_vision advice.reasoning_tick', $problem->trans($translator));
     }
 
-    public function testAGuesserThatFollowsTheDrawerIsOneLineForBoth(): void
+    public function testRolesThatFollowTheDrawerAreOneLineNamedByTheRolesItPlays(): void
     {
         $report = [
             ['role' => 'drawer', 'model' => 'm at Anthropic', 'ok' => false, 'problem' => 'nope', 'follows' => null],
             ['role' => 'guesser', 'model' => 'm at Anthropic', 'ok' => false, 'problem' => 'nope', 'follows' => 'drawer'],
+            ['role' => 'judge', 'model' => 'm at Anthropic', 'ok' => false, 'problem' => 'nope', 'follows' => 'drawer'],
         ];
 
-        self::assertSame([['role' => 'both', 'model' => 'm at Anthropic', 'ok' => false, 'problem' => 'nope']], ModelHealth::lines($report));
+        self::assertSame([['role' => 'drawer_guesser_judge', 'model' => 'm at Anthropic', 'ok' => false, 'problem' => 'nope']], ModelHealth::lines($report));
+    }
+
+    public function testAJudgeThatFollowsAGuesserOfItsOwnIsOnTheGuessersLine(): void
+    {
+        $report = [
+            ['role' => 'drawer', 'model' => 'a', 'ok' => true, 'problem' => null, 'follows' => null],
+            ['role' => 'guesser', 'model' => 'b', 'ok' => true, 'problem' => null, 'follows' => null],
+            ['role' => 'judge', 'model' => 'b', 'ok' => true, 'problem' => null, 'follows' => 'guesser'],
+        ];
+
+        self::assertSame(['drawer', 'guesser_judge'], array_column(ModelHealth::lines($report), 'role'));
     }
 
     public function testRolesWithAModelOfTheirOwnKeepTheirLine(): void

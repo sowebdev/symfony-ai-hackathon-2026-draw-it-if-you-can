@@ -36,10 +36,12 @@ final readonly class Models
 
     /**
      * The same models, on a setting that is not saved: to check it before saving it.
+     *
+     * @param array<string, RoleSetup> $setups What each role calls, by role value
      */
-    public function with(RoleSetup $drawer, RoleSetup $guesser): self
+    public function with(array $setups): self
     {
-        return new self($this->settings, $this->platforms, [Role::Drawer->value => $drawer, Role::Guesser->value => $guesser]);
+        return new self($this->settings, $this->platforms, $setups);
     }
 
     /**

@@ -20,8 +20,8 @@ Inside the game, the controllers stay thin; the rules (`src/Game`) decide, the A
 
 ## The principles
 
-- **The model plays, the code judges.** A model never decides what counts. `WordMatcher` accepts the word or one typo; otherwise `Judge` asks the guessing model for one label and `Verdict` decides. Every answer, whoever gives it, goes through `Referee`: kept at once, pending, then judged, and the round is settled in the order the words were said, so a slow verdict never loses to a word said after it ([ADR 0006](adr/0006-the-judge-is-the-guessing-model-with-a-strict-label-and-a-cache.md)). `OneWordModel` checks that a model said one word, `ModelCheck` tries each model on a known task. Points, time and the end of a round are the game's.
-- **Two roles, any model.** The drawer and the guesser each have a provider, a model and a key (`Models`, from the accounts and role models stored by the models screen; a guesser without a model of its own uses the drawer's), on the platform bridge of that provider in Symfony AI, or on the Generic one for any OpenAI-compatible endpoint: Ollama, LM Studio, llama.cpp or OpenRouter. Both must see images; the drawer must call tools.
+- **The model plays, the code judges.** A model never decides what counts. `WordMatcher` accepts the word or one typo; otherwise `Judge` asks the guessing model for one label and `Verdict` decides. Every answer, whoever gives it, goes through `Referee`: kept at once, pending, then judged, and the round is settled in the order the words were said, so a slow verdict never loses to a word said after it ([ADR 0006](adr/0006-the-judge-a-strict-label-a-cache-and-the-order-of-the-words.md)). `OneWordModel` checks that a model said one word, `ModelCheck` tries each model on a known task. Points, time and the end of a round are the game's.
+- **Three roles, any model.** The drawer, the guesser and the judge each have a provider, a model and a key (`Models`, from the accounts and role models stored by the models screen; a guesser without a model of its own uses the drawer's, a judge the guesser's, so one model plays them all by default), on the platform bridge of that provider in Symfony AI, or on the Generic one for any OpenAI-compatible endpoint: Ollama, LM Studio, llama.cpp or OpenRouter. The drawer and the guesser must see images, the drawer must call tools; the judge only answers with a label.
 - **The model draws with a tool.** `Pen` is a Symfony AI tool (`#[AsTool]`), `draw_stroke`, on the 50 x 50 grid of SketchAgent. The answer is streamed, and each stroke goes to the browser as soon as its call is written, without waiting for the end of the answer (`ToolCallAssembler`, see [Contributions to Symfony AI](../README.md#contributions-to-symfony-ai)).
 - **The hand is code.** The model writes grid cells; `StrokeTracer` turns them into a line that wobbles, overshoots and speeds up like a pen, deterministically. `StrokeRenderer` draws strokes into a PNG with GD, which is what the guesser, and the drawer adding details, look at.
 - **The server sets the rhythm.** A round is one server-sent events response: the AI calls out a word every few seconds (`GuessLoop`), or draws until the word is found or the time is up (`DrawingLoop`). A reload replays what is stored, then follows.
@@ -53,7 +53,7 @@ sequenceDiagram
     B->>B: the walrus repeats the word while he thinks
     B->>G: an answer (HTTP)
     G->>D: Referee: kept, pending, at the moment it was said
-    G->>G: Judge: WordMatcher, else one label from the guesser, kept
+    G->>G: Judge: WordMatcher, else one label from the judge's model, kept
     G->>D: settled in the order the words were said (one lock per round)
     G-->>B: accepted, warm or refused, once the words said before it are settled
 ```

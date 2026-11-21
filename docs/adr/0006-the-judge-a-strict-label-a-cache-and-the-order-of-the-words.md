@@ -1,7 +1,7 @@
-# 6. The judge is the guessing model, with a strict label and a cache
+# 6. The judge: a strict label, a cache, and the order of the words
 
 - Status: accepted
-- Date: 2026-11-20, completed on 2026-11-21 (the order of the verdicts)
+- Date: 2026-11-20, completed on 2026-11-21 (the order of the verdicts, a role of its own)
 
 ## Context
 
@@ -15,6 +15,8 @@ A model takes time, up to 8 s, and the exact word none. In a duel, the first ver
 2. **A small decision model** (Liquid d1-omni-600M, d1-2B): 20 and 25 right out of 39 pairs in five languages on 20/11/2026, against 34 for the guessing model (Qwen 3.8 27B). Worse, and one more model to install.
 3. **The guessing model**, asked for one label, with a cache.
 
+On 2026-11-21 the judge got a role of its own on the models screen, which follows the guesser by default: one model still plays every role, and the judge can be given a faster one, or a model of decision later, without touching the guesser. The judge's latency is on the path of every new pair: it is worth a model chosen for it.
+
 And for the order of the verdicts:
 
 1. **The first verdict given wins**, as before: unfair as soon as the model is slow.
@@ -23,13 +25,13 @@ And for the order of the verdicts:
 
 ## Decision
 
-Option 3. `WordMatcher` first accepts the word, or one typo of it from six letters. Otherwise `Judge` asks the guessing model for exactly one label (`same_word`, `synonym`, `very_close`, `related`, `unrelated`), within 8 s, and keeps it per pair and language. `Verdict::of()` turns the label into a verdict, by mode. No label: refused, not kept.
+Option 3. `WordMatcher` first accepts the word, or one typo of it from six letters. Otherwise `Judge` asks the model of its role (`Role::Judge`, the guesser's until the player chooses another) for exactly one label (`same_word`, `synonym`, `very_close`, `related`, `unrelated`), within 8 s, and keeps it per pair and language. `Verdict::of()` turns the label into a verdict, by mode. No label: refused, not kept.
 
 The circuit, option 3, is `Referee`, for the player, the AI that guesses and the rival alike. `hear()` keeps the word, pending, at the moment it was said. `judge()` gets the verdict, then `Round::settle()` walks the words in the order they were said: the first accepted finds the round, and a word still pending holds back those said after it. A word whose judge is gone (`Referee::JUDGING_LIMIT_MS`) is refused. The request that said a word answers once the words said before it are settled; refused and warm do not change who wins, but they come in the same answer. `symfony/lock` keeps two requests from settling a round at once.
 
 ## Consequences
 
-- A new pair costs one call, up to 8 s; a pair seen before costs nothing and keeps its verdict, right or wrong.
+- A new pair costs one call, up to 8 s, to the judge's model; a pair seen before costs nothing and keeps its verdict, right or wrong.
 - The model only names a link: an answer that tries to talk it into accepting gets no label.
 - The side that said the word first wins it, whatever the judge takes. An exact word said just after a synonym waits for the synonym's verdict, up to the judge's limit: the walrus repeats the word while he thinks, so the wait shows.
 - The streams of Olaf and of the agent say a word twice: `heard` when it is said, then its verdict (`guess`, `answer`).

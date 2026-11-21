@@ -888,8 +888,8 @@
                 <target>Oublier</target>
                 <note>Button that forgets a stored API key</note>
             </trans-unit>
-            <trans-unit id="role.both" resname="role.both">
-                <source>role.both</source>
+            <trans-unit id="role.drawer_guesser" resname="role.drawer_guesser">
+                <source>role.drawer_guesser</source>
                 <target>Il dessine et devine</target>
                 <note>The home page line when the guesser uses the model of the drawer</note>
             </trans-unit>
@@ -928,8 +928,8 @@
                 <target>Sert à deviner</target>
                 <note>Why a stored key cannot be forgotten</note>
             </trans-unit>
-            <trans-unit id="models.used_by_both" resname="models.used_by_both">
-                <source>models.used_by_both</source>
+            <trans-unit id="models.used_by_drawer_guesser" resname="models.used_by_drawer_guesser">
+                <source>models.used_by_drawer_guesser</source>
                 <target>Sert à dessiner et à deviner</target>
                 <note>Why a stored key cannot be forgotten</note>
             </trans-unit>
@@ -1180,6 +1180,71 @@
             <trans-unit id="agent.watching" resname="agent.watching">
                 <source>agent.watching</source>
                 <target>je regarde le dessin…</target>
+            </trans-unit>
+            <trans-unit id="role.judge" resname="role.judge">
+                <source>role.judge</source>
+                <target>Il juge</target>
+                <note>The role of the judge</note>
+            </trans-unit>
+            <trans-unit id="role.guesser_judge" resname="role.guesser_judge">
+                <source>role.guesser_judge</source>
+                <target>Il devine et juge</target>
+                <note>One model guesses and judges</note>
+            </trans-unit>
+            <trans-unit id="role.drawer_guesser_judge" resname="role.drawer_guesser_judge">
+                <source>role.drawer_guesser_judge</source>
+                <target>Il dessine, devine et juge</target>
+                <note>One model plays every role</note>
+            </trans-unit>
+            <trans-unit id="models.follows_judge" resname="models.follows_judge">
+                <source>models.follows_judge</source>
+                <target>Il juge aussi les réponses.</target>
+                <note>Models screen: the judge follows the guesser</note>
+            </trans-unit>
+            <trans-unit id="models.other_judge_q" resname="models.other_judge_q">
+                <source>models.other_judge_q</source>
+                <target>Une autre IA pour juger ?</target>
+                <note>Models screen: a model of its own for the judge</note>
+            </trans-unit>
+            <trans-unit id="models.same_as_guesser" resname="models.same_as_guesser">
+                <source>models.same_as_guesser</source>
+                <target>La même IA que celui qui devine</target>
+                <note>Models screen: the judge follows the guesser again</note>
+            </trans-unit>
+            <trans-unit id="models.question_provider_judge" resname="models.question_provider_judge">
+                <source>models.question_provider_judge</source>
+                <target>Quelle IA juge les réponses ?</target>
+                <note>Models screen: the provider of the judge</note>
+            </trans-unit>
+            <trans-unit id="models.question_model_judge" resname="models.question_model_judge">
+                <source>models.question_model_judge</source>
+                <target>Quel modèle juge ?</target>
+                <note>Models screen: the model of the judge</note>
+            </trans-unit>
+            <trans-unit id="models.used_by_judge" resname="models.used_by_judge">
+                <source>models.used_by_judge</source>
+                <target>Sert à juger</target>
+                <note>A saved provider used by the judge</note>
+            </trans-unit>
+            <trans-unit id="models.used_by_drawer_judge" resname="models.used_by_drawer_judge">
+                <source>models.used_by_drawer_judge</source>
+                <target>Sert à dessiner et à juger</target>
+                <note>A saved provider used to draw and to judge</note>
+            </trans-unit>
+            <trans-unit id="models.used_by_guesser_judge" resname="models.used_by_guesser_judge">
+                <source>models.used_by_guesser_judge</source>
+                <target>Sert à deviner et à juger</target>
+                <note>A saved provider used to guess and to judge</note>
+            </trans-unit>
+            <trans-unit id="models.used_by_drawer_guesser_judge" resname="models.used_by_drawer_guesser_judge">
+                <source>models.used_by_drawer_guesser_judge</source>
+                <target>Sert à dessiner, deviner et juger</target>
+                <note>A saved provider used by every role</note>
+            </trans-unit>
+            <trans-unit id="problem.no_label" resname="problem.no_label">
+                <source>problem.no_label</source>
+                <target>Ce modèle ne répond pas par une des étiquettes demandées : il ne peut pas juger les réponses.</target>
+                <note>The check of the judge: the model gave none of the labels</note>
             </trans-unit>
         </body>
     </file>

@@ -29,7 +29,11 @@ final readonly class ModelChoice
      */
     public function canPlay(Role $role): bool
     {
-        return false !== $this->vision && (Role::Drawer !== $role || false !== $this->tools);
+        return match ($role) {
+            Role::Judge => true,
+            Role::Guesser => false !== $this->vision,
+            Role::Drawer => false !== $this->vision && false !== $this->tools,
+        };
     }
 
     /**

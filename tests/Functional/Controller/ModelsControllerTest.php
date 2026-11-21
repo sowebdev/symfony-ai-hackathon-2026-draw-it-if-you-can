@@ -234,11 +234,15 @@ final class ModelsControllerTest extends WebTestCase
         self::assertCount(0, $crawler->filter('details.saved-keys[open]'), 'Folded');
         $this->noKeyInAnyPage();
 
-        // With a guesser of its own, one line each, "on your server" for a server.
+        self::assertSelectorTextContains('.role-line.follows:nth-child(3)', 'It judges the answers too.');
+        self::assertSame('/en/models/judge', $crawler->filter('.role-line.follows a')->eq(1)->attr('href'));
+
+        // With a guesser of its own, one line each, "on your server" for a server; the judge still follows.
         $this->settings()->choose(Role::Guesser, Provider::Compatible, 'http://gate:8001', 'qwen3.8-27b-vision', true);
         $crawler = $this->get($client, '/en/models');
         self::assertCount(2, $crawler->filter('.role-line:not(.follows)'));
-        self::assertSelectorNotExists('.role-line.follows');
+        self::assertCount(1, $crawler->filter('.role-line.follows'));
+        self::assertSelectorTextContains('.role-line.follows a', 'Another AI to judge?');
         self::assertSelectorTextContains('.role-line:nth-child(2)', 'It guesses · qwen3.8-27b-vision on your server · change');
 
         $client->request('GET', '/fr/models');
@@ -818,8 +822,27 @@ final class ModelsControllerTest extends WebTestCase
             $client->request('GET', "/en/models/guesser/{$step}");
             self::assertResponseRedirects('/en/models/guesser');
         }
-        $client->request('GET', '/en/models/judge');
+        $client->request('GET', '/en/models/voice');
         self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testTheJudgeFollowsTheGuesserUntilItGetsAModelOfItsOwn(): void
+    {
+        $client = $this->client(self::anthropicList());
+        $this->settings()->choose(Role::Drawer, Provider::Anthropic, null, 'claude-haiku-5-5', false, 'sk-ant-api03-0123456789abcdef3f9a');
+
+        $crawler = $this->get($client, '/en/models/judge');
+        self::assertSelectorTextContains('h1', 'Which AI judges the answers?');
+        self::assertSelectorTextContains('.same-as-drawer button', 'The same AI as the one that guesses');
+
+        // A model of its own, then back to the guesser's.
+        $this->settings()->choose(Role::Judge, Provider::Anthropic, null, 'claude-sonnet-5-5', false);
+        self::assertSame('claude-sonnet-5-5', $this->settings()->forRole(Role::Judge)->model);
+        self::assertSame('claude-haiku-5-5', $this->settings()->forRole(Role::Guesser)->model);
+        $client->submit($crawler->filter('.same-as-drawer')->form());
+        self::assertResponseRedirects('/en/models');
+        $this->get($client, '/en/models');
+        self::assertSelectorTextContains('.role-line.follows:nth-child(3)', 'It judges the answers too.');
     }
 
     public function testTheHomePageLeadsToTheScreen(): void

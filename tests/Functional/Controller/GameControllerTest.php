@@ -117,10 +117,10 @@ final class GameControllerTest extends WebTestCase
         $client->request('GET', '/en/health?fresh=1');
         $report = json_decode((string) $client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
         self::assertTrue($report['ok']);
-        self::assertSame(['drawer', 'guesser'], array_column($report['roles'], 'role'));
+        self::assertSame(['drawer', 'guesser_judge'], array_column($report['roles'], 'role'), 'The judge follows the guesser');
     }
 
-    public function testTheHealthCardIsOneLineWhenTheGuesserFollowsTheDrawer(): void
+    public function testTheHealthCardIsOneLineWhenTheOtherRolesFollowTheDrawer(): void
     {
         $client = self::createClient();
         self::scriptModel($client, ['circle', 'circle'], chosen: false);
@@ -131,7 +131,7 @@ final class GameControllerTest extends WebTestCase
 
         self::assertTrue($report['ok']);
         self::assertCount(1, $report['roles']);
-        self::assertSame('both', $report['roles'][0]['role']);
+        self::assertSame('drawer_guesser_judge', $report['roles'][0]['role'], 'One model plays every role');
         self::assertSame('claude-haiku-5-5 chez Anthropic', $report['roles'][0]['model']);
         $crawler = $client->request('GET', '/fr');
         self::assertStringContainsString('Il dessine et devine', $crawler->filter('.health')->attr('data-health-labels-value') ?? '');
@@ -148,7 +148,7 @@ final class GameControllerTest extends WebTestCase
         $client->request('GET', '/en/health?fresh=1');
         $report = json_decode((string) $client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
 
-        self::assertSame(['drawer', 'guesser'], array_column($report['roles'], 'role'));
+        self::assertSame(['drawer', 'guesser_judge'], array_column($report['roles'], 'role'), 'The judge follows the guesser');
         self::assertSame(['claude-haiku-5-5 at Anthropic', 'qwen at http://gate:8001'], array_column($report['roles'], 'model'));
     }
 

@@ -2,11 +2,7 @@
 <section class="health" aria-live="polite"
          data-controller="health"
          data-health-url-value="{{ path('health') }}"
-         data-health-labels-value="{{ {
-             drawer: 'role.drawer'|trans,
-             guesser: 'role.guesser'|trans,
-             both: 'role.both'|trans,
-         }|json_encode }}">
+         data-health-labels-value="{{ ['drawer', 'guesser', 'judge', 'drawer_guesser', 'guesser_judge', 'drawer_guesser_judge']|reduce((labels, roles) => labels|merge({(roles): ('role.' ~ roles)|trans}), {})|json_encode }}">
     <p class="health-checking" data-health-target="checking">{{ 'status.checking_models'|trans }}</p>
     <p class="health-checking" data-health-target="slow" hidden>{{ 'status.models_slow'|trans }}</p>
     <ul data-health-target="list"></ul>

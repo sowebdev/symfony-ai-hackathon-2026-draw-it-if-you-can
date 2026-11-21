@@ -77,8 +77,8 @@ final readonly class ModelHealth
     }
 
     /**
-     * The report as the home page shows it: one line per role with a model of its own, and one line for
-     * "it draws and guesses" when the guesser follows the drawer.
+     * The report as the home page shows it: one line per model, named by the roles it plays, in the order of
+     * the roles: "drawer_guesser_judge" when the guesser and the judge follow the drawer (role.* labels).
      *
      * @param list<array{role: string, model: string, ok: bool, problem: ?string, follows: ?string}> $report
      *
@@ -86,14 +86,17 @@ final readonly class ModelHealth
      */
     public static function lines(array $report): array
     {
-        $followed = array_column(array_filter($report, static fn (array $entry): bool => null !== $entry['follows']), 'follows');
+        $plays = [];
+        foreach ($report as $entry) {
+            $plays[$entry['follows'] ?? $entry['role']][] = $entry['role'];
+        }
         $lines = [];
         foreach ($report as $entry) {
             if (null !== $entry['follows']) {
                 continue;
             }
             $lines[] = [
-                'role' => \in_array($entry['role'], $followed, true) && Role::Drawer->value === $entry['role'] ? 'both' : $entry['role'],
+                'role' => implode('_', $plays[$entry['role']]),
                 'model' => $entry['model'],
                 'ok' => $entry['ok'],
                 'problem' => $entry['problem'],

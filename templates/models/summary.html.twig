@@ -52,7 +52,7 @@
                             </span>
                             {% if account.isUsed %}
                                 <button type="button" class="link" disabled>{{ 'action.forget'|trans }}</button>
-                                <small class="hint">{{ (account.usedBy|length > 1 ? "models.used_by_both" : "models.used_by_" ~ account.usedBy[0].value)|trans }}</small>
+                                <small class="hint">{{ ('models.used_by_' ~ account.usedBy|map(role => role.value)|join('_'))|trans }}</small>
                             {% else %}
                                 {{ form_start(forget[account.id], {attr: {class: 'forget'}}) }}
                                     {{ form_widget(forget[account.id].forget, {attr: {class: 'link'}}) }}

@@ -5,6 +5,7 @@ namespace App\Ai;
 use App\Drawing\GridStroke;
 use App\Drawing\StrokeRenderer;
 use App\Drawing\StrokeTracer;
+use App\Game\Language;
 use App\Game\WordMatcher;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -58,7 +59,10 @@ final readonly class ModelCheck
     public function run(Role $role, ?int $budgetS = Models::REQUEST_LIMIT_S): ModelCheckResult
     {
         $deadline = null === $budgetS ? null : microtime(true) + $budgetS;
-        // Both roles read images: the guesser names the drawing, the drawer looks at its own to add
+        if (Role::Judge === $role) {
+            return $this->checkJudges(self::remaining($deadline));
+        }
+        // Both other roles read images: the guesser names the drawing, the drawer looks at its own to add
         // details. The drawer must also call a tool, or it cannot draw at all.
         $seen = $this->checkSeesImages($role, self::remaining($deadline));
         if (null !== $seen->problem || Role::Drawer !== $role) {
@@ -111,6 +115,21 @@ final readonly class ModelCheck
         }
 
         return $setup->reasoningOff ? 'advice.reasoning_choose' : 'advice.reasoning_tick';
+    }
+
+    /**
+     * The judge's own question on a pair whose link is plain: any one label will do, the check is that
+     * the model answers with a label at all, in time.
+     */
+    private function checkJudges(?int $maxDurationS): ModelCheckResult
+    {
+        $answer = $this->models->invoke(Role::Judge, Judge::question('kitten', 'cat', Language::English), maxTokens: OneWordModel::MAX_TOKENS_FOR_A_WORD, maxDurationS: $maxDurationS)->asText();
+        if (null !== Judge::label($answer)) {
+            return new ModelCheckResult(null, $answer);
+        }
+        $this->logger->info('A model gave no label in the check of the judge.', ['answer' => mb_substr($answer, 0, 200)]);
+
+        return new ModelCheckResult(new Problem('problem.no_label', advice: $this->reasoningAdvice(Role::Judge)), $answer);
     }
 
     /**

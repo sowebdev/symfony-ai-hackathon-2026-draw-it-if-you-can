@@ -10,12 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Olaf, a penguin, is the AI of the game (name set by `GAME_AI_NAME`). Each word he guesses pops in his bubble; he hops, sways and jumps for joy.
-- A judge for every answer, the player's, Olaf's and the agent's: accepted, warm or refused. The word or one typo of it is accepted by code; otherwise the guessing model names the link with one label, kept per pair, and the code decides ([ADR 0006](docs/adr/0006-the-judge-is-the-guessing-model-with-a-strict-label-and-a-cache.md)).
+- A judge for every answer, the player's, Olaf's and the agent's: accepted, warm or refused. The word or one typo of it is accepted by code; otherwise the guessing model names the link with one label, kept per pair, and the code decides ([ADR 0006](docs/adr/0006-the-judge-a-strict-label-a-cache-and-the-order-of-the-words.md)).
 - A walrus referee who whistles « ça chauffe » and « c'est juste » for everyone.
 - The round in three sides: our team in yellow on the left, the sheet and the walrus in the middle, the agent in orange on the right as a robot with a terminal bubble. Alone, the walrus sits on a high chair. A top bar that never moves, with « Quitter » on the left.
 - The game settings, on their own screen: themes, who draws, number and length of rounds, and the easy mode, where the judge accepts synonyms and very close words. A game keeps the settings it started with.
 - `make smoke` plays a solo game and a duel in a real browser, at two widths, against a scripted model; the CI runs it.
 - The walrus thinks aloud: while the judge decides on a word, he repeats it with one of ten phrases (« "chaton" ? Une seconde… »), in turn.
+- The judge has its own line on the models screen: by default it uses the guesser's model, and it can be given another one, a faster one for instance (« Une autre IA pour juger ? »).
 
 ### Changed
 

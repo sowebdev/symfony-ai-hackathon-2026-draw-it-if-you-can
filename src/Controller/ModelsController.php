@@ -114,7 +114,7 @@ final class ModelsController extends AbstractController
             'role' => $role,
             'others' => $this->others($role, $draft),
             'saved' => array_values(array_map(static fn (Provider $provider): string => $provider->value, array_filter(Provider::cases(), fn (Provider $provider): bool => $this->plan->hasKeyFor($provider, $draft)))),
-            'same' => null !== $role->fallback() ? $this->sameForm()->createView() : null,
+            'same' => null !== $role->fallback() ? $this->sameForm($role)->createView() : null,
             'back' => isset($this->plan->choices($draft)[Role::Drawer->value]) ? $this->generateUrl('models') : $this->generateUrl('home'),
         ], $this->statusOf($form));
     }
@@ -223,15 +223,18 @@ final class ModelsController extends AbstractController
     }
 
     /**
-     * "The same AI as the one that draws": the guesser has no model of its own again.
+     * "The same AI as the one that draws" (or guesses): the role has no model of its own again, and follows its fallback.
      */
-    #[Route('/guesser/same', name: 'models_same', methods: ['POST'])]
-    public function same(Request $request): Response
+    #[Route('/{role}/same', name: 'models_same', requirements: ['role' => new EnumRequirement(Role::class)], methods: ['POST'])]
+    public function same(Request $request, Role $role): Response
     {
-        $form = $this->sameForm();
+        if (null === $role->fallback()) {
+            return $this->redirectToRoute('models');
+        }
+        $form = $this->sameForm($role);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->drafts->put(($this->drafts->get() ?? new ModelDraft())->withRole(Role::Guesser, null));
+            $this->drafts->put(($this->drafts->get() ?? new ModelDraft())->withRole($role, null));
         }
 
         return $this->redirectToRoute('models');
@@ -246,8 +249,10 @@ final class ModelsController extends AbstractController
     {
         $draft = $this->drafts->get() ?? new ModelDraft();
         try {
-            $drawer = $this->plan->setup(Role::Drawer, $draft);
-            $guesser = $this->plan->setup(Role::Guesser, $draft);
+            $setups = [];
+            foreach (Role::cases() as $role) {
+                $setups[$role->value] = $this->plan->setup($role, $draft);
+            }
         } catch (NoModelException) {
             return $this->redirectToRoute('models_provider', ['role' => Role::Drawer->value]);
         } catch (EncryptionException $exception) {
@@ -259,7 +264,7 @@ final class ModelsController extends AbstractController
 
         // A model that loads into memory takes tens of seconds on its first call.
         set_time_limit(300);
-        $models = $this->models->with($drawer, $guesser);
+        $models = $this->models->with($setups);
         $check = $this->modelCheck->with($models);
         $own = $this->plan->choices($draft);
         $results = [];
@@ -356,9 +361,9 @@ final class ModelsController extends AbstractController
     /**
      * @return FormInterface<mixed>
      */
-    private function sameForm(): FormInterface
+    private function sameForm(Role $role): FormInterface
     {
-        return $this->createFormBuilder(null, ['action' => $this->generateUrl('models_same')])->add('same', SubmitType::class, ['label' => 'models.same_as_drawer'])->getForm();
+        return $this->createFormBuilder(null, ['action' => $this->generateUrl('models_same', ['role' => $role->value])])->add('same', SubmitType::class, ['label' => 'models.same_as_'.$role->fallback()?->value])->getForm();
     }
 
     /**

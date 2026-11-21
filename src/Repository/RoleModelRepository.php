@@ -36,6 +36,9 @@ class RoleModelRepository extends ServiceEntityRepository
      */
     public function usingAccount(ProviderAccount $account): array
     {
-        return array_map(static fn (RoleModel $row): Role => $row->getRole(), $this->findBy(['account' => $account], ['id' => 'ASC']));
+        // In the order of the roles, which names them together: « Sert à dessiner et à juger ».
+        $roles = array_map(static fn (RoleModel $row): Role => $row->getRole(), $this->findBy(['account' => $account]));
+
+        return array_values(array_filter(Role::cases(), static fn (Role $role): bool => \in_array($role, $roles, true)));
     }
 }

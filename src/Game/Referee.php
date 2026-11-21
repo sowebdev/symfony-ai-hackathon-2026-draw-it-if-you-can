@@ -16,7 +16,7 @@ use Symfony\Component\Lock\LockFactory;
  * then gives its verdict, at once for the exact word, after the model for the others (judge). The round
  * is settled in the order the words were said (Round::settle), so a word that waits for the model is
  * never overtaken by a word said after it. One lock per round: two requests never settle it at once.
- * Why: docs/adr/0006-the-judge-is-the-guessing-model-with-a-strict-label-and-a-cache.md.
+ * Why: docs/adr/0006-the-judge-a-strict-label-a-cache-and-the-order-of-the-words.md.
  */
 final readonly class Referee
 {
