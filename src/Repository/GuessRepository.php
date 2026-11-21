@@ -18,10 +18,19 @@ class GuessRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param bool $fresh Read again the words already loaded: other requests judge them
+     *
      * @return list<Guess>
      */
-    public function findByRound(Round $round): array
+    public function findByRound(Round $round, bool $fresh = false): array
     {
-        return $this->findBy(['round' => $round], ['id' => 'ASC']);
+        $guesses = $this->findBy(['round' => $round], ['id' => 'ASC']);
+        if ($fresh) {
+            foreach ($guesses as $guess) {
+                $this->getEntityManager()->refresh($guess);
+            }
+        }
+
+        return $guesses;
     }
 }

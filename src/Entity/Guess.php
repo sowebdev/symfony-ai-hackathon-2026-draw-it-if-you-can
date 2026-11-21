@@ -9,7 +9,8 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * A word said to guess a drawing: by the AI while the player draws, by the player while the AI
- * draws, and in a duel by the rival agent in both.
+ * draws, and in a duel by the rival agent in both. It is kept as soon as it is said, pending, and
+ * gets its verdict once judged (App\Game\Referee).
  */
 #[ORM\Entity(repositoryClass: GuessRepository::class)]
 class Guess
@@ -32,9 +33,9 @@ class Guess
         private int $saidAfterMs,
         #[ORM\Column(length: 10, enumType: Author::class, options: ['default' => 'player'])]
         private Author $author,
-        /** What the judge said of the word: warm is neither found nor wrong. */
-        #[ORM\Column(length: 10, enumType: Verdict::class, options: ['default' => 'refused'])]
-        private Verdict $verdict = Verdict::Refused,
+        /** What the judge said of the word, warm being neither found nor wrong; null while it is being judged. */
+        #[ORM\Column(length: 10, nullable: true, enumType: Verdict::class)]
+        private ?Verdict $verdict = null,
     ) {
     }
 
@@ -63,14 +64,30 @@ class Guess
         return $this->author;
     }
 
-    public function getVerdict(): Verdict
+    /**
+     * Null while the word is being judged.
+     */
+    public function getVerdict(): ?Verdict
     {
         return $this->verdict;
     }
 
+    public function isPending(): bool
+    {
+        return null === $this->verdict;
+    }
+
+    /**
+     * The verdict, once: a word refused for a judge that took too long keeps that verdict when the judge answers late.
+     */
+    public function judged(Verdict $verdict): void
+    {
+        $this->verdict ??= $verdict;
+    }
+
     public function isWarm(): bool
     {
-        return $this->verdict->isWarm();
+        return true === $this->verdict?->isWarm();
     }
 
     public function isAccepted(): bool

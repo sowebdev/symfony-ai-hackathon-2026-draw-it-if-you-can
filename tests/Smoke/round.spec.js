@@ -198,3 +198,28 @@ test('a duel, the AI draws: the rival answers beside us, the walrus judges under
     await expect(page.locator('.round-end h2.side-team')).toBeVisible();
     await checkLayout(page, { referee: 'field' });
 });
+
+test('a duel race: the word said first wins, even when its judge is slower', async ({ page }) => {
+    await startGame(page, 'duel');
+    await page.waitForURL(/\/lobby$/);
+    await callTool(page.request, 'choose_nickname', { nickname: 'Smokey' });
+    await expect(page.locator('.agent-status.connected')).toContainText('Smokey');
+    await leaveFor(page, page.getByRole('button', { name: 'Start the game' }));
+    await waitForRound(page);
+    await expect(page.locator('[data-ai-drawing-target="thinking"]')).toBeHidden({ timeout: 15_000 });
+
+    // The player says "kitty …": the judge takes 3 s, and the walrus thinks aloud meanwhile. One word per
+    // width: the judge keeps the pairs it judged, and would answer at once the second time.
+    const kitty = `kitty ${test.info().project.name}`;
+    await answer(page, kitty);
+    await expect(page.locator('.referee-bubble.referee-thinking')).toContainText(kitty);
+    // The rival says the exact word after it: known at once, but it waits for "kitty".
+    const rival = await callTool(page.request, 'submit_answer', { word: 'cat' });
+    expect(rival).toContain('too late');
+
+    await expect(page.locator('[data-ai-drawing-target="list"] li.accepted')).toHaveText(kitty);
+    await expect(page.locator('.referee-bubble.referee-accepted')).toBeVisible();
+    await page.reload();
+    await expect(page.locator('.round-end h2.side-team')).toBeVisible();
+    await checkLayout(page, { referee: 'field' });
+});

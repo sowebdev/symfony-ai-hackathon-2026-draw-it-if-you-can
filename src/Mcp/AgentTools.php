@@ -280,7 +280,7 @@ final readonly class AgentTools
 
         return match (true) {
             $current->isFound() && $answer->isAccepted() => \sprintf('accepted. Right! "%s" was the word: you win %d points. Call wait_for_your_turn for the next round.', $current->getTargetWord(), $this->gauge->pointsOf($current)),
-            $answer->getVerdict()->isAccepted() => \sprintf('accepted, but too late: "%s" was found first. Call wait_for_your_turn for the next round.', $answer->getWord()),
+            true === $answer->getVerdict()?->isAccepted() => \sprintf('accepted, but too late: "%s" was found first. Call wait_for_your_turn for the next round.', $answer->getWord()),
             $answer->isWarm() => \sprintf('warm: "%s" is close to the word, but it is not the word. Look at the drawing again, and try a word nearer to it in %d s.', $answer->getWord(), $seconds),
             default => \sprintf('refused: "%s" is wrong. Look at the drawing again, and try another word in %d s.', $answer->getWord(), $seconds),
         };
@@ -355,7 +355,7 @@ final readonly class AgentTools
     {
         return array_values(array_map(
             static fn (Guess $guess): string => $guess->getWord(),
-            array_filter($this->guesses->findByRound($round), static fn (Guess $guess): bool => !$guess->isAccepted() && \in_array($guess->getAuthor(), $authors, true)),
+            array_filter($this->guesses->findByRound($round), static fn (Guess $guess): bool => !$guess->isAccepted() && !$guess->isPending() && \in_array($guess->getAuthor(), $authors, true)),
         ));
     }
 

@@ -28,7 +28,7 @@
                 <h2>{{ 'heading.rival_answers'|trans({'%name%': round.game.agentDisplayName ?? 'label.rival_unknown'|trans}) }}</h2>
                 <ol data-agent-target="answers">
                     {% for answer in rival_answers %}
-                        <li data-answer-id="{{ answer.id }}" class="{{ answer.accepted ? 'accepted' : (answer.warm ? 'warm') }}">{{ answer.word }}</li>
+                        <li data-answer-id="{{ answer.id }}" class="{{ answer.accepted ? 'accepted' : (answer.warm ? 'warm' : (answer.pending ? 'pending')) }}">{{ answer.word }}</li>
                     {% endfor %}
                 </ol>
             </div>

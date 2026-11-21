@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Ai\Judge;
 use App\Drawing\InvalidStroke;
 use App\Drawing\StrokePoints;
 use App\Entity\Guess;
@@ -12,6 +11,7 @@ use App\Game\AgentLoop;
 use App\Game\Author;
 use App\Game\DrawingLoop;
 use App\Game\GuessLoop;
+use App\Game\Referee;
 use App\Game\ScoreGauge;
 use App\Repository\GuessRepository;
 use App\Repository\HintRepository;
@@ -148,28 +148,22 @@ final class RoundController extends AbstractController
      * A word the player types to guess the drawing of the AI, judged: accepted, warm or refused.
      */
     #[Route('/answers', name: 'round_answer', methods: ['POST'])]
-    public function answer(Round $round, #[MapRequestPayload] NewAnswer $payload, Judge $judge): JsonResponse
+    public function answer(Round $round, #[MapRequestPayload] NewAnswer $payload, Referee $referee): JsonResponse
     {
         $this->denyUnlessAiDraws($round);
         if ($round->isOver()) {
             return $this->roundIsOver();
         }
 
-        // The word is said now, whatever the time the judge takes.
-        $saidAfterMs = $round->elapsedMs();
-        $word = trim($payload->word);
-        $game = $round->getGame();
-        $verdict = $judge->judge($word, $round->getTargetWord(), $game->getLanguage(), $game->isEasyMode());
-        $guess = new Guess($round, $word, $saidAfterMs, Author::Player, $verdict);
-        $this->entityManager->persist($guess);
-        if ($verdict->isAccepted()) {
-            $round->markFound($guess);
-        }
-        $this->entityManager->flush();
+        // Kept at once, at the moment it is said; answered once the words said before it are settled.
+        $guess = $referee->hear($round, trim($payload->word), Author::Player);
+        $referee->judge($guess);
 
         return $this->json([
             'word' => $guess->getWord(),
-            'verdict' => $guess->getVerdict()->value,
+            'verdict' => $guess->getVerdict()?->value,
+            // This word found the round; "found" alone may be a word said before it, by the rival.
+            'accepted' => $guess->isAccepted(),
             'found' => $round->isFound(),
             'foundAfterMs' => $round->getFoundAfterMs(),
             'targetWord' => $round->isFound() ? $round->getTargetWord() : null,

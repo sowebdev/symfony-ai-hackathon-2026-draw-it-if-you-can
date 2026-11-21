@@ -15,6 +15,7 @@ export default class extends Controller {
         this.source = new EventSource(this.streamUrlValue);
         this.source.addEventListener('hint', (event) => this.addHint(JSON.parse(event.data)));
         this.source.addEventListener('tip', (event) => this.addTip(JSON.parse(event.data)));
+        this.source.addEventListener('heard', (event) => this.heard(JSON.parse(event.data)));
         this.source.addEventListener('answer', (event) => this.addAnswer(JSON.parse(event.data)));
         this.source.addEventListener('rival_found', () => {
             this.source.close();
@@ -69,6 +70,13 @@ export default class extends Controller {
         this.bubbleTarget.classList.add('pop');
     }
 
+    // The rival says its word at once; the referee thinks about it until its verdict comes ("answer").
+    heard({ id, word }) {
+        this.heardId = id;
+        this.say(word);
+        this.dispatch('thinking', { prefix: 'referee', target: window, detail: { word } });
+    }
+
     addAnswer({ id, word, right, verdict }) {
         if (!this.hasAnswersTarget || this.answersTarget.querySelector(`[data-answer-id="${id}"]`)) {
             return;
@@ -79,7 +87,9 @@ export default class extends Controller {
         item.classList.toggle('accepted', right);
         item.classList.toggle('warm', verdict === 'warm');
         this.answersTarget.append(item);
-        this.say(word);
+        if (id !== this.heardId) {
+            this.say(word);
+        }
         this.dispatch('verdict', { prefix: 'referee', target: window, detail: { verdict: right ? 'accepted' : verdict } });
     }
 

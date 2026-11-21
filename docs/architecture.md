@@ -20,7 +20,7 @@ Inside the game, the controllers stay thin; the rules (`src/Game`) decide, the A
 
 ## The principles
 
-- **The model plays, the code judges.** A model never decides what counts. `WordMatcher` accepts the word or one typo; otherwise `Judge` asks the guessing model for one label and `Verdict` decides ([ADR 0006](adr/0006-the-judge-is-the-guessing-model-with-a-strict-label-and-a-cache.md)). `OneWordModel` checks that a model said one word, `ModelCheck` tries each model on a known task. Points, time and the end of a round are the game's.
+- **The model plays, the code judges.** A model never decides what counts. `WordMatcher` accepts the word or one typo; otherwise `Judge` asks the guessing model for one label and `Verdict` decides. Every answer, whoever gives it, goes through `Referee`: kept at once, pending, then judged, and the round is settled in the order the words were said, so a slow verdict never loses to a word said after it ([ADR 0006](adr/0006-the-judge-is-the-guessing-model-with-a-strict-label-and-a-cache.md)). `OneWordModel` checks that a model said one word, `ModelCheck` tries each model on a known task. Points, time and the end of a round are the game's.
 - **Two roles, any model.** The drawer and the guesser each have a provider, a model and a key (`Models`, from the accounts and role models stored by the models screen; a guesser without a model of its own uses the drawer's), on the platform bridge of that provider in Symfony AI, or on the Generic one for any OpenAI-compatible endpoint: Ollama, LM Studio, llama.cpp or OpenRouter. Both must see images; the drawer must call tools.
 - **The model draws with a tool.** `Pen` is a Symfony AI tool (`#[AsTool]`), `draw_stroke`, on the 50 x 50 grid of SketchAgent. The answer is streamed, and each stroke goes to the browser as soon as its call is written, without waiting for the end of the answer (`ToolCallAssembler`, see [Contributions to Symfony AI](../README.md#contributions-to-symfony-ai)).
 - **The hand is code.** The model writes grid cells; `StrokeTracer` turns them into a line that wobbles, overshoots and speeds up like a pen, deterministically. `StrokeRenderer` draws strokes into a PNG with GD, which is what the guesser, and the drawer adding details, look at.
@@ -50,9 +50,12 @@ sequenceDiagram
         M-->>G: draw_stroke(cells)...
         G-->>B: stroke
     end
+    B->>B: the walrus repeats the word while he thinks
     B->>G: an answer (HTTP)
+    G->>D: Referee: kept, pending, at the moment it was said
     G->>G: Judge: WordMatcher, else one label from the guesser, kept
-    G-->>B: accepted, warm or refused
+    G->>D: settled in the order the words were said (one lock per round)
+    G-->>B: accepted, warm or refused, once the words said before it are settled
 ```
 
 ## You draw, the AI guesses
@@ -68,8 +71,10 @@ sequenceDiagram
         G->>G: StrokeRenderer, drawing to PNG
         G->>M: the image and the words said so far: one new word
         M-->>G: a word
-        G->>G: OneWordModel checks it, Judge gives its verdict
-        G-->>B: the word and its verdict (SSE), or "found"
+        G->>G: OneWordModel checks it, Referee keeps it
+        G-->>B: heard: Olaf says the word, the walrus thinks (SSE)
+        G->>G: Judge, then the round settled in the order said
+        G-->>B: the verdict (SSE), or "found"
     end
 ```
 

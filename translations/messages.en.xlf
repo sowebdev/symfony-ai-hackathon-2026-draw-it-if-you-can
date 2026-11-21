@@ -1113,6 +1113,56 @@
                 <target>easy mode</target>
                 <note>Home page summary: the easy mode is on</note>
             </trans-unit>
+            <trans-unit id="referee.thinking_1" resname="referee.thinking_1">
+                <source>referee.thinking_1</source>
+                <target>"%word%"? One second…</target>
+                <note>The walrus referee repeats an answer while the judge decides (one of ten, in turn); %word% is the answer</note>
+            </trans-unit>
+            <trans-unit id="referee.thinking_2" resname="referee.thinking_2">
+                <source>referee.thinking_2</source>
+                <target>"%word%"… You say so?</target>
+                <note>The walrus referee repeats an answer while the judge decides (one of ten, in turn); %word% is the answer</note>
+            </trans-unit>
+            <trans-unit id="referee.thinking_3" resname="referee.thinking_3">
+                <source>referee.thinking_3</source>
+                <target>"%word%"? I see…</target>
+                <note>The walrus referee repeats an answer while the judge decides (one of ten, in turn); %word% is the answer</note>
+            </trans-unit>
+            <trans-unit id="referee.thinking_4" resname="referee.thinking_4">
+                <source>referee.thinking_4</source>
+                <target>Hmm, "%word%"… Let's see.</target>
+                <note>The walrus referee repeats an answer while the judge decides (one of ten, in turn); %word% is the answer</note>
+            </trans-unit>
+            <trans-unit id="referee.thinking_5" resname="referee.thinking_5">
+                <source>referee.thinking_5</source>
+                <target>"%word%"? Let me think.</target>
+                <note>The walrus referee repeats an answer while the judge decides (one of ten, in turn); %word% is the answer</note>
+            </trans-unit>
+            <trans-unit id="referee.thinking_6" resname="referee.thinking_6">
+                <source>referee.thinking_6</source>
+                <target>"%word%"… Interesting.</target>
+                <note>The walrus referee repeats an answer while the judge decides (one of ten, in turn); %word% is the answer</note>
+            </trans-unit>
+            <trans-unit id="referee.thinking_7" resname="referee.thinking_7">
+                <source>referee.thinking_7</source>
+                <target>"%word%"? Checking.</target>
+                <note>The walrus referee repeats an answer while the judge decides (one of ten, in turn); %word% is the answer</note>
+            </trans-unit>
+            <trans-unit id="referee.thinking_8" resname="referee.thinking_8">
+                <source>referee.thinking_8</source>
+                <target>"%word%"? Not so fast…</target>
+                <note>The walrus referee repeats an answer while the judge decides (one of ten, in turn); %word% is the answer</note>
+            </trans-unit>
+            <trans-unit id="referee.thinking_9" resname="referee.thinking_9">
+                <source>referee.thinking_9</source>
+                <target>"%word%"… Let me check my notes.</target>
+                <note>The walrus referee repeats an answer while the judge decides (one of ten, in turn); %word% is the answer</note>
+            </trans-unit>
+            <trans-unit id="referee.thinking_10" resname="referee.thinking_10">
+                <source>referee.thinking_10</source>
+                <target>"%word%"? Wait a moment…</target>
+                <note>The walrus referee repeats an answer while the judge decides (one of ten, in turn); %word% is the answer</note>
+            </trans-unit>
             <trans-unit id="referee.warm" resname="referee.warm">
                 <source>referee.warm</source>
                 <target>Toot! Getting warm!</target>

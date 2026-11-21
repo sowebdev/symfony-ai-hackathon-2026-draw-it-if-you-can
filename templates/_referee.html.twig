@@ -4,7 +4,10 @@
    him is already aria-live: no second one here. #}
 {% set found = found|default(false) %}
 {% set chair = chair|default(false) %}
-<div class="referee{{ chair ? ' on-chair' }}{{ found ? ' is-speaking is-accepted' }}" data-controller="referee" data-action="referee:verdict@window->referee#hear">
+{# While a word waits for its verdict, he repeats it with one of ten phrases, in turn (referee.thinking_N, %word% replaced by the browser). #}
+<div class="referee{{ chair ? ' on-chair' }}{{ found ? ' is-speaking is-accepted' }}" data-controller="referee"
+     data-referee-phrases-value="{{ range(1, 10)|map(n => ('referee.thinking_' ~ n)|trans)|json_encode }}"
+     data-action="referee:verdict@window->referee#hear referee:thinking@window->referee#think">
     <svg class="referee-walrus" viewBox="0 0 140 120" width="64" height="55" fill="none" stroke="#2b2b2b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M20 95 C10 50 40 20 70 20 C100 20 130 50 120 95 Z" fill="#d9b99b"/>
         <circle cx="52" cy="50" r="5" fill="#2b2b2b"/><circle cx="88" cy="50" r="5" fill="#2b2b2b"/>
@@ -15,6 +18,7 @@
         <path d="M30 32 h80" stroke-width="3"/><rect x="40" y="18" width="60" height="14" rx="3" fill="#2b2b2b"/>
     </svg>
     {% if chair %}<svg class="referee-chair" viewBox="0 0 120 150" width="110" height="137" fill="none" stroke="#2b2b2b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M30 20 v120 M90 20 v120 M30 70 h60 M30 110 h60 M20 140 h20 M80 140 h20"/><rect x="18" y="6" width="84" height="16" rx="3" fill="#fff4bf"/></svg>{% endif %}
+    <p class="referee-bubble referee-thinking" data-referee-target="thinking" hidden></p>
     <p class="referee-bubble referee-warm" data-referee-target="warm" hidden>{{ 'referee.warm'|trans }}</p>
     <p class="referee-bubble referee-accepted" data-referee-target="accepted" {{ found ? '' : 'hidden' }}>{{ 'referee.accepted'|trans }}</p>
 </div>

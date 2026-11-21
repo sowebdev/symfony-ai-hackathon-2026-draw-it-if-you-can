@@ -154,8 +154,8 @@ final class JudgeTest extends WebTestCase
 
         $events = self::readEvents($this->client, $round.'/guesses');
 
-        self::assertSame('guess', $events[0]['type']);
-        self::assertSame(['word' => 'lion', 'verdict' => 'warm'], ['word' => $events[0]['data']['word'], 'verdict' => $events[0]['data']['verdict']]);
+        self::assertSame(['heard', 'guess'], array_column(\array_slice($events, 0, 2), 'type'), 'Olaf says his word, then the referee gives his verdict');
+        self::assertSame(['word' => 'lion', 'verdict' => 'warm'], ['word' => $events[1]['data']['word'], 'verdict' => $events[1]['data']['verdict']]);
         $this->client->request('GET', $round);
         self::assertSelectorTextContains('li.warm', 'lion');
     }
@@ -168,8 +168,8 @@ final class JudgeTest extends WebTestCase
 
         $events = self::readEvents($this->client, $round.'/guesses');
 
-        self::assertSame(['guess', 'found'], array_column($events, 'type'));
-        self::assertSame('accepted', $events[0]['data']['verdict']);
+        self::assertSame(['heard', 'guess', 'found'], array_column($events, 'type'));
+        self::assertSame('accepted', $events[1]['data']['verdict']);
     }
 
     /**

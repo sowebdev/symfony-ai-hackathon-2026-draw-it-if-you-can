@@ -192,6 +192,32 @@
     animation: bubble-pop 0.35s ease-out;
 }
 
+/* While the judge decides, he repeats the word in grey ink, a hand on his chin: awake, but not whistling. */
+.referee.is-thinking {
+    opacity: 1;
+}
+
+.referee.is-thinking .referee-walrus {
+    animation: referee-ponder 1.6s ease-in-out infinite;
+    transform-origin: 50% 100%;
+}
+
+.referee-bubble.referee-thinking {
+    color: var(--ink);
+    border-color: #868e96;
+    border-style: dashed;
+    font-style: italic;
+}
+
+.referee-bubble.referee-thinking::before {
+    border-right-color: #868e96;
+}
+
+@keyframes referee-ponder {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(-3deg); }
+}
+
 @keyframes referee-sway {
     0%, 100% { transform: rotate(0deg); }
     30% { transform: rotate(-6deg); }
@@ -200,6 +226,7 @@
 
 @media (prefers-reduced-motion: reduce) {
     .referee.is-speaking .referee-walrus,
+    .referee.is-thinking .referee-walrus,
     .referee.is-speaking .referee-bubble {
         animation: none;
     }

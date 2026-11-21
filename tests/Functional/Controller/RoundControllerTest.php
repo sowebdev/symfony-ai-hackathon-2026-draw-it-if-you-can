@@ -94,11 +94,13 @@ final class RoundControllerTest extends WebTestCase
         $events = $this->streamGuesses($round);
 
         self::assertSame([
+            ['heard', 'dog'],
             ['guess', 'dog'],
+            ['heard', 'Cats'],
             ['guess', 'Cats'],
             ['found', null],
         ], array_map(static fn (array $event): array => [$event['type'], $event['data']['word'] ?? null], $events));
-        self::assertIsInt($events[2]['data']['foundAfterMs']);
+        self::assertIsInt($events[4]['data']['foundAfterMs']);
 
         // Once found, the round shows the result and the stream only says so.
         $this->client->request('GET', $round);
@@ -127,9 +129,9 @@ final class RoundControllerTest extends WebTestCase
         $this->addStroke($round, [[10, 10, 0]]);
 
         // Two guesses per unchanged drawing: "Dogs" repeats "dog" and is dropped, then the AI waits.
-        $words = array_column(array_column($this->streamGuesses($round), 'data'), 'word');
+        $guesses = array_filter($this->streamGuesses($round), static fn (array $event): bool => 'guess' === $event['type']);
 
-        self::assertSame(['dog'], $words);
+        self::assertSame(['dog'], array_column(array_column($guesses, 'data'), 'word'));
     }
 
     public function testTheStreamEndsCleanlyWhenTheModelStopsAnswering(): void

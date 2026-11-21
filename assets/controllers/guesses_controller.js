@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 import { seconds } from '../seconds.js';
 
-// The words of the AI, received as server-sent events while the player draws.
+// The words of the AI, received as server-sent events while the player draws: "heard" when said, "guess" once judged.
 // The exact word is recognised by the server. The stream ends with the round: "found", or "over" when the time is up.
 export default class extends Controller {
     static targets = ['list', 'result', 'time', 'olaf', 'bubble'];
@@ -12,6 +12,7 @@ export default class extends Controller {
             return;
         }
         this.source = new EventSource(this.streamUrlValue);
+        this.source.addEventListener('heard', (event) => this.heard(JSON.parse(event.data)));
         this.source.addEventListener('guess', (event) => this.add(JSON.parse(event.data)));
         this.source.addEventListener('found', (event) => this.finish(JSON.parse(event.data).foundAfterMs));
         this.source.addEventListener('over', () => this.stop());
@@ -19,6 +20,13 @@ export default class extends Controller {
 
     disconnect() {
         this.source?.close();
+    }
+
+    // Olaf says his word at once; the referee thinks about it until its verdict comes ("guess").
+    heard({ id, word }) {
+        this.heardId = id;
+        this.say(word);
+        this.dispatch('thinking', { prefix: 'referee', target: window, detail: { word } });
     }
 
     add({ id, word, verdict }) {
@@ -29,7 +37,9 @@ export default class extends Controller {
         item.classList.toggle('warm', verdict === 'warm');
         this.listTarget.append(item);
         this.dispatch('verdict', { prefix: 'referee', target: window, detail: { verdict } });
-        this.say(word);
+        if (id !== this.heardId) {
+            this.say(word);
+        }
     }
 
     // Olaf says the word: it pops in his bubble, he hops and opens his beak (characters.css, .olaf-wrap.is-saying).

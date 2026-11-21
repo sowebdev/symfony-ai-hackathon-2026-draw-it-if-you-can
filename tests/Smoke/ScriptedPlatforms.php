@@ -15,13 +15,15 @@ use Symfony\AI\Platform\Test\MockPlatformFactory;
 
 /**
  * The model of the smoke test, whatever the provider: the word is always "cat", the AI guesses "dog",
- * "kitten", then "cat", and the judge finds "kitten" very close to "cat" and everything else unrelated.
+ * "kitten", then "cat", and the judge finds "kitten" very close to "cat", "kitty…" the same word after
+ * 3 s, and everything else unrelated.
  * It keeps no state: each request of the game builds it again, so it reads what was said from the prompt.
  */
 final readonly class ScriptedPlatforms implements PlatformFactory
 {
     public const string WORD = 'cat';
     public const array GUESSES = ['dog', 'kitten', 'cat'];
+    public const int SLOW_JUDGE_S = 3;
 
     public function create(Provider $provider, ?string $address, #[\SensitiveParameter] ?string $apiKey, ?int $maxDurationS = null): PlatformInterface
     {
@@ -40,7 +42,18 @@ final readonly class ScriptedPlatforms implements PlatformFactory
         if (str_contains($prompt, 'which link there is')) {
             preg_match('/Answer of the player: \\\\"(.+?)\\\\"/', $prompt, $answer);
 
-            return 'kitten' === ($answer[1] ?? null) ? 'very_close' : 'unrelated';
+            $answer = $answer[1] ?? '';
+
+            return match (true) {
+                'kitten' === $answer => 'very_close',
+                // A slow judge, for the race of the duel: "kitty…" counts as the word, after 3 s.
+                str_starts_with($answer, 'kitty') => (static function (): string {
+                    sleep(self::SLOW_JUDGE_S);
+
+                    return 'same_word';
+                })(),
+                default => 'unrelated',
+            };
         }
         if (str_contains($prompt, 'List words the player could draw')) {
             return self::WORD;

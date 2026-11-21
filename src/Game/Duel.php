@@ -2,17 +2,15 @@
 
 namespace App\Game;
 
-use App\Ai\Judge;
 use App\Entity\Guess;
 use App\Entity\Round;
 use App\Repository\GuessRepository;
-use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * The rules of the rival in a duel: an agent connected over MCP guesses the same drawing as the
- * side of the player, whoever draws, and wins the points of a word it finds first. Every answer gets
- * the verdict of the judge (accepted, warm or refused): the exact word, or one typo of it, is accepted
- * by code, the other words by what the judge says of them, in the mode the game started with. It
+ * side of the player, whoever draws, and wins the points of a word it finds first. Every answer goes
+ * through the circuit of the referee, like the player's (Referee): judged accepted, warm or refused, and
+ * settled in the order the words were said, so that the side that said the word first wins it. It
  * answers once every few seconds at most.
  */
 final readonly class Duel
@@ -21,9 +19,8 @@ final readonly class Duel
     public const int ANSWER_GAP_MS = 3000;
 
     public function __construct(
-        private EntityManagerInterface $entityManager,
         private GuessRepository $guesses,
-        private Judge $judge,
+        private Referee $referee,
     ) {
     }
 
@@ -59,13 +56,8 @@ final readonly class Duel
             }
         }
 
-        $verdict = $this->judge->judge($word, $round->getTargetWord(), $game->getLanguage(), $game->isEasyMode());
-        $guess = new Guess($round, $word, $now, Author::Agent, $verdict);
-        $this->entityManager->persist($guess);
-        if ($verdict->isAccepted()) {
-            $round->markFound($guess);
-        }
-        $this->entityManager->flush();
+        $guess = $this->referee->hear($round, $word, Author::Agent);
+        $this->referee->judge($guess);
 
         return $guess;
     }

@@ -16,7 +16,8 @@ use Symfony\Component\HttpFoundation\ServerEvent;
 
 /**
  * What the agent connected over MCP does, pushed to the browser as it comes: the hints and tips
- * of a copilot, the answers of the rival in a duel, and "rival_found" when the rival finds the word.
+ * of a copilot, the answers of the rival in a duel ("heard" as soon as said, "answer" once judged),
+ * and "rival_found" when the rival finds the word.
  * They are written by another request, the MCP one, so the stream reads them from the database.
  */
 final readonly class AgentLoop
@@ -46,6 +47,7 @@ final readonly class AgentLoop
         $sentHint = 0;
         $sentTip = 0;
         $sentAnswer = 0;
+        $heardAnswer = 0;
 
         while (true) {
             $this->entityManager->clear();
@@ -63,10 +65,19 @@ final readonly class AgentLoop
                 }
             }
             foreach ($this->guesses->findByRound($round) as $guess) {
-                if (Author::Agent === $guess->getAuthor() && $guess->getId() > $sentAnswer) {
-                    yield self::answerEvent($guess);
-                    $sentAnswer = (int) $guess->getId();
+                if (Author::Agent !== $guess->getAuthor() || $guess->getId() <= $sentAnswer) {
+                    continue;
                 }
+                // Heard but not judged yet: said once, then its verdict when it comes, in the order said.
+                if ($guess->isPending()) {
+                    if ($guess->getId() > $heardAnswer) {
+                        yield new ServerEvent((string) json_encode(['id' => $guess->getId(), 'word' => $guess->getWord()]), type: 'heard');
+                        $heardAnswer = (int) $guess->getId();
+                    }
+                    break;
+                }
+                yield self::answerEvent($guess);
+                $sentAnswer = (int) $guess->getId();
             }
             if ($round->isFoundByRival()) {
                 yield new ServerEvent((string) json_encode(['foundAfterMs' => $round->getFoundAfterMs()]), type: 'rival_found');
@@ -93,6 +104,6 @@ final readonly class AgentLoop
 
     private static function answerEvent(Guess $guess): ServerEvent
     {
-        return new ServerEvent((string) json_encode(['id' => $guess->getId(), 'word' => $guess->getWord(), 'right' => $guess->isAccepted(), 'verdict' => $guess->getVerdict()->value]), type: 'answer');
+        return new ServerEvent((string) json_encode(['id' => $guess->getId(), 'word' => $guess->getWord(), 'right' => $guess->isAccepted(), 'verdict' => $guess->getVerdict()?->value]), type: 'answer');
     }
 }

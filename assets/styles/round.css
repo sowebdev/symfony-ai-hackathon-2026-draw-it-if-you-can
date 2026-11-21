@@ -485,7 +485,7 @@
     flex-direction: column;
     gap: 0;
     margin: 0;
-    padding-top: 3.4rem;
+    padding-top: 4.6rem;
 }
 
 .referee.on-chair .referee-walrus {
@@ -501,13 +501,17 @@
     height: auto;
 }
 
+/* His bubble sits just above his head and grows upwards: a long one wraps, in the width of the column. */
 .referee.on-chair .referee-bubble {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    bottom: calc(100% - 4.6rem + 0.7rem);
+    left: 50%;
     width: max-content;
-    margin: 0 auto;
+    max-width: 14rem;
+    margin: 0;
+    text-align: center;
+    /* Centred with translate, which the pop animation (a transform) leaves alone. */
+    translate: -50% 0;
     transform-origin: center bottom;
 }
 
@@ -523,6 +527,10 @@
 
 .referee.on-chair .referee-bubble.referee-accepted::before {
     border-top-color: var(--found);
+}
+
+.referee.on-chair .referee-bubble.referee-thinking::before {
+    border-top-color: #868e96;
 }
 
 /* The words: struck through when the player missed, bubbles when the AI calls them out. */
@@ -549,6 +557,12 @@
     border-color: var(--found);
     text-decoration: none;
     font-size: 1.3rem;
+}
+
+/* A word still with the judge, after a reload: not struck through, not coloured yet. */
+.guesses ol li.pending {
+    text-decoration: none;
+    font-style: italic;
 }
 
 /* A warm word ("ça chauffe"): close to the word, in orange and not struck through. */

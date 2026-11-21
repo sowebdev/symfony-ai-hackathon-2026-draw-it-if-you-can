@@ -26,7 +26,7 @@
                 <h2>{{ 'heading.our_words'|trans }}</h2>
                 <ol data-guesses-target="list"{% if round.game.duel %} class="team-words"{% endif %}>
                     {% for guess in guesses %}
-                        <li data-guess-id="{{ guess.id }}" class="{{ guess.accepted ? 'accepted' : (guess.warm ? 'warm') }}">{{ guess.word }}</li>
+                        <li data-guess-id="{{ guess.id }}" class="{{ guess.accepted ? 'accepted' : (guess.warm ? 'warm' : (guess.pending ? 'pending')) }}">{{ guess.word }}</li>
                     {% endfor %}
                 </ol>
                 <p class="result" data-guesses-target="result" hidden>

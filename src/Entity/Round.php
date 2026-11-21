@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Game\Author;
 use App\Game\DrawnBy;
 use App\Game\Theme;
+use App\Game\Verdict;
 use App\Repository\RoundRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -229,6 +230,38 @@ class Round
     public function getFoundAfterMs(): ?int
     {
         return $this->foundAfterMs;
+    }
+
+    /**
+     * Settles the words of this round in the order they were said, whoever said them: the first one
+     * accepted finds the round. A word still being judged holds back the words said after it, so that a
+     * word accepted at once never wins over a word said before it and still with the judge. A word judged
+     * for longer than $judgingLimitMs is refused: its judge is gone.
+     *
+     * @param list<Guess> $guesses All the words of the round
+     *
+     * @return bool Whether a word said before $guess is still being judged: its fate is not settled yet
+     */
+    public function settle(array $guesses, Guess $guess, int $judgingLimitMs, ?\DateTimeImmutable $now = null): bool
+    {
+        $elapsedMs = $this->elapsedMs($now);
+        usort($guesses, static fn (Guess $a, Guess $b): int => [$a->getSaidAfterMs(), $a->getId()] <=> [$b->getSaidAfterMs(), $b->getId()]);
+        $reached = false;
+        foreach ($guesses as $said) {
+            if ($said->isPending() && $elapsedMs - $said->getSaidAfterMs() > $judgingLimitMs) {
+                $said->judged(Verdict::Refused);
+            }
+            if ($said->isPending()) {
+                // Nothing said after it is settled yet; it only matters to $guess if said before it.
+                return !$reached;
+            }
+            if (true === $said->getVerdict()?->isAccepted()) {
+                $this->markFound($said);
+            }
+            $reached = $reached || $said === $guess;
+        }
+
+        return false;
     }
 
     /**

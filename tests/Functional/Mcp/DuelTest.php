@@ -2,15 +2,21 @@
 
 namespace App\Tests\Functional\Mcp;
 
+use App\Game\Author;
 use App\Game\GameSettings;
+use App\Game\Referee;
 use App\Game\Settings;
 use App\Game\Theme;
 use App\Game\Turns;
+use App\Game\Verdict;
+use App\Repository\GuessRepository;
+use App\Repository\RoundRepository;
 use App\Tests\Functional\EventStream;
 use App\Tests\Functional\ScriptedModel;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Clock\Clock;
 use Symfony\Component\Clock\Test\ClockSensitiveTrait;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * The duel: an agent connected over MCP guesses the same drawings as the side of the player, and
@@ -215,6 +221,30 @@ final class DuelTest extends WebTestCase
         self::assertSame('nothing new yet', $status['news']);
         self::assertSame('waiting for the player to start the game', $status['state']);
         self::assertStringContainsString('wait_for_your_turn', $status['what_you_can_do']);
+    }
+
+    public function testAnExactWordWaitsForAWordSaidBeforeItThatIsStillWithTheJudge(): void
+    {
+        $url = $this->startRound('ai', 'duel');
+        $round = self::getContainer()->get(RoundRepository::class)->find(Uuid::fromString(basename($url))) ?? self::fail('No round');
+        $referee = self::getContainer()->get(Referee::class);
+        // The rival said a word whose judge has not answered yet: heard, pending, as the referee keeps it.
+        Clock::get()->sleep(1);
+        $pending = $referee->hear($round, 'girafon', Author::Agent);
+        Clock::get()->sleep(1);
+        $before = Clock::get()->now();
+
+        $this->client->request('POST', $url.'/answers', server: ['CONTENT_TYPE' => 'application/json'], content: '{"word": "girafe"}');
+
+        $answer = json_decode((string) $this->client->getResponse()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
+        $waitedMs = (int) ((float) Clock::get()->now()->format('U.u') * 1000 - (float) $before->format('U.u') * 1000);
+        self::assertGreaterThanOrEqual(Referee::JUDGING_LIMIT_MS - 2000, $waitedMs, 'The exact word waited for the word said before it');
+        $judged = self::getContainer()->get(GuessRepository::class)->find($pending->getId());
+        self::assertSame(Verdict::Refused, $judged?->getVerdict(), 'Its judge never answered: refused');
+        self::assertTrue($answer['accepted']);
+        self::assertTrue($answer['found']);
+        $events = self::readEvents($this->client, $url.'/agent');
+        self::assertSame(['answer', 'girafon', 'refused'], [$events[0]['type'], $events[0]['data']['word'], $events[0]['data']['verdict']]);
     }
 
     public function testTheEndOfARoundSaysWhichSideFound(): void

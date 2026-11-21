@@ -122,25 +122,34 @@ export default class extends Controller {
         if (word === '' || this.overValue) {
             return;
         }
+        // The referee repeats the word while the judge decides; the answer comes once it is settled.
+        this.dispatch('thinking', { prefix: 'referee', target: window, detail: { word } });
         const response = await fetch(this.answerUrlValue, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ word }),
         });
         if (response.status === 409) {
+            this.dispatch('verdict', { prefix: 'referee', target: window, detail: { verdict: 'refused' } });
             this.stop();
             return;
         }
         if (!response.ok) {
+            this.dispatch('verdict', { prefix: 'referee', target: window, detail: { verdict: 'refused' } });
             return;
         }
         const result = await response.json();
         const item = document.createElement('li');
         item.textContent = result.word;
-        item.classList.toggle('accepted', result.found);
+        item.classList.toggle('accepted', result.accepted);
         item.classList.toggle('warm', result.verdict === 'warm');
         this.listTarget.append(item);
-        this.dispatch('verdict', { prefix: 'referee', target: window, detail: { verdict: result.found ? 'accepted' : result.verdict } });
+        // Accepted but too late: a word said before it, by the rival, found the round; its stream ends the round.
+        this.dispatch('verdict', { prefix: 'referee', target: window, detail: { verdict: result.accepted ? 'accepted' : (result.verdict === 'warm' ? 'warm' : 'refused') } });
+        if (result.found && !result.accepted) {
+            this.stop();
+            return;
+        }
         if (result.found) {
             this.timeTarget.textContent = seconds(result.foundAfterMs);
             this.resultTarget.hidden = false;
