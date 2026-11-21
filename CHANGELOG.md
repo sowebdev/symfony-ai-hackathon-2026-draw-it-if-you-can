@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `make smoke` plays a solo game and a duel in a real browser, at two widths, against a scripted model; the CI runs it.
 - The walrus thinks aloud: while the judge decides on a word, he repeats it with one of ten phrases (« "chaton" ? Une seconde… »), in turn.
 - The judge has its own line on the models screen: by default it uses the guesser's model, and it can be given another one, a faster one for instance (« Une autre IA pour juger ? »).
+- [docs/bench](docs/bench/README.md): the same cat, windmill and train drawn by eleven models, with time and cost; `app:bench` draws what is missing and writes the page again.
 - In development, the Symfony profiler and its toolbar, whose AI panel shows every call to a model with its tokens, and the logs in `var/log/dev.log`.
 - Every call to a model is logged in `var/log/ai.log`, one line each: role, model, time, tokens and cost. `bin/console app:ai:usage` says what each role and model took and cost.
 

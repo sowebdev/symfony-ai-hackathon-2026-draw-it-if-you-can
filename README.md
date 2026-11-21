@@ -12,6 +12,8 @@ Plug in the model you like, from a cloud API or on your own machine: this may be
 
 Built with Symfony AI for the Symfony AI hackathon (November 2026). The game speaks English, French, German, Spanish and Italian.
 
+Tested on real children, my own.
+
 [![The AI draws an octopus](docs/demo.gif)](https://youtu.be/oz9XYaZwmiU)
 
 Click the animation to watch the 90-second video on YouTube.
@@ -34,7 +36,9 @@ A poor drawer makes you laugh, a good one makes you play.
 
 - **Claude Haiku 5.5** is plenty, for drawing as for guessing.
 - **Qwen 3.8 27B on your own machine** is the sweet spot for fun: it draws a cat with whiskers or a snail with its shell, for free, if you have a GPU with 16 GB or a Mac with enough memory.
-- **Mistral Small 4** is quick, but a poor artist: expect kangaroos nobody will ever guess (sorry, Mistral).
+- **Mistral** has its place in the game, as a provider of its own and with Mistral Vibe as an agent, but I cannot recommend it for now. In my tries, Mistral Small 4 answered in half a second yet missed a clear swan, and Mistral Medium 3.5 drew a kangaroo in 47 strokes that nobody could guess. Mistral Large 4 always reasons: it often spends its answer thinking and fails the model check, and once past it, it plays badly. Its reasoning could surely be tuned, but I chose not to tune the game for one model (sorry, Mistral).
+
+The same cat, windmill and train drawn by eleven models, from Anthropic, OpenAI, Mistral and on my own machine: [docs/bench](docs/bench/README.md).
 
 The model must see images and call tools. Details, the models I tried, reasoning, and what to do when it does not play: [docs/models.md](docs/models.md).
 

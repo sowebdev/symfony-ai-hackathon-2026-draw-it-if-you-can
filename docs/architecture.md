@@ -105,7 +105,7 @@ flowchart LR
 | `src/Drawing` | Strokes: the grid, the hand-drawn line, the PNG |
 | `src/Mcp` | The tools and prompts an agent sees |
 | `src/Controller` | Pages and HTTP endpoints, thin |
-| `src/Command` | `app:ai:check`, and `app:draw`, which makes a model draw words pass after pass and writes a page to `var/bench` |
+| `src/Command` | `app:ai:check`; `app:draw`, which makes a model draw words pass after pass and writes a page to `var/bench`; `app:bench`, the drawings of [docs/bench](bench/README.md) |
 | `assets/controllers` | Stimulus: the canvas, the drawing of the AI, the timer, the agent, the lobby, the referee |
 | `assets/styles` | One stylesheet per screen, after the base and the characters |
 | `tests/Smoke` | The smoke test: the scripted model of the `smoke` environment, and Playwright playing in a browser (`make smoke`) |

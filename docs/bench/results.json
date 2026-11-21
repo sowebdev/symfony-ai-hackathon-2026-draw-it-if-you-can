@@ -1,0 +1,595 @@
+{
+    "claude-haiku-5-5/cat": {
+        "strokes": 12,
+        "seconds": 7.7,
+        "cost_usd": 0.0012,
+        "parts": [
+            "head outline",
+            "left ear",
+            "right ear",
+            "left eye",
+            "right eye",
+            "nose",
+            "mouth",
+            "mouth right side",
+            "left whiskers",
+            "right whiskers",
+            "body",
+            "tail"
+        ],
+        "date": "2026-11-21"
+    },
+    "claude-haiku-5-5/train": {
+        "strokes": 12,
+        "seconds": 8.3,
+        "cost_usd": 0.0013,
+        "parts": [
+            "locomotive body",
+            "cab",
+            "cab roof",
+            "chimney",
+            "smoke",
+            "window",
+            "cab window",
+            "chassis",
+            "front wheel",
+            "middle wheel",
+            "cab wheel",
+            "rear wheel"
+        ],
+        "date": "2026-11-21"
+    },
+    "claude-haiku-5-5/windmill": {
+        "strokes": 8,
+        "seconds": 8.1,
+        "cost_usd": 0.0011,
+        "parts": [
+            "tower body",
+            "roof cap",
+            "hub",
+            "blade one",
+            "blade two",
+            "sail panel left",
+            "door",
+            "ground"
+        ],
+        "date": "2026-11-21"
+    },
+    "claude-opus-5-5/cat": {
+        "strokes": 10,
+        "seconds": 8.7,
+        "cost_usd": 0.0327,
+        "parts": [
+            "head outline",
+            "left ear",
+            "right ear",
+            "left eye",
+            "right eye",
+            "nose and mouth",
+            "left whiskers",
+            "right whiskers",
+            "body",
+            "tail"
+        ],
+        "date": "2026-11-21"
+    },
+    "claude-opus-5-5/train": {
+        "strokes": 12,
+        "seconds": 15.7,
+        "cost_usd": 0.0351,
+        "parts": [
+            "locomotive body",
+            "cab roof",
+            "cab window",
+            "chimney",
+            "smoke",
+            "big rear wheel",
+            "middle wheel",
+            "front wheel",
+            "cowcatcher",
+            "rail track",
+            "connecting rod",
+            "headlight"
+        ],
+        "date": "2026-11-21"
+    },
+    "claude-opus-5-5/windmill": {
+        "strokes": 9,
+        "seconds": 7.8,
+        "cost_usd": 0.025,
+        "parts": [
+            "tower body",
+            "roof cap",
+            "blade up-left",
+            "blade up-right",
+            "blade down-left",
+            "blade down-right",
+            "door",
+            "ground",
+            "hub"
+        ],
+        "date": "2026-11-21"
+    },
+    "claude-sonnet-5-5/cat": {
+        "strokes": 9,
+        "seconds": 6.8,
+        "cost_usd": 0.0146,
+        "parts": [
+            "head outline",
+            "left eye",
+            "right eye",
+            "nose",
+            "mouth",
+            "mouth right",
+            "left whiskers",
+            "right whiskers",
+            "body"
+        ],
+        "date": "2026-11-21"
+    },
+    "claude-sonnet-5-5/train": {
+        "strokes": 12,
+        "seconds": 18.3,
+        "cost_usd": 0.0161,
+        "parts": [
+            "locomotive body",
+            "cab roof",
+            "front nose",
+            "chimney",
+            "smoke",
+            "window",
+            "rail",
+            "wheel big",
+            "wheel 2",
+            "wheel 3",
+            "coupling",
+            "headlight"
+        ],
+        "date": "2026-11-21"
+    },
+    "claude-sonnet-5-5/windmill": {
+        "strokes": 9,
+        "seconds": 11.1,
+        "cost_usd": 0.0116,
+        "parts": [
+            "tower body",
+            "roof",
+            "blade up-left",
+            "blade down-right",
+            "blade up-right",
+            "blade down-left",
+            "door",
+            "window",
+            "ground"
+        ],
+        "date": "2026-11-21"
+    },
+    "gemma-4-12b-local/cat": {
+        "strokes": 10,
+        "seconds": 5.5,
+        "cost_usd": null,
+        "parts": [
+            "head and face outline",
+            "left eye",
+            "right eye",
+            "nose",
+            "right ear",
+            "left ear",
+            "body right side",
+            "body left side",
+            "belly/chest",
+            "tail"
+        ],
+        "date": "2026-11-21"
+    },
+    "gemma-4-12b-local/train": {
+        "strokes": 6,
+        "seconds": 6.3,
+        "cost_usd": null,
+        "parts": [
+            "main body of the train",
+            "windows",
+            "bottom chassis",
+            "wheels",
+            "front cabin door\"\"\"}<tool_call|><|channel>thought\n<channel|><|tool_call>call:draw_stroke{cells:",
+            "roof/top line"
+        ],
+        "date": "2026-11-21"
+    },
+    "gemma-4-12b-local/windmill": {
+        "strokes": 7,
+        "seconds": 4.4,
+        "cost_usd": null,
+        "parts": [
+            "main body",
+            "roof",
+            "roof peak",
+            "central pole",
+            "blades upper",
+            "blades lower",
+            "base"
+        ],
+        "date": "2026-11-21"
+    },
+    "gpt-6-2-astra/cat": {
+        "strokes": 9,
+        "seconds": 24.4,
+        "cost_usd": 0.0743,
+        "parts": [
+            "head with pointed ears",
+            "left eye",
+            "right eye",
+            "nose and muzzle",
+            "right smile",
+            "upper left whisker",
+            "lower left whisker",
+            "upper right whisker",
+            "lower right whisker"
+        ],
+        "date": "2026-11-21"
+    },
+    "gpt-6-2-astra/train": {
+        "strokes": 9,
+        "seconds": 35.4,
+        "cost_usd": 0.0779,
+        "parts": [
+            "steam locomotive outline",
+            "chimney",
+            "cab window",
+            "rear wheel",
+            "middle wheel",
+            "front wheel",
+            "coupling rod",
+            "curling steam plume",
+            "rail under wheels"
+        ],
+        "date": "2026-11-21"
+    },
+    "gpt-6-2-astra/windmill": {
+        "strokes": 8,
+        "seconds": 22.4,
+        "cost_usd": 0.0641,
+        "parts": [
+            "tapered mill tower",
+            "cap roof",
+            "upper left sail",
+            "upper right sail",
+            "lower right sail",
+            "lower left sail",
+            "arched door",
+            "little loft window"
+        ],
+        "date": "2026-11-21"
+    },
+    "gpt-6-2-sol/cat": {
+        "strokes": 8,
+        "seconds": 15.7,
+        "cost_usd": 0.0161,
+        "parts": [
+            "head and pointy ears",
+            "left eye",
+            "right eye",
+            "nose and mouth",
+            "left upper whisker",
+            "right upper whisker",
+            "left lower whisker",
+            "right lower whisker"
+        ],
+        "date": "2026-11-21"
+    },
+    "gpt-6-2-sol/train": {
+        "strokes": 11,
+        "seconds": 22,
+        "cost_usd": 0.0231,
+        "parts": [
+            "engine",
+            "carriage",
+            "chimney",
+            "cab roof",
+            "driving wheel",
+            "front wheel",
+            "carriage wheels",
+            "rails",
+            "cab window",
+            "coupler",
+            "steam cloud"
+        ],
+        "date": "2026-11-21"
+    },
+    "gpt-6-2-sol/windmill": {
+        "strokes": 7,
+        "seconds": 13.5,
+        "cost_usd": 0.012,
+        "parts": [
+            "tower",
+            "roof",
+            "upper left sail",
+            "upper right sail",
+            "lower right sail",
+            "lower left sail",
+            "arched door"
+        ],
+        "date": "2026-11-21"
+    },
+    "gpt-6-luna/cat": {
+        "strokes": 10,
+        "seconds": 11.4,
+        "cost_usd": 0.0004,
+        "parts": [
+            "cat outer silhouette with pointed ears, cheeks, and body",
+            "left eye",
+            "right eye",
+            "nose and mouth",
+            "left whiskers",
+            "right whiskers",
+            "left ear inner detail",
+            "right ear inner detail",
+            "curled tail",
+            "front paws divider"
+        ],
+        "date": "2026-11-21"
+    },
+    "gpt-6-luna/train": {
+        "strokes": 19,
+        "seconds": 14.1,
+        "cost_usd": 0.001,
+        "parts": [
+            "long train body",
+            "locomotive front cab and roof",
+            "front of engine",
+            "roof line",
+            "large cab window",
+            "passenger windows",
+            "passenger windows",
+            "engine headlight",
+            "smokestack",
+            "smoke puff",
+            "front cowcatcher",
+            "rail track",
+            "rail track lower edge",
+            "rail ties",
+            "rail ties",
+            "rail ties",
+            "rail ties",
+            "front wheel",
+            "rear wheel"
+        ],
+        "date": "2026-11-21"
+    },
+    "gpt-6-luna/windmill": {
+        "strokes": 12,
+        "seconds": 7.3,
+        "cost_usd": 0.0004,
+        "parts": [
+            "windmill tower silhouette",
+            "tower base",
+            "roof",
+            "door",
+            "small window",
+            "central hub",
+            "windmill sail upper left",
+            "windmill sail upper right",
+            "windmill sail lower right",
+            "windmill sail lower left",
+            "sail crossbar",
+            "foreground ground"
+        ],
+        "date": "2026-11-21"
+    },
+    "mistral-large-4/cat": {
+        "error": "no stroke",
+        "date": "2026-11-21"
+    },
+    "mistral-large-4/train": {
+        "strokes": 13,
+        "seconds": 58,
+        "cost_usd": 0.0198,
+        "parts": [
+            "train body outline (boiler and cab)",
+            "smokestack",
+            "smoke puff",
+            "smoke puff",
+            "cab window",
+            "boiler band detail",
+            "front wheel",
+            "middle wheel",
+            "rear wheel",
+            "connecting rod",
+            "cowcatcher at the front",
+            "rail",
+            "rail ties"
+        ],
+        "date": "2026-11-21"
+    },
+    "mistral-large-4/windmill": {
+        "error": "no stroke",
+        "date": "2026-11-21"
+    },
+    "mistral-medium-3-5/cat": {
+        "strokes": 15,
+        "seconds": 4,
+        "cost_usd": 0.0081,
+        "parts": [
+            "head outline",
+            "left ear",
+            "right ear",
+            "left eye",
+            "right eye",
+            "nose",
+            "mouth",
+            "left whiskers",
+            "right whiskers",
+            "body outline",
+            "tail",
+            "left front leg",
+            "right front leg",
+            "left back leg",
+            "right back leg"
+        ],
+        "date": "2026-11-21"
+    },
+    "mistral-medium-3-5/train": {
+        "strokes": 10,
+        "seconds": 3.1,
+        "cost_usd": 0.0055,
+        "parts": [
+            "main body",
+            "front of train",
+            "back of train",
+            "top of train",
+            "bottom of train",
+            "windows row 1",
+            "windows row 2",
+            "smoke stack",
+            "smoke",
+            "wheels"
+        ],
+        "date": "2026-11-21"
+    },
+    "mistral-medium-3-5/windmill": {
+        "strokes": 10,
+        "seconds": 2,
+        "cost_usd": 0.0039,
+        "parts": [
+            "main tower",
+            "tower base",
+            "blade 1",
+            "blade 2",
+            "blade 3",
+            "blade 4",
+            "roof",
+            "door",
+            "window left",
+            "window right"
+        ],
+        "date": "2026-11-21"
+    },
+    "mistral-small-4/cat": {
+        "strokes": 11,
+        "seconds": 3.2,
+        "cost_usd": 0.0005,
+        "parts": [
+            "cat body",
+            "cat head",
+            "cat tail",
+            "cat ear left",
+            "cat ear right",
+            "cat eye left",
+            "cat eye right",
+            "cat nose",
+            "cat mouth",
+            "cat whiskers left",
+            "cat whiskers right"
+        ],
+        "date": "2026-11-21"
+    },
+    "mistral-small-4/train": {
+        "strokes": 15,
+        "seconds": 4.2,
+        "cost_usd": 0.0006,
+        "parts": [
+            "main body",
+            "wheels",
+            "wheels",
+            "wheels",
+            "wheels",
+            "front window",
+            "middle window",
+            "rear window",
+            "roof details",
+            "roof details",
+            "connecting lines",
+            "connecting lines",
+            "chimney",
+            "chimney top",
+            "door"
+        ],
+        "date": "2026-11-21"
+    },
+    "mistral-small-4/windmill": {
+        "strokes": 8,
+        "seconds": 3,
+        "cost_usd": 0.0004,
+        "parts": [
+            "windmill base",
+            "windmill sails outline",
+            "windmill sails cross",
+            "windmill sails diagonal",
+            "windmill top detail",
+            "windmill door",
+            "windmill window",
+            "windmill tail"
+        ],
+        "date": "2026-11-21"
+    },
+    "qwen-3-8-27b-local/cat": {
+        "strokes": 11,
+        "seconds": 33.2,
+        "cost_usd": null,
+        "parts": [
+            "cat head outline",
+            "left ear",
+            "right ear",
+            "left eye",
+            "right eye",
+            "nose",
+            "mouth",
+            "left whiskers",
+            "left whisker 2",
+            "right whiskers",
+            "right whisker 2"
+        ],
+        "date": "2026-11-21"
+    },
+    "qwen-3-8-27b-local/train": {
+        "strokes": 20,
+        "seconds": 50,
+        "cost_usd": null,
+        "parts": [
+            "locomotive body",
+            "second car body",
+            "locomotive bottom",
+            "front of locomotive (right side)",
+            "cabin",
+            "smokestack",
+            "front cowcatcher (angled)",
+            "smoke puff",
+            "cabin window",
+            "side window 1",
+            "side window 2",
+            "side window 3",
+            "front window",
+            "rail/track",
+            "wheel 1",
+            "wheel 2",
+            "wheel 3",
+            "wheel 4",
+            "wheel 5",
+            "second car body (behind)"
+        ],
+        "date": "2026-11-21"
+    },
+    "qwen-3-8-27b-local/windmill": {
+        "strokes": 15,
+        "seconds": 34.9,
+        "cost_usd": null,
+        "parts": [
+            "tower left wall",
+            "tower right wall",
+            "tower top",
+            "tower base",
+            "cap",
+            "door",
+            "window",
+            "ground",
+            "blade 1",
+            "blade upper-right",
+            "blade lower-right",
+            "blade lower-left",
+            "blade upper-left",
+            "hub",
+            "windsock tail"
+        ],
+        "date": "2026-11-21"
+    }
+}
