@@ -61,13 +61,17 @@ Three specifics worth spelling out, because they are easy to get wrong:
 
 ## Everyday workflow
 
-- Run the app with `symfony serve -d`, and commands with `symfony console ...`
-  (or `bin/console` when the Symfony CLI isn't available).
+- Run the app with `make start`, and commands in the container with
+  `docker compose exec php bin/console ...`. `make install` installs a player's
+  game in the prod environment; a developer writes `APP_ENV=dev` in `.env.local`
+  first (`bin/install-env` never replaces it). The database is `var/data.db` in
+  both; the tests and the smoke test have their own.
 - When something fails, read `var/log/dev.log` and the web profiler
   (`/_profiler`) before changing code. Its AI panel shows every call to a model,
   with its messages, options, result and tokens (`src/Ai/TracedPlatforms.php`,
   as the platforms are built at runtime). The streams of a round and the MCP
-  requests have no toolbar: find their profile in `/_profiler` by URL.
+  requests have no toolbar: find their profile in `/_profiler` by URL. It keeps
+  the headers of the requests to the models, API keys included: never in prod.
 - Every call to a model is one JSON line of `var/log/ai.log` (role, model, time,
   tokens, cost at the prices of models.dev; never the messages nor the key), in
   every environment but the tests. `bin/console app:ai:usage [--since=today]`

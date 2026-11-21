@@ -1,0 +1,38 @@
+#!/usr/bin/env php
+<?php
+
+/*
+ * Prepares .env.local before the dependencies are installed (make install), without them: the environment, prod
+ * unless one is already set (a developer writes APP_ENV=dev), and a secret of its own. Never replaces a value.
+ * The database of a game installed before 0.4, var/data_dev.db, becomes var/data.db, the name it has in every
+ * environment of a player.
+ *
+ * Usage: php bin/install-env [project directory]
+ */
+$root = rtrim($argv[1] ?? dirname(__DIR__), '/');
+$file = $root.'/.env.local';
+$content = is_file($file) ? (string) file_get_contents($file) : '';
+
+$added = [];
+if (1 !== preg_match('/^APP_ENV=\S/m', $content)) {
+    $added[] = 'APP_ENV=prod';
+}
+if (1 !== preg_match('/^APP_SECRET=["\']?[^"\'\s]/m', $content)) {
+    $added[] = 'APP_SECRET='.bin2hex(random_bytes(16));
+}
+if ([] !== $added) {
+    $separator = '' === $content || str_ends_with($content, "\n") ? '' : "\n";
+    if (false === file_put_contents($file, $content.$separator.implode("\n", $added)."\n")) {
+        fwrite(STDERR, ".env.local cannot be written: add APP_ENV=prod and APP_SECRET=<32 random hexadecimal characters> to it by hand.\n");
+        exit(1);
+    }
+}
+preg_match_all('/^APP_ENV=(\S+)/m', (string) file_get_contents($file), $env);
+echo 'The game runs in the '.end($env[1])." environment (APP_ENV in .env.local).\n";
+
+$old = $root.'/var/data_dev.db';
+$new = $root.'/var/data.db';
+if (is_file($old) && !is_file($new)) {
+    rename($old, $new);
+    echo "The database of the game is now var/data.db.\n";
+}

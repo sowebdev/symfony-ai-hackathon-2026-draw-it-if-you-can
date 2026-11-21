@@ -13,14 +13,17 @@ PHPUNIT = $(EXEC) vendor/bin/phpunit
 help: ## List the commands
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z0-9_-]+:.*##/ {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-install: ## Build the image, install the dependencies and the database; the model is chosen on the page
+install: ## Build the image, install the game in the prod environment (APP_ENV=dev in .env.local for a developer) and its database; the model is chosen on the page
 	@./docker/start.sh
+	@$(EXEC) php bin/install-env
 	@echo "Installing the dependencies..."
 	@$(EXEC) composer install --no-progress --quiet
 	@$(CONSOLE) importmap:install --quiet
 	@$(MAKE) --no-print-directory encryption-key
 	@$(CONSOLE) app:models-dev
 	@$(CONSOLE) doctrine:migrations:migrate -n --quiet
+	@# Prod serves the assets compiled in public/assets; dev serves them as they are, and must not find old compiled ones.
+	@if $(CONSOLE) about | grep -qE 'Environment +prod'; then $(CONSOLE) asset-map:compile --quiet && $(CONSOLE) cache:clear --quiet; else $(EXEC) rm -rf public/assets; fi
 	@echo
 	@echo "Ready: open http://127.0.0.1:$$(cat .app-port) and choose your model"
 

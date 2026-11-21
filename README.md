@@ -20,7 +20,7 @@ Click the animation to watch the 90-second video on YouTube.
 
 You need Docker, make, and a model: a cloud API key, or a model server of your own.
 
-1. `make install`: it builds the image, installs the dependencies and the database, and asks nothing.
+1. `make install`: it builds the image, installs the dependencies and the database, and asks nothing. The game runs in Symfony's production environment. After an update of the game (`git pull`), run it again.
 2. Open the address it ends with, http://127.0.0.1:8040 unless that port is taken (`make start` gives it again), and **choose your models** on the page, one question at a time: which AI draws (Anthropic, OpenAI, Mistral, or your own server or another OpenAI-compatible service such as Ollama, LM Studio or OpenRouter), your API key, its model (the middle of the provider's range is preselected, from [models.dev](https://models.dev)); the guesser and the judge use the same AI unless you give each another one, at any provider. "Check and play" tries them and saves them when they pass. Your keys are kept encrypted in the game's database.
 3. Draw, guess, laugh.
 
@@ -66,6 +66,10 @@ The code of the game is under the [MIT license](LICENSE).
 - **SketchAgent** (CVPR 2025, [arXiv:2411.17673](https://arxiv.org/abs/2411.17673)) gave the method the AI draws with: a 50 x 50 grid of named cells, a stroke as the cells the pen goes through. The prompts, the tool and the hand-drawn rendering are the game's own; nothing is copied from the paper, which is under CC BY-NC-SA 4.0.
 - Built with [Symfony](https://symfony.com), [Symfony AI](https://github.com/symfony/ai) and its MCP bundle, on the [MCP PHP SDK](https://github.com/modelcontextprotocol/php-sdk), and [Stimulus](https://stimulus.hotwired.dev).
 - The dependencies are installed by Composer and the importmap, not shipped in this repository; each keeps its own license (MIT, BSD-3-Clause for Twig, Apache-2.0 for the MCP SDK and the opis libraries). `docker compose exec php composer licenses` lists them.
+
+## Develop
+
+A developer works in the development environment, with the profiler and its AI panel: write `APP_ENV=dev` in `.env.local` before `make install` (or add it and run `make install` again). Commands run in the container: `docker compose exec php bin/console …`. In development the profiler keeps the headers of the requests to the models, your API key included, in `var/cache/dev/profiler`: keep that environment on your own machine.
 
 ## Tests
 

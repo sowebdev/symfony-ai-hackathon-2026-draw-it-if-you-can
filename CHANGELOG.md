@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `make install` installs the game in the production environment, with its own secret: faster, and no developer tools for a player. A developer writes `APP_ENV=dev` in `.env.local` first (README, « Develop »). The database is now `var/data.db`; the one of an earlier install is renamed, nothing is lost.
 - The styles are split by screen (`assets/styles/`), and a round's layout is written once, without the layer that overrode the old one.
 
 ### Fixed
