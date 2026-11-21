@@ -3,6 +3,7 @@
 namespace App\Ai;
 
 use App\Game\Language;
+use App\Game\Link;
 use App\Game\Verdict;
 use App\Game\WordMatcher;
 use App\Repository\JudgedPairRepository;
@@ -79,11 +80,22 @@ final readonly class Judge
             return null;
         }
 
-        $link = Link::fromAnswer($text);
+        $link = self::label($text);
         if (null === $link) {
             $this->logger->warning('The judge gave no label for "{answer}" and "{word}": {text}', ['answer' => $answer, 'word' => $target, 'text' => mb_substr($text, 0, 200)]);
         }
 
         return $link;
+    }
+
+    /**
+     * Reads the answer of the model: one label, whatever its case and the punctuation around it, once its
+     * reasoning is removed. Anything else is no label.
+     */
+    public static function label(string $answer): ?Link
+    {
+        $label = mb_strtolower(trim(OneWordModel::withoutReasoning($answer), " \t\n\r\0\x0B\"'`*.,;:!?"));
+
+        return Link::tryFrom($label);
     }
 }

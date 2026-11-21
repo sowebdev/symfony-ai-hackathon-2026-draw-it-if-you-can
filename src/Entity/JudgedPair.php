@@ -2,8 +2,8 @@
 
 namespace App\Entity;
 
-use App\Ai\Link;
 use App\Game\Language;
+use App\Game\Link;
 use App\Repository\JudgedPairRepository;
 use Doctrine\ORM\Mapping as ORM;
 

@@ -2,11 +2,15 @@
 
 namespace App\Tests\Unit\Ai;
 
-use App\Ai\Link;
+use App\Ai\Judge;
+use App\Game\Link;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-final class LinkTest extends TestCase
+/**
+ * The judge reads exactly one label in the answer of its model.
+ */
+final class JudgeLabelTest extends TestCase
 {
     /**
      * @return iterable<string, array{string, ?Link}>
@@ -30,6 +34,6 @@ final class LinkTest extends TestCase
     #[DataProvider('answers')]
     public function testReadsExactlyOneLabel(string $answer, ?Link $expected): void
     {
-        self::assertSame($expected, Link::fromAnswer($answer));
+        self::assertSame($expected, Judge::label($answer));
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Tests\Unit\Game;
 
-use App\Ai\Link;
+use App\Game\Link;
 use App\Game\Verdict;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;

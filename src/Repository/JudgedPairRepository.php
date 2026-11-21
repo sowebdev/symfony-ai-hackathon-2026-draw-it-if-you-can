@@ -2,9 +2,9 @@
 
 namespace App\Repository;
 
-use App\Ai\Link;
 use App\Entity\JudgedPair;
 use App\Game\Language;
+use App\Game\Link;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\Persistence\ManagerRegistry;

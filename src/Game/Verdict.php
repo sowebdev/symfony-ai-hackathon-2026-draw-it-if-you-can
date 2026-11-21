@@ -2,8 +2,6 @@
 
 namespace App\Game;
 
-use App\Ai\Link;
-
 /**
  * What the judge says of an answer: accepted, warm ("ça chauffe") or refused. A word that is exact, or one
  * typo away, is accepted by code before any label (WordMatcher); for the others, this table is the only
