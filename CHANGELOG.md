@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The walrus thinks aloud: while the judge decides on a word, he repeats it with one of ten phrases (« "chaton" ? Une seconde… »), in turn.
 - The judge has its own line on the models screen: by default it uses the guesser's model, and it can be given another one, a faster one for instance (« Une autre IA pour juger ? »).
 - In development, the Symfony profiler and its toolbar, whose AI panel shows every call to a model with its tokens, and the logs in `var/log/dev.log`.
+- Every call to a model is logged in `var/log/ai.log`, one line each: role, model, time, tokens and cost. `bin/console app:ai:usage` says what each role and model took and cost.
 
 ### Changed
 

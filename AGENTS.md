@@ -68,6 +68,10 @@ Three specifics worth spelling out, because they are easy to get wrong:
   with its messages, options, result and tokens (`src/Ai/TracedPlatforms.php`,
   as the platforms are built at runtime). The streams of a round and the MCP
   requests have no toolbar: find their profile in `/_profiler` by URL.
+- Every call to a model is one JSON line of `var/log/ai.log` (role, model, time,
+  tokens, cost at the prices of models.dev; never the messages nor the key), in
+  every environment but the tests. `bin/console app:ai:usage [--since=today]`
+  adds them up per role and model.
 - If `maker-bundle` is installed, prefer `bin/console make:*` with every argument
   passed up front and `--no-interaction` where supported: makers prompt on a
   terminal by default, which hangs a non-interactive shell. If a maker still

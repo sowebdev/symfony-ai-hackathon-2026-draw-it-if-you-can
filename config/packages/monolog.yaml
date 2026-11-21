@@ -1,10 +1,18 @@
 monolog:
     channels: # To see all channels, run bin/console debug:autowiring logger
         - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
+        - ai # One line per call to a model (src/Ai/ModelCallLog.php), added up by app:ai:usage
 
 when@dev:
     monolog:
         handlers:
+            # Each call to a model, one JSON object a line, outside the tests: app:ai:usage reads it.
+            model_calls:
+                type: stream
+                path: "%kernel.logs_dir%/ai.log"
+                level: info
+                channels: [ai]
+                formatter: monolog.formatter.json
             main:
                 type: stream
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
@@ -32,6 +40,13 @@ when@test:
 when@prod:
     monolog:
         handlers:
+            # Each call to a model, one JSON object a line, outside the tests: app:ai:usage reads it.
+            model_calls:
+                type: stream
+                path: "%kernel.logs_dir%/ai.log"
+                level: info
+                channels: [ai]
+                formatter: monolog.formatter.json
             main:
                 type: fingers_crossed
                 action_level: error
@@ -52,4 +67,15 @@ when@prod:
                 type: stream
                 channels: [deprecation]
                 path: php://stderr
+                formatter: monolog.formatter.json
+
+when@smoke:
+    monolog:
+        handlers:
+            # Each call to a model, one JSON object a line, outside the tests: app:ai:usage reads it.
+            model_calls:
+                type: stream
+                path: "%kernel.logs_dir%/ai.log"
+                level: info
+                channels: [ai]
                 formatter: monolog.formatter.json

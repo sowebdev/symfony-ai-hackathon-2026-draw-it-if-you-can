@@ -31,6 +31,7 @@ final readonly class Models
         private ModelSettings $settings,
         private PlatformFactory $platforms,
         private array $setups = [],
+        private ModelCallLog $log = new ModelCallLog(),
     ) {
     }
 
@@ -41,7 +42,7 @@ final readonly class Models
      */
     public function with(array $setups): self
     {
-        return new self($this->settings, $this->platforms, $setups);
+        return new self($this->settings, $this->platforms, $setups, $this->log);
     }
 
     /**
@@ -61,7 +62,7 @@ final readonly class Models
     {
         $setup = $this->setup($role);
 
-        return $this->platform($setup, $maxDurationS)->invoke($this->modelName($role, $setup), $messages, $this->optionsOf($setup, $options, $maxTokens));
+        return $this->platform($role, $setup, $maxDurationS)->invoke($this->modelName($role, $setup), $messages, $this->optionsOf($setup, $options, $maxTokens));
     }
 
     /**
@@ -73,7 +74,7 @@ final readonly class Models
     {
         $setup = $this->setup($role);
 
-        return new Agent($this->platform($setup, $maxDurationS), $this->modelName($role, $setup), toolbox: new Toolbox([$tool]), maxToolCalls: $maxToolCalls);
+        return new Agent($this->platform($role, $setup, $maxDurationS), $this->modelName($role, $setup), toolbox: new Toolbox([$tool]), maxToolCalls: $maxToolCalls);
     }
 
     /**
@@ -134,9 +135,12 @@ final readonly class Models
         return $options;
     }
 
-    private function platform(RoleSetup $setup, ?int $maxDurationS): PlatformInterface
+    /**
+     * The platform of the role, which writes each of its calls to the ModelCallLog.
+     */
+    private function platform(Role $role, RoleSetup $setup, ?int $maxDurationS): PlatformInterface
     {
-        return $this->platforms->create($setup->provider, $setup->address, $setup->apiKey(), $maxDurationS);
+        return new MeteredPlatform($this->platforms->create($setup->provider, $setup->address, $setup->apiKey(), $maxDurationS), $role, $setup, $this->log);
     }
 
     /**
