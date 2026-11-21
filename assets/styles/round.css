@@ -1,0 +1,749 @@
+/* A round (round/show.html.twig, round/guess.html.twig): a bar on top, then one side per column. Our side in
+   yellow on the left, the sheet in the middle with the referee under it when an agent plays, the agent in orange
+   on the right, or the referee on his chair when alone. Narrower than a laptop, the parts go one under the other,
+   the sheet first. */
+.round {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 1.5rem 2rem;
+}
+
+/* The bar (round/_scoreboard.html.twig): three zones that never push each other. The way out, the round and its
+   theme on the left; the scores in the middle; the clock and what the word is worth on the right, in boxes of a
+   fixed width. */
+.topbar {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 0.2rem;
+    font-size: 1.3rem;
+    border-bottom: 2px dashed #c9bfa6;
+}
+
+.topbar p {
+    margin: 0;
+}
+
+.topbar p,
+.topbar button,
+.topbar .worth {
+    white-space: nowrap;
+}
+
+.topbar-left,
+.topbar-scores,
+.topbar-time {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.topbar-scores {
+    justify-content: center;
+}
+
+.topbar-time {
+    justify-content: flex-end;
+}
+
+/* Narrower, the three zones no longer fit on one line: they go to the next one, like words. */
+@media (max-width: 60rem) {
+    .topbar {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 0.6rem 1rem;
+    }
+
+    .topbar-left,
+    .topbar-scores,
+    .topbar-time,
+    .topbar .worth {
+        flex-wrap: wrap;
+    }
+
+    .topbar .copilot-badge {
+        white-space: normal;
+    }
+}
+
+.topbar .leave {
+    margin: 0;
+}
+
+.leave-button {
+    font: inherit;
+    font-size: 1rem;
+    padding: 0.1rem 0.6rem;
+    background: #fff;
+    border: 2px solid var(--ink, #2b2b2b);
+    border-radius: 8px 6px 9px 7px;
+    cursor: pointer;
+}
+
+.round-number {
+    flex: none;
+}
+
+/* The theme of the round: a label taped in the bar, as on the card drawn before the round. */
+.theme-tag {
+    position: relative;
+    color: var(--theme, var(--ink));
+    margin-right: auto !important;
+    padding: 0.15rem 0.8rem;
+    font-size: 1.4rem;
+    background: var(--sheet);
+    border: 2px solid var(--theme, var(--ink));
+    border-radius: 4px 7px 5px 8px;
+    box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.1);
+    transform: rotate(-2deg);
+}
+
+.theme-tag::before {
+    content: '';
+    position: absolute;
+    top: -0.6rem;
+    left: 50%;
+    width: 3rem;
+    height: 1rem;
+    background: var(--tape);
+    transform: translateX(-50%) rotate(3deg);
+}
+
+/* The scores, on the colours of the sides (.side-team, .side-rival): dark ink on a light fill. */
+.score-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.1rem 0.7rem;
+    border: 2px solid var(--ink);
+    border-radius: 9px 7px 10px 8px;
+    white-space: nowrap;
+}
+
+.score-box .olaf {
+    width: 34px;
+    height: auto;
+}
+
+.score-box strong {
+    display: inline-block;
+    min-width: 3ch;
+    text-align: right;
+    font-size: 1.4rem;
+}
+
+/* The copilot in the bar: grey until it connects, then in the orange of the agent. */
+.copilot-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #777;
+}
+
+.copilot-badge.connected {
+    color: var(--pencil);
+}
+
+.clock {
+    min-width: 5.5rem;
+    padding: 0 0.5rem;
+    text-align: right;
+    color: var(--rust);
+    background: #fff;
+    border: 2px solid #2b2b2b;
+    border-radius: 8px;
+    transform: rotate(-3deg);
+}
+
+.clock strong {
+    display: inline-block;
+    min-width: 2.2ch;
+    text-align: right;
+    font-size: 2rem;
+    font-weight: normal;
+    font-variant-numeric: tabular-nums;
+}
+
+.round-ending .clock {
+    color: #999;
+}
+
+/* What the word is worth now (round/_gauge.html.twig), and the gauge that empties with the points. */
+.worth {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.worth .points {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 0 0 0.3rem;
+}
+
+.worth .points strong {
+    display: inline-block;
+    min-width: 3.4ch;
+    text-align: right;
+    font-size: 2.2rem;
+    font-weight: normal;
+    color: var(--rust);
+    font-variant-numeric: tabular-nums;
+}
+
+.gauge {
+    position: relative;
+    width: 8rem;
+    height: 26px;
+    border: 2px solid var(--ink);
+    border-radius: 13px 9px 12px 8px;
+    background: #fff;
+    overflow: hidden;
+}
+
+.gauge-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 100%;
+    background: repeating-linear-gradient(-45deg, #f4b740 0 8px, #f7c95f 8px 16px);
+    transition: width 0.1s linear;
+}
+
+.round-ending .gauge-fill {
+    background: repeating-linear-gradient(-45deg, #ccc 0 8px, #ddd 8px 16px);
+}
+
+/* The three columns, and their one-column variant. */
+.board {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr) 250px;
+    gap: 1.5rem;
+    align-items: stretch;
+    margin-top: 0.8rem;
+}
+
+@media (max-width: 60rem) {
+    .board {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* The sheet first: the one thing to see without scrolling. */
+    .pitch {
+        order: -1;
+    }
+}
+
+/* A side: ours in yellow, the agent's in orange (its voice: characters.css). */
+.camp {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 0.8rem;
+    border-radius: 14px 12px 15px 11px;
+}
+
+.camp h2 {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.camp-team {
+    background: rgba(255, 212, 59, 0.13);
+    border: 2px solid #f2c94c;
+}
+
+.camp-agent {
+    background: rgba(232, 89, 12, 0.06);
+    border: 2px solid #f7b07a;
+}
+
+.camp .ai-voice {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.camp-team .olaf-bubble {
+    margin: 0;
+}
+
+.camp-team .olaf-bubble::before {
+    left: 50%;
+    top: -11px;
+    margin: 0 0 0 -6px;
+    border: 6px solid transparent;
+    border-bottom: 9px solid #2b2b2b;
+    border-top: 0;
+}
+
+.camp-team .olaf-bubble.found::before {
+    border-bottom-color: var(--found);
+}
+
+.status {
+    margin: 0;
+    color: #777;
+}
+
+/* The answer field, the width of our side. */
+.answer {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.4rem;
+}
+
+.answer label {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.answer input {
+    width: 100%;
+}
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    margin-top: auto;
+}
+
+.toolbar button {
+    background: #fff;
+}
+
+.result {
+    margin: 0;
+    color: var(--found);
+    font-size: 1.3rem;
+}
+
+/* The middle column: what to draw or guess, the sheet, and the referee under it when an agent plays. */
+.pitch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.target {
+    align-self: flex-start;
+    margin: 0 0 0.4rem;
+    font-size: 1.5rem;
+}
+
+.target strong {
+    padding: 0 0.3rem;
+    background: linear-gradient(transparent 55%, var(--marker) 55%);
+}
+
+/* The sheet: the canvas, with two pieces of tape. */
+.stage {
+    position: relative;
+    width: min(100%, 64vh);
+    aspect-ratio: 1;
+    margin-top: 12px;
+    background: var(--sheet);
+    border: 2px solid #3a3a3a;
+    border-radius: 6px 10px 7px 12px;
+    box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.08);
+    transform: rotate(-0.6deg);
+}
+
+.stage::before,
+.stage::after {
+    content: '';
+    position: absolute;
+    top: -12px;
+    width: 90px;
+    height: 26px;
+    background: var(--tape);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.stage::before {
+    left: 18px;
+    transform: rotate(-6deg);
+}
+
+.stage::after {
+    right: 18px;
+    transform: rotate(5deg);
+}
+
+.canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    cursor: crosshair;
+}
+
+.canvas.locked {
+    cursor: default;
+}
+
+/* Before its first stroke, the AI thinks: a pencil taps on the sheet, with a handwritten bubble. */
+.thinking {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--ink);
+    pointer-events: none;
+}
+
+.thinking-pencil {
+    transform-origin: 20% 90%;
+    animation: thinking-tap 0.9s ease-in-out infinite;
+}
+
+.thinking-bubble {
+    margin: 0;
+    padding: 6px 14px;
+    font-family: var(--hand);
+    font-size: 1.5rem;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 14px 18px 12px 16px;
+    transform: rotate(-2deg);
+}
+
+.thinking-dots span {
+    animation: thinking-dot 1.2s infinite;
+    opacity: 0;
+}
+
+.thinking-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.thinking-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes thinking-tap {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    40% { transform: rotate(-12deg) translateY(-6px); }
+    60% { transform: rotate(4deg) translateY(2px); }
+}
+
+@keyframes thinking-dot {
+    0%, 20% { opacity: 0; }
+    40%, 100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .thinking-pencil,
+    .thinking-dots span {
+        animation: none;
+        opacity: 1;
+    }
+}
+
+/* The referee under the sheet: his bubble comes out beside him without pushing him, he stays where he stands. */
+.pitch .referee {
+    position: relative;
+    margin-top: 0.8rem;
+}
+
+.pitch .referee-walrus {
+    width: 90px;
+    height: auto;
+}
+
+.pitch .referee .referee-bubble {
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    margin-top: -1.1em;
+    white-space: nowrap;
+}
+
+/* Alone, the referee on his high chair in the third column, his bubble above him. */
+.umpire {
+    display: flex;
+    justify-content: center;
+}
+
+.referee.on-chair {
+    position: relative;
+    flex-direction: column;
+    gap: 0;
+    margin: 0;
+    padding-top: 3.4rem;
+}
+
+.referee.on-chair .referee-walrus {
+    position: relative;
+    z-index: 1;
+    width: 150px;
+    height: auto;
+    margin-bottom: -36px;
+}
+
+.referee.on-chair .referee-chair {
+    width: 150px;
+    height: auto;
+}
+
+.referee.on-chair .referee-bubble {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: max-content;
+    margin: 0 auto;
+    transform-origin: center bottom;
+}
+
+.referee.on-chair .referee-bubble::before {
+    left: 50%;
+    top: auto;
+    bottom: -11px;
+    margin: 0 0 0 -6px;
+    border: 6px solid transparent;
+    border-top: 9px solid var(--pencil);
+    border-bottom: 0;
+}
+
+.referee.on-chair .referee-bubble.referee-accepted::before {
+    border-top-color: var(--found);
+}
+
+/* The words: struck through when the player missed, bubbles when the AI calls them out. */
+.guesses ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.guesses ol li {
+    padding: 0.15rem 0.6rem;
+    background: #fff;
+    border: 1.5px solid #bbb;
+    border-radius: 10px;
+    color: #777;
+    text-decoration: line-through;
+}
+
+.guesses ol li.accepted {
+    color: var(--found);
+    border-color: var(--found);
+    text-decoration: none;
+    font-size: 1.3rem;
+}
+
+/* A warm word ("ça chauffe"): close to the word, in orange and not struck through. */
+.guesses ol li.warm,
+.guesses ol.team-words li.warm,
+.guesses .rival-answers ol li.warm {
+    color: var(--pencil);
+    border-color: var(--pencil);
+    text-decoration: none;
+}
+
+/* When the player draws, the AI calls its words out like a player around the table. */
+[data-guesses-target='list'] li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.8rem;
+    color: var(--ink);
+    text-decoration: none;
+    border: 2px solid var(--ink);
+    border-radius: 18px 18px 18px 4px;
+    opacity: 0.55;
+}
+
+[data-guesses-target='list'] li:nth-last-child(-n + 2) {
+    opacity: 0.8;
+}
+
+[data-guesses-target='list'] li:last-child,
+[data-guesses-target='list'] li.accepted {
+    opacity: 1;
+}
+
+/* What the agent says, in its orange: the headings of its hints, its tips and its answers. */
+.hints h2,
+.tips h2,
+.rival-answers h2 {
+    color: var(--pencil);
+}
+
+/* The hints of the copilot: notes in the margin, a click puts the word in the answer field. */
+.hints ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.4rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hints button {
+    padding: 0.15rem 0.7rem;
+    background: #fff4e6;
+    border-color: var(--pencil);
+    border-style: dashed;
+    border-radius: 18px 18px 4px 18px;
+    box-shadow: none;
+}
+
+.hints button::after {
+    content: ' ?';
+}
+
+/* The tips of the copilot to the player who draws: post-its taped in the margin, the newest on top, the one
+   before fading below; his last one is also in his bubble. Not struck like the wrong guesses. */
+.tips ol {
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.guesses .tips li {
+    position: relative;
+    margin: 0 0 0.6rem;
+    padding: 0.9rem 0.9rem 0.6rem;
+    font-size: 0.95rem;
+    line-height: 1.25;
+    color: var(--ink);
+    text-decoration: none;
+    background: #fff9c4;
+    border: 2px solid var(--ink);
+    border-radius: 4px 8px 6px 10px;
+    box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.1);
+    transform: rotate(-1.2deg);
+}
+
+.guesses .tips li:first-child {
+    animation: tip-stick 0.35s ease-out;
+}
+
+.guesses .tips li:first-child::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    width: 60px;
+    height: 20px;
+    margin-left: -30px;
+    background: var(--tape);
+    transform: rotate(3deg);
+}
+
+.guesses .tips li + li {
+    opacity: 0.5;
+    box-shadow: none;
+    transform: rotate(0.8deg);
+}
+
+.guesses .tips li:nth-child(n + 3) {
+    display: none;
+}
+
+@keyframes tip-stick {
+    from {
+        transform: translateY(-8px) rotate(6deg) scale(1.08);
+        opacity: 0;
+    }
+}
+
+/* A duel: the answers of each side on its own colour. */
+.guesses .rival-answers ol li,
+.guesses ol.team-words li {
+    color: var(--ink);
+    border-color: var(--ink);
+}
+
+.guesses .rival-answers ol li {
+    background: #ffe8cc;
+    border-color: #ffa94d;
+}
+
+.guesses ol.team-words li {
+    background: #fff3bf;
+    border-color: var(--marker);
+}
+
+.guesses .rival-answers ol li.accepted {
+    background: #ffa94d;
+    border-color: var(--ink);
+}
+
+.guesses ol.team-words li.accepted {
+    background: var(--marker);
+    border-color: var(--ink);
+}
+
+/* The end of a round: a note stuck on the drawing. */
+.round-end {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 2;
+    width: min(90%, 22rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 1.4rem 1.6rem;
+    text-align: center;
+    background: #fff9c4;
+    border: 2px solid var(--ink);
+    border-radius: 4px 8px 6px 10px;
+    box-shadow: 6px 8px 0 rgba(0, 0, 0, 0.12);
+    transform: translate(-50%, -50%) rotate(1.5deg);
+    animation: stick 0.35s ease-out;
+    /* Stuck on the canvas: a stroke still going on when the word is found must not select its text. */
+    user-select: none;
+}
+
+@keyframes stick {
+    from {
+        transform: translate(-50%, -60%) rotate(8deg) scale(1.15);
+        opacity: 0;
+    }
+}
+
+.round-end h2 {
+    margin: 0;
+    font-size: 2rem;
+}
+
+.round-end h2.side-team,
+.round-end h2.side-rival {
+    padding: 0.2rem 0.8rem;
+}
+
+.round-end p {
+    margin: 0;
+}
+
+.round-end-points {
+    font-size: 2.4rem;
+    color: var(--rust);
+}
+
+.round-end form {
+    margin-top: 0.5rem;
+}

@@ -1,0 +1,245 @@
+/* Olaf, the penguin who is the AI of the game: in full on our side, his head in the score. He bobs and opens his beak
+   while he thinks or proposes (class "speaking", set by the server, and the round's own state
+   attributes, which Stimulus keeps up to date); still otherwise. */
+.ai-voice {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.olaf {
+    flex: none;
+    overflow: visible;
+}
+
+.olaf .beak {
+    transform-box: fill-box;
+    transform-origin: 50% 0;
+}
+
+.olaf.speaking {
+    animation: olaf-bob 1.4s ease-in-out infinite;
+}
+
+.olaf.speaking .beak {
+    animation: olaf-beak 0.6s ease-in-out infinite;
+}
+
+[data-guesses-over-value='true'] .olaf,
+[data-guesses-over-value='true'] .olaf .beak,
+[data-ai-drawing-over-value='true'] .olaf,
+[data-ai-drawing-over-value='true'] .olaf .beak {
+    animation: none;
+}
+
+@keyframes olaf-bob {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-3px) rotate(-3deg); }
+}
+
+@keyframes olaf-beak {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(1.45); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .olaf.speaking,
+    .olaf.speaking .beak {
+        animation: none;
+    }
+}
+
+.olaf-wrap {
+    display: inline-block;
+    line-height: 0;
+}
+
+.olaf-bubble {
+    position: relative;
+    margin: 0 0 0 0.6rem;
+    padding: 0.2rem 0.8rem;
+    background: #fff;
+    border: 2px solid #2b2b2b;
+    border-radius: 14px 16px 13px 15px;
+    transform-origin: left center;
+    font-size: 1.5rem;
+}
+
+.olaf-bubble::before {
+    content: '';
+    position: absolute;
+    left: -11px;
+    top: 50%;
+    margin-top: -6px;
+    border: 6px solid transparent;
+    border-right: 9px solid #2b2b2b;
+    border-left: 0;
+}
+
+.olaf-bubble.found {
+    color: var(--found);
+    border-color: var(--found);
+}
+
+.olaf-bubble.found::before {
+    border-right-color: var(--found);
+}
+
+.olaf-wrap.is-thinking .olaf {
+    animation: olaf-think 2.4s ease-in-out infinite;
+}
+
+.olaf-wrap.is-saying .olaf {
+    animation: olaf-hop 0.45s ease-out;
+}
+
+.olaf-wrap.is-saying .olaf .beak {
+    animation: olaf-beak 0.3s ease-in-out 3;
+}
+
+.olaf-wrap.is-cheering .olaf {
+    animation: olaf-cheer 0.5s ease-in-out 4;
+}
+
+.olaf-bubble.pop {
+    animation: bubble-pop 0.35s ease-out;
+}
+
+@keyframes olaf-think {
+    0%, 100% { transform: rotate(0deg); }
+    30% { transform: rotate(-5deg); }
+    60% { transform: rotate(3deg); }
+}
+
+@keyframes olaf-hop {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-9px) rotate(-4deg); }
+}
+
+@keyframes olaf-cheer {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-12px) rotate(-8deg); }
+    75% { transform: translateY(-12px) rotate(8deg); }
+}
+
+@keyframes bubble-pop {
+    0% { transform: scale(0.3); opacity: 0; }
+    70% { transform: scale(1.12); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .olaf-wrap .olaf,
+    .olaf-wrap .olaf .beak,
+    .olaf-bubble.pop {
+        animation: none;
+    }
+}
+
+/* The walrus referee, under the sheet or on his chair (round.css): a little faded and still at rest, but in
+   sight, since he is the one who referees; in full colour and swaying when he whistles a warm or a right answer
+   (referee_controller.js). */
+.referee {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 1rem;
+    opacity: 0.85;
+}
+
+.referee.is-speaking {
+    opacity: 1;
+}
+
+.referee.is-speaking .referee-walrus {
+    animation: referee-sway 0.6s ease-in-out 3;
+    transform-origin: 50% 100%;
+}
+
+.referee-bubble {
+    position: relative;
+    margin: 0 0 0 0.4rem;
+    padding: 0.2rem 0.8rem;
+    background: #fff;
+    border: 2px solid var(--pencil);
+    border-radius: 14px 16px 13px 15px;
+    color: var(--pencil);
+    font-size: 1.15rem;
+    transform-origin: left center;
+}
+
+.referee-bubble::before {
+    content: '';
+    position: absolute;
+    left: -11px;
+    top: 50%;
+    margin-top: -6px;
+    border: 6px solid transparent;
+    border-right: 9px solid var(--pencil);
+    border-left: 0;
+}
+
+.referee-bubble.referee-accepted {
+    color: var(--found);
+    border-color: var(--found);
+}
+
+.referee-bubble.referee-accepted::before {
+    border-right-color: var(--found);
+}
+
+.referee.is-speaking .referee-bubble {
+    animation: bubble-pop 0.35s ease-out;
+}
+
+@keyframes referee-sway {
+    0%, 100% { transform: rotate(0deg); }
+    30% { transform: rotate(-6deg); }
+    70% { transform: rotate(6deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .referee.is-speaking .referee-walrus,
+    .referee.is-speaking .referee-bubble {
+        animation: none;
+    }
+}
+
+/* The agent's voice, at the top of its side (round/_agent_voice.html.twig): its robot head, its name, and its
+   last word in a terminal bubble, never like the walrus's; until its first word, a line in grey. */
+.agent-voice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.agent-name {
+    color: var(--pencil);
+}
+
+.agent-bubble {
+    max-width: 100%;
+    margin: 0;
+    padding: 0.2rem 0.6rem;
+    background: #2b2b2b;
+    color: #f8f9fa;
+    border-radius: 3px;
+    font-family: ui-monospace, 'DejaVu Sans Mono', monospace;
+    font-size: 0.95rem;
+    transform-origin: center top;
+}
+
+.agent-bubble::before {
+    content: '> ';
+    color: var(--pencil);
+}
+
+.agent-bubble.pop {
+    animation: bubble-pop 0.35s ease-out;
+}
+
+.agent-bubble.is-waiting {
+    color: #adb5bd;
+    font-style: italic;
+}

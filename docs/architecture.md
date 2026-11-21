@@ -83,5 +83,6 @@ sequenceDiagram
 | `src/Mcp` | The tools and prompts an agent sees |
 | `src/Controller` | Pages and HTTP endpoints, thin |
 | `src/Command` | `app:ai:check`, and `app:draw`, which makes a model draw words pass after pass and writes a page to `var/bench` |
-| `assets/controllers` | Stimulus: the canvas, the drawing of the AI, the timer, the agent, the lobby |
+| `assets/controllers` | Stimulus: the canvas, the drawing of the AI, the timer, the agent, the lobby, the referee |
+| `assets/styles` | One stylesheet per screen, after the base and the characters |
 | `docs/adr` | The decisions and why |

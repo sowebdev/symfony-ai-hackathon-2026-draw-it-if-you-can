@@ -2,7 +2,7 @@
    the way out, the round and its theme on the left; the scores in the middle, on the colours of
    the sides (.side-team, .side-rival); the clock and what the word is worth on the right, in boxes of a fixed width.
    The round-timer controller is on the main element (round/_timer.html.twig). #}
-<header class="scoreboard topbar">
+<header class="topbar">
     <div class="topbar-left">
         <form method="post" action="{{ path('game_leave', {id: round.game.id}) }}" class="leave"><button type="submit" class="leave-button">← {{ 'action.leave_game'|trans }}</button></form>
         <p class="round-number">{{ 'label.round'|trans({'%number%': round.number, '%count%': round.game.roundCount}) }}</p>

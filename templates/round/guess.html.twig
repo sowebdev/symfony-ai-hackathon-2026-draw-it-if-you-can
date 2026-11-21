@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <main class="round round-f {{ round.game.withAgent ? 'with-agent' : 'solo' }}"
+    <main class="round"
           data-controller="ai-drawing round-timer{{ round.game.withAgent ? ' agent' }}"
           {{ include('round/_timer.html.twig') }}
           data-ai-drawing-stream-url-value="{{ path('round_drawing', {id: round.id}) }}"
@@ -45,7 +45,7 @@
                 </div>
             </section>
 
-            <div class="field">
+            <div class="pitch">
                 <p class="target">{{ 'instruction.guess'|trans }}</p>
                 <div class="stage">
                     <canvas class="canvas locked" width="1000" height="1000" data-ai-drawing-target="canvas"></canvas>

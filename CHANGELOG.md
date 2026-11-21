@@ -15,9 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The round in three sides: our team in yellow on the left, the sheet and the walrus in the middle, the agent in orange on the right as a robot with a terminal bubble. Alone, the walrus sits on a high chair. A top bar that never moves, with « Quitter » on the left.
 - The game settings, on their own screen: themes, who draws, number and length of rounds, and the easy mode, where the judge accepts synonyms and very close words. A game keeps the settings it started with.
 
+### Changed
+
+- The styles are split by screen (`assets/styles/`), and a round's layout is written once, without the layer that overrode the old one.
+
 ### Fixed
 
 - A model that calls tools but drew no stroke during the check is told to try again, no longer that it cannot draw.
+- A round on a tablet held upright: the three sides now go one under the other, the sheet first and whole in the window, and the top bar goes to the next line instead of overlapping. The fields of the settings screen are aligned on the left again, like those of the models screen.
 
 ## [0.3.0] - 2026-11-20
 

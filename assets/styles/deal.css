@@ -1,0 +1,127 @@
+/* The loading screen: a pencil scribbling while the AI picks a word. */
+.loading {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 1.5rem;
+    justify-content: center;
+    background: rgba(251, 247, 236, 0.85);
+}
+
+.loading-card {
+    padding: 1.5rem 2.5rem;
+    text-align: center;
+    background: var(--sheet);
+    border: 2px solid var(--ink);
+    border-radius: 6px 10px 7px 12px;
+    box-shadow: 6px 8px 0 rgba(0, 0, 0, 0.12);
+    transform: rotate(-1deg);
+}
+
+.loading svg {
+    width: 12rem;
+    height: auto;
+}
+
+.loading path {
+    fill: none;
+    stroke: var(--pencil);
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-dasharray: 320;
+    stroke-dashoffset: 320;
+    animation: scribble 1.6s ease-in-out infinite;
+}
+
+@keyframes scribble {
+    70%,
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+.loading-title {
+    margin: 0.5rem 0 0;
+    font-size: 1.8rem;
+}
+
+.loading-note {
+    margin: 0.3rem 0 0;
+    color: #777;
+}
+
+/* The page that deals the first theme: its button only starts the round, by itself, under the card. */
+.deal form {
+    visibility: hidden;
+}
+
+/* The card of the theme, drawn before a round: face down, then turned over (loading_controller.js). */
+.theme-card {
+    width: 13rem;
+    height: 17rem;
+    perspective: 900px;
+}
+
+.theme-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(0.3, 1.4, 0.5, 1) 0.25s;
+}
+
+.theme-card.dealt .theme-card-inner {
+    transform: rotateY(180deg) rotate(-3deg);
+}
+
+.theme-card-back,
+.theme-card-face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    border: 2px solid var(--ink);
+    border-radius: 10px 14px 9px 16px;
+    box-shadow: 6px 8px 0 rgba(0, 0, 0, 0.12);
+    backface-visibility: hidden;
+}
+
+.theme-card-back {
+    font-size: 5rem;
+    color: var(--sheet);
+    background: repeating-linear-gradient(45deg, var(--pencil) 0 12px, var(--rust) 12px 24px);
+}
+
+.theme-card-face {
+    padding: 1rem;
+    text-align: center;
+    background: var(--sheet);
+    border-color: var(--theme, var(--ink));
+    border-width: 3px;
+    box-shadow: inset 0 0 0 0.6rem color-mix(in srgb, var(--theme, var(--ink)) 18%, transparent), 6px 8px 0 rgba(0, 0, 0, 0.12);
+    transform: rotateY(180deg);
+}
+
+.theme-card-round {
+    font-size: 1.2rem;
+    color: #777;
+}
+
+.theme-card-theme {
+    color: var(--theme, var(--ink));
+    font-size: 2.2rem;
+    font-weight: normal;
+    line-height: 1.2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .theme-card-inner {
+        transition: none;
+    }
+}

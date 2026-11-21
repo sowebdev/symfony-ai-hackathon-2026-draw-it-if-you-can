@@ -1,0 +1,546 @@
+/* The model screen: a sheet of the sketchbook, one question at a time, no script. */
+.models {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 1rem 1rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.models h1 {
+    margin: 0;
+    font-size: clamp(1.9rem, 6vw, 2.5rem);
+    transform: rotate(-1deg);
+}
+
+.models-home {
+    align-self: flex-start;
+    font-size: 1rem;
+}
+
+.models-intro {
+    margin: 0;
+}
+
+.models code {
+    font-family: inherit;
+    padding: 0 0.3rem;
+    background: rgba(255, 212, 59, 0.35);
+    border-radius: 4px;
+    overflow-wrap: anywhere;
+}
+
+.models-form {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: 1.4rem 1.4rem 1.1rem;
+    background: var(--sheet);
+    border: 2px solid var(--ink);
+    border-radius: 6px 10px 7px 12px;
+    box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.08);
+}
+
+.models-form::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    width: 90px;
+    height: 26px;
+    margin-left: -45px;
+    background: var(--tape);
+    transform: rotate(-3deg);
+}
+
+.models-form fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+}
+
+.models-form legend {
+    padding: 0;
+    margin-bottom: 0.4rem;
+    font-size: 1.3rem;
+}
+
+.provider-card,
+.model-option {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.7rem 0.9rem 0.6rem;
+    background: #fff;
+    border: 2px solid #bbb;
+    border-radius: 8px 5px 10px 6px;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+}
+
+.provider-card:nth-child(odd),
+.model-cards .model-option:nth-child(odd) { transform: rotate(-0.8deg); }
+.provider-card:nth-child(even),
+.model-cards .model-option:nth-child(even) { transform: rotate(0.6deg); }
+
+.provider-card:has(input:checked),
+.model-option:has(input:checked),
+.model-cards .model-option:has(input:checked) {
+    transform: rotate(0) translateY(-3px);
+    border-color: var(--ink);
+    box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.12);
+}
+
+/* The mark of the choice: a filled, slightly lopsided dot with a check, in the corner. */
+.provider-card:has(input:checked)::after,
+.model-option:has(input:checked)::after {
+    content: '✓';
+    position: absolute;
+    top: -12px;
+    right: -10px;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ink);
+    color: #fff;
+    font-size: 1.3rem;
+    line-height: 1;
+    border-radius: 55% 45% 50% 50% / 50% 55% 45% 50%;
+    transform: rotate(-6deg);
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.18);
+}
+
+.provider-card:has(input:focus-visible),
+.model-option:has(input:focus-visible) {
+    outline: 3px dashed var(--pencil);
+    outline-offset: 4px;
+}
+
+/* The radio button stays for the keyboard and screen readers, the card shows the choice. */
+.provider-card input,
+.model-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.provider-card strong {
+    font-weight: normal;
+    font-size: 1.25rem;
+    line-height: 1.15;
+}
+
+.models-form .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.models-form .field input[type='text'],
+.models-form .field input[type='password'],
+.models-form .field select {
+    width: 100%;
+    min-height: 2.5rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    text-overflow: ellipsis;
+}
+
+.models .hint {
+    font-size: 0.95rem;
+    color: #666;
+    line-height: 1.3;
+}
+
+.models-form ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: #b42318;
+    font-size: 1rem;
+}
+
+.role-models {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.model-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1rem 0.9rem;
+    padding-top: 0.4rem;
+}
+
+.model-option {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem 0.6rem;
+    min-height: 2.75rem;
+    padding: 0.6rem 0.9rem;
+    overflow-wrap: anywhere;
+}
+
+.model-option code {
+    font-size: 1.05rem;
+}
+
+.recommended-mark {
+    font-style: normal;
+    font-size: 0.85rem;
+    padding: 0.05rem 0.5rem;
+    color: #fff;
+    background: var(--found);
+    border-radius: 999px;
+}
+
+.model-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.role-models .hint {
+    margin: 0;
+}
+
+.long-list summary {
+    cursor: pointer;
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.2rem 1rem;
+    list-style: none;
+    font-weight: bold;
+    color: var(--ink);
+    background: #fff;
+    border: 2px solid var(--pencil);
+    border-radius: 6px 10px 7px 12px;
+    text-decoration: underline var(--pencil);
+    text-underline-offset: 0.2em;
+}
+
+.long-list summary::-webkit-details-marker {
+    display: none;
+}
+
+.long-list summary::after {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-right: 3px solid var(--pencil);
+    border-bottom: 3px solid var(--pencil);
+    transform: translateY(-0.15rem) rotate(45deg);
+    transition: transform 0.15s;
+}
+
+.long-list[open] summary::after {
+    transform: translateY(0.1rem) rotate(-135deg);
+}
+
+.long-list summary:hover,
+.long-list summary:focus-visible {
+    background: #fff8d6;
+}
+
+.unknown-mark {
+    font-style: normal;
+    font-size: 0.85rem;
+    padding: 0.05rem 0.5rem;
+    color: var(--ink);
+    background: #f1f1f1;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+}
+
+.long-list select {
+    margin-top: 0.3rem;
+}
+
+.switch-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    cursor: pointer;
+}
+
+.switch-label input {
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-top: 0.1rem;
+    accent-color: var(--pencil);
+}
+
+.models-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem 1.2rem;
+}
+
+.models-actions button,
+.models-actions .button {
+    font-size: 1.2rem;
+    min-height: 2.75rem;
+}
+
+.models-actions a:not(.button) {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.models-problem {
+    padding: 0.8rem 1rem;
+    border: 2px solid #b42318;
+    border-radius: 6px;
+    background: #fff5f5;
+}
+
+.models-problem p {
+    margin: 0 0 0.4rem;
+}
+
+.models-problem p:last-child {
+    margin: 0;
+}
+
+@media (max-width: 40rem) {
+    .models-form {
+        padding: 1.6rem 1rem 1.2rem;
+    }
+
+    .models-form .field input[type='text'],
+    .models-form .field input[type='password'],
+    .models-form .field select {
+        min-height: 2.75rem;
+    }
+
+    .models-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+        text-align: center;
+    }
+
+    .models-actions a:not(.button) {
+        justify-content: center;
+    }
+}
+
+/* A question's list of providers: one choice per line, nothing else. */
+.provider-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.provider-card {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem 0.8rem;
+    min-height: 3.25rem;
+}
+
+.saved-mark {
+    font-style: normal;
+    font-size: 0.85rem;
+    padding: 0.05rem 0.5rem;
+    color: #fff;
+    background: var(--found);
+    border-radius: 999px;
+}
+
+/* The AI of each role, one line each: what it does, its model, where it answers, "change". */
+.role-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.role-line {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.6rem;
+    padding: 0.75rem 1rem;
+    background: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 6px 10px 7px 12px;
+    box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.08);
+    overflow-wrap: anywhere;
+}
+
+.role-line .role-what {
+    flex: 1 1 14rem;
+}
+
+.role-line .sep {
+    color: #999;
+}
+
+.role-line .where {
+    color: #666;
+}
+
+.role-line.follows {
+    color: #666;
+    background: transparent;
+    border: 2px dashed #c9bfa9;
+    box-shadow: none;
+}
+
+.role-line .mark {
+    font-size: 1.4rem;
+    line-height: 1;
+}
+
+.role-line.ok {
+    border-color: var(--found);
+}
+
+.role-line.ok .mark {
+    color: var(--found);
+}
+
+.role-line.failed {
+    border-color: #b42318;
+    background: #fff5f5;
+}
+
+.role-line.failed .mark {
+    color: #b42318;
+}
+
+.role-line p {
+    flex-basis: 100%;
+    margin: 0.2rem 0 0;
+}
+
+.role-line .why {
+    color: #b42318;
+}
+
+.role-line form {
+    flex-basis: 100%;
+    margin-top: 0.3rem;
+}
+
+/* "Another AI to guess?", under the model of the drawer. */
+.follows-line {
+    margin: 0;
+    color: #666;
+}
+
+.same-as-drawer {
+    margin: 0;
+}
+
+.models .notice {
+    margin: 0;
+    color: var(--found);
+}
+
+.saved-keys {
+    margin-top: 0.6rem;
+    color: #555;
+}
+
+.saved-keys summary {
+    cursor: pointer;
+    min-height: 2.75rem;
+    display: flex;
+    align-items: center;
+}
+
+.saved-keys ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.saved-keys li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.2rem 0.8rem;
+    padding: 0.3rem 0;
+    border-top: 1px dashed #d8cfbd;
+}
+
+.saved-keys .account {
+    flex: 1 1 12rem;
+    overflow-wrap: anywhere;
+}
+
+.saved-keys form {
+    margin: 0;
+}
+
+.saved-keys button.link {
+    min-height: 2.75rem;
+}
+
+.saved-keys button.link:disabled {
+    color: #999;
+    cursor: not-allowed;
+    text-decoration: none;
+}
+
+.models .role-lines + h1 {
+    margin-top: 0.3rem;
+}
+
+.models h1 + .role-lines {
+    margin-top: 0.3rem;
+}
+
+.long-list[open] > :not(summary) {
+    margin-top: 0.7rem;
+}
+
+.settings-choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.2rem;
+}
+
+.settings-choice {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    cursor: pointer;
+}
+
+.settings-turns .settings-choices {
+    flex-direction: column;
+    gap: 0;
+}
+
+.settings-form label[for$='_rounds'] {
+    font-size: 1.3rem;
+}
+
+/* The line under the easy mode: what the judge does in it. */
+.settings-hint {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #555;
+}

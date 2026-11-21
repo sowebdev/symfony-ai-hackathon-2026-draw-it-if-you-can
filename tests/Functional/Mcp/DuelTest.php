@@ -95,7 +95,7 @@ final class DuelTest extends WebTestCase
         self::assertSelectorTextContains('.rival-score strong', '1000');
         self::assertSelectorTextContains('.rival-answers', 'zèbre');
         self::assertSelectorExists('.camp-agent .robot', 'The rival has his side, with his robot head');
-        self::assertSelectorExists('.field .referee', 'With an agent, the walrus stands under the sheet');
+        self::assertSelectorExists('.pitch .referee', 'With an agent, the walrus stands under the sheet');
 
         $status = $this->roundStatus();
         self::assertSame('agent', $status['found_by']);

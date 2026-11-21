@@ -93,6 +93,12 @@ request must pass (lint, style, PHPStan, `composer audit`, schema, then the test
 - `make lint`: composer.json, container, Twig, YAML and translations linters.
 - `make schema`: on a fresh test database, mapping validates and the migrations run down to `first` and back up.
 
+The styles are one file per screen in `assets/styles/`, imported by `assets/app.js`
+in order: `app.css` (paper, pencil, buttons, the colours of the sides), then
+`characters.css` (Olaf, the walrus, the robot), then the screens. A rule is defined
+once, in the file of its screen; a narrower variant goes in a media query next to it,
+never in a second rule further down.
+
 ## Documentation
 
 Docs are written in English, like the code: the README, and the architecture
